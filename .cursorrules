@@ -1,0 +1,72 @@
+# AssApp — Configuração do Cursor AI
+
+## Contexto
+
+SaaS multi-tenant para associações científicas (PIPE FAPESP Fase 1).
+Base tecnológica: WellSaaS/Wellflows (~80% reutilizável).
+
+## Stack
+
+- Backend: Django 4.2 + DRF + JWT + django-tenants
+- Frontend: React 18 + TypeScript + Vite + Tailwind (utilitário pontual) + **CSS semântico WellSaaS**
+- DB: PostgreSQL 14
+- Docker Compose para desenvolvimento
+
+## Branches (Git / DigitalOcean)
+
+- `orb` — desenvolvimento Mac / OrbStack (trabalho diário)
+- `develop` — staging (CI → DigitalOcean :8080)
+- `assapp` — **produção** (CI → DigitalOcean :80)
+- Fluxo: `orb` → `develop` → `assapp` (nunca pular staging)
+- Mac: `./scripts/up-orb.sh` — ver `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`
+
+## Consultar Primeiro
+
+1. `cursor-readme.md` — referência técnica rápida
+2. `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md` — branches + OrbStack
+3. `docs/changelog/CHANGELOG_2026_07_14.md` — o que mudou recentemente
+4. `docs/pesquisa/HIPOTESES_PIPE.md` — H1, H2, H3
+5. `docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md` — signup / setup / transição
+6. `docs/guias/UI_PADRAO_WELLSAAS.md` — padrão visual de páginas
+7. `prisma/schema.prisma` — modelo de domínio (documentação)
+8. WellSaaS em `/Users/ale/Desktop/wellsaas` — padrões a reutilizar
+
+## Regras PIPE
+
+- Comentar código com referência a H1, H2 ou H3 quando aplicável
+- Prioridade Fase 1: módulo `mandatos` (transição + onboarding H2)
+- Distinguir **Setup pós-compra** (`AssociationSetup`) de **Onboarding H2** (`OnboardingWizard`)
+- `prisma/schema.prisma` é documentação — fonte de verdade é Django ORM
+- Não replicar módulos WellSaaS irrelevantes (meal plans, e-commerce, prescrições)
+
+## UI
+
+- Novas páginas autenticadas: usar classes `dashboard-page`, `dashboard-header`, `dashboard-btn-*`, `page-form`, etc.
+- Não reinventar layout com Tailwind longo; seguir `docs/guias/UI_PADRAO_WELLSAAS.md`
+
+## Docker (Mac / OrbStack)
+
+```bash
+./scripts/up-orb.sh              # sobe com overrides ARM
+./scripts/up-orb.sh -d --build   # detached + rebuild frontend
+# Sem OrbStack:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+Frontend: http://localhost:5174 · Backend: http://localhost:8001
+
+## Migrations
+
+```bash
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate_schemas --shared
+docker compose exec backend python manage.py migrate_schemas
+```
+
+## Multi-tenancy
+
+- Schema `public`: SHARED_APPS (tenants, accounts, …)
+- Schema `sistema`: superadmin
+- Schema por associação: TENANT_APPS (mandatos, memoria, eventos, membros, accounts)
+- Roles: superadmin, association_admin, board_member, member, reviewer
+- Signup cria tenant; `Tenant.setup_completed` controla o wizard de setup

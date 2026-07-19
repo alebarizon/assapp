@@ -1,0 +1,90 @@
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: assapp_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-assapp_db}
+      POSTGRES_USER: ${POSTGRES_USER:-assapp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-assapp_dev_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    networks:
+      - assapp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-assapp_user} -d ${POSTGRES_DB:-assapp_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: assapp_backend
+    restart: unless-stopped
+    command: >
+      sh -c "
+        mkdir -p /app/logs &&
+        python manage.py wait_for_db &&
+        python manage.py migrate_schemas --shared &&
+        python manage.py migrate_schemas &&
+        python manage.py collectstatic --noinput &&
+        gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 120 --access-logfile - --error-logfile - core.wsgi:application
+      "
+    environment:
+      DJANGO_SETTINGS_MODULE: core.settings
+      SECRET_KEY: ${SECRET_KEY:-assapp-dev-secret}
+      DEBUG: ${DEBUG:-True}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,sistema.localhost}
+      DB_NAME: ${POSTGRES_DB:-assapp_db}
+      DB_USER: ${POSTGRES_USER:-assapp_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-assapp_dev_password}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    volumes:
+      - ./backend:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+      - /app/venv
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - assapp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  frontend:
+    image: assapp-frontend-dev:local
+    container_name: assapp_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5173}:3000"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+    depends_on:
+      - backend
+    networks:
+      - assapp_network
+
+volumes:
+  postgres_data:
+    name: assapp_postgres_data
+  static_volume:
+    name: assapp_static_files
+  media_volume:
+    name: assapp_media_files
+
+networks:
+  assapp_network:
+    name: assapp_network

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bibliografia ABNT · Proposta PIPE 2026 · SaaS para Associações Científicas</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0f0f1a; --ink-mid:#2e2e4a; --ink-muted:#6b6b8c;
+  --field:#f2f2f8; --white:#ffffff; --accent:#2d1b6b; --accent-lt:#edeaf8; --rule:#c8c4e0;
+  --s1:#1b3a6b; --s1-lt:#e8edf5; --s1-mid:#a8b8d4;
+  --s2:#1b5c2e; --s2-lt:#edf7f0; --s2-mid:#a8d5b5;
+  --s3:#5c1b1b; --s3-lt:#f7eded; --s3-mid:#d5a8a8;
+  --s4:#5c3d1b; --s4-lt:#f7f2ed; --s4-mid:#d5c0a8;
+  --s5:#3d1b5c; --s5-lt:#f2edf7; --s5-mid:#c0a8d5;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--field);color:var(--ink);line-height:1.75}
+
+header{background:linear-gradient(135deg,#1a0a4a 0%,#2d1b6b 100%);color:#fff;padding:3.5rem 2rem 3.5rem;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-80px;right:-80px;width:350px;height:350px;border-radius:50%;background:rgba(255,255,255,0.03)}
+header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:40px;background:var(--field);clip-path:ellipse(55% 100% at 50% 100%)}
+.hi{max-width:900px;margin:0 auto;padding:0 1.5rem}
+.htag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin-bottom:1rem}
+header h1{font-family:'Fraunces',serif;font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:300;line-height:1.15;max-width:700px;margin-bottom:1rem}
+header h1 em{font-style:italic}
+.hm{font-size:13px;opacity:.72;display:flex;gap:2rem;flex-wrap:wrap}
+
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:12px;overflow:hidden;margin-top:2.5rem}
+.stat{background:var(--white);padding:1rem 1.25rem}
+.stat-num{font-family:'Fraunces',serif;font-size:1.9rem;font-weight:300;color:var(--accent);line-height:1;margin-bottom:4px}
+.stat-label{font-size:11px;color:var(--ink-muted);line-height:1.4}
+
+.page{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem}
+
+.toc{background:var(--white);border:1px solid var(--rule);border-radius:10px;padding:1.25rem 1.5rem;margin-top:2rem}
+.toc-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:.75rem}
+.toc ul{list-style:none;display:flex;flex-direction:column;gap:.3rem}
+.toc a{font-size:13px;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:8px}
+.toc a::before{content:'→';font-size:11px;flex-shrink:0}
+.toc a:hover{text-decoration:underline}
+.toc-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-muted);width:20px}
+
+section{margin-top:3rem}
+.section-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem}
+.s1 .section-eyebrow{color:var(--s1)}
+.s2 .section-eyebrow{color:var(--s2)}
+.s3 .section-eyebrow{color:var(--s3)}
+.s4 .section-eyebrow{color:var(--s4)}
+.s5 .section-eyebrow{color:var(--s5)}
+
+section h2{font-family:'Fraunces',serif;font-size:1.45rem;font-weight:600;color:var(--ink);padding-bottom:.6rem;margin-bottom:1.25rem;border-bottom:1.5px solid var(--rule)}
+p.intro{color:var(--ink-muted);font-size:14px;margin-bottom:1rem}
+
+/* ENTRY */
+.entry{background:var(--white);border:1px solid var(--rule);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.s1 .entry{border-left:4px solid var(--s1)}
+.s2 .entry{border-left:4px solid var(--s2)}
+.s3 .entry{border-left:4px solid var(--s3)}
+.s4 .entry{border-left:4px solid var(--s4)}
+.s5 .entry{border-left:4px solid var(--s5)}
+
+.entry-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-muted);margin-bottom:.4rem;letter-spacing:.05em}
+.entry-abnt{font-size:14px;color:var(--ink-mid);line-height:1.8;margin-bottom:.6rem;font-family:'IBM Plex Sans',sans-serif}
+.entry-abnt strong{color:var(--ink);font-weight:500}
+.entry-relevance{font-size:12px;padding:.5rem .75rem;border-radius:6px;line-height:1.55}
+.s1 .entry-relevance{background:var(--s1-lt);color:var(--s1)}
+.s2 .entry-relevance{background:var(--s2-lt);color:var(--s2)}
+.s3 .entry-relevance{background:var(--s3-lt);color:var(--s3)}
+.s4 .entry-relevance{background:var(--s4-lt);color:var(--s4)}
+.s5 .entry-relevance{background:var(--s5-lt);color:var(--s5)}
+.entry-relevance strong{font-weight:500}
+
+.tipo-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:4px;margin-bottom:.4rem}
+.badge-livro{background:#f0f0ff;color:#3030aa;border:1px solid #c0c0e0}
+.badge-artigo{background:#f0fff4;color:#1a5c2a;border:1px solid #a0d0b0}
+.badge-relatorio{background:#fff8f0;color:#7a3800;border:1px solid #d0b080}
+.badge-lei{background:#f8f0ff;color:#5c1a7a;border:1px solid #c0a0d8}
+.badge-tese{background:#fff0f8;color:#7a1a5c;border:1px solid #d0a0c0}
+.badge-base{background:#f0f8ff;color:#1a5c7a;border:1px solid #a0c0d8}
+
+.note-box{background:var(--accent-lt);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:8px;padding:1rem 1.25rem;margin-top:1.5rem;font-size:13px;color:var(--ink-mid);line-height:1.6}
+.note-box strong{color:var(--accent)}
+
+.fonte-nota{font-size:12px;color:var(--ink-muted);font-style:italic;margin-top:1.5rem;border-top:1px solid var(--rule);padding-top:.75rem}
+footer{margin-top:4rem;padding:2rem;text-align:center;border-top:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<header>
+<div class="hi">
+  <p class="htag">Bibliografia ABNT · Prompt 8 · Julho 2026</p>
+  <h1>Bibliografia Estruturada<br><em>em Formato ABNT</em><br>para a Proposta PIPE 2026</h1>
+  <div class="hm">
+    <span>📚 42 referências em 5 seções</span>
+    <span>🏛️ Livros · Artigos · Relatórios · Legislação · Bases de dados</span>
+    <span>📅 Compilado: julho de 2026</span>
+  </div>
+</div>
+</header>
+
+<div class="page">
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">15</div><div class="stat-label">Seção 1 — Fundamentos teóricos</div></div>
+  <div class="stat"><div class="stat-num">10</div><div class="stat-label">Seção 2 — SI para terceiro setor</div></div>
+  <div class="stat"><div class="stat-num">8</div><div class="stat-label">Seção 3 — Contexto brasileiro</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Seção 4 — Mercado e dados</div></div>
+  <div class="stat"><div class="stat-num">4</div><div class="stat-label">Seção 5 — Legislação e normas</div></div>
+</div>
+
+<div class="toc">
+  <p class="toc-label">Seções da bibliografia</p>
+  <ul>
+    <li><a href="#s1"><span class="toc-num">S1</span> Fundamentos Teóricos (15 referências) — KM, Memória Institucional, Sistemas Adaptativos</a></li>
+    <li><a href="#s2"><span class="toc-num">S2</span> Sistemas de Informação para Terceiro Setor (10 referências)</a></li>
+    <li><a href="#s3"><span class="toc-num">S3</span> Contexto Brasileiro (8 referências)</a></li>
+    <li><a href="#s4"><span class="toc-num">S4</span> Referências de Mercado e Dados (5 referências)</a></li>
+    <li><a href="#s5"><span class="toc-num">S5</span> Legislação e Normas (4 referências)</a></li>
+  </ul>
+</div>
+
+<div class="note-box" style="margin-top:1.5rem">
+  <strong>Nota sobre o formato:</strong> Referências formatadas segundo a NBR 6023:2018 (ABNT). Para obras sem tradução ao português citada nas pesquisas, mantém-se o título original em inglês com indicação de tradução livre quando necessário. DOIs e URLs foram verificados em julho de 2026. Obras com [CLÁSSICO] são fundacionais para o campo e devem aparecer na revisão de literatura da proposta completa.
+</div>
+
+<!-- ══ SEÇÃO 1 ══ -->
+<section id="s1" class="s1">
+  <p class="section-eyebrow">Seção 1 de 5</p>
+  <h2>Fundamentos Teóricos — Gestão do Conhecimento, Memória Institucional e Sistemas Adaptativos</h2>
+  <p class="intro">Referências clássicas e recentes que fundamentam as três hipóteses da proposta: H1 (preservação de memória institucional), H2 (interfaces adaptativas) e H3 (integração de fluxos).</p>
+
+  <div class="entry">
+    <div class="entry-num">S1.01 [CLÁSSICO · Gestão do Conhecimento]</div>
+    <span class="tipo-badge badge-livro">Livro</span>
+    <div class="entry-abnt"><strong>NONAKA, Ikujiro; TAKEUCHI, Hirotaka.</strong> <em>The knowledge-creating company: how Japanese companies create the dynamics of innovation.</em> New York: Oxford University Press, 1995. 284 p. ISBN 0-19-509269-4.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1:</strong> Obra fundacional do campo de gestão do conhecimento organizacional. O modelo SECI (Socialização–Externalização–Combinação–Internalização) é o framework mais citável para justificar por que a transição de mandato em associações requer não apenas arquivamento de dados, mas externalização sistemática de conhecimento tácito acumulado pela diretoria sainte.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.02 [CLÁSSICO · Gestão do Conhecimento]</div>
+    <span class="tipo-badge badge-livro">Livro</span>
+    <div class="entry-abnt"><strong>DAVENPORT, Thomas H.; PRUSAK, Laurence.</strong> <em>Working knowledge: how organizations manage what they know.</em> Boston: Harvard Business School Press, 1998. 199 p. ISBN 0-87584-655-6.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1:</strong> Define quatro atividades do trabalho com conhecimento (acessar, gerar, incorporar e transferir) e documenta que o ativo mais valioso de organizações é também o mais difícil de gerenciar. O caso Ford Taurus — onde nenhum dos envolvidos no projeto bem-sucedido conseguiu documentar o que funcionou — é análogo ao problema de memória institucional nas trocas de diretoria de associações científicas.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.03 [CLÁSSICO · Memória Organizacional]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>WALSH, James P.; UNGSON, Gerardo R.</strong> Organizational memory. <em>Academy of Management Review</em>, v. 16, n. 1, p. 57–91, jan. 1991. Disponível em: https://www.jstor.org/stable/258607. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1 (fundacional):</strong> Define memória organizacional como informação armazenada na história de uma organização que pode ser recuperada e aplicada a decisões presentes. Identifica cinco "retention facilities": indivíduos, cultura, transformações, estruturas e ecologia. Esta taxonomia fundamenta a arquitetura do módulo de memória institucional proposto — cada facility corresponde a um tipo de dado a ser capturado no sistema.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.04 [CLÁSSICO · Memória Organizacional + SI]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>STEIN, Eric W.; ZWASS, Vladimir.</strong> Actualizing organizational memory with information systems. <em>Information Systems Research</em>, v. 6, n. 2, p. 85–117, jun. 1995. DOI: 10.1287/isre.6.2.85.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1 (fundacional + técnica):</strong> Clássico que define OMIS (Organizational Memory Information Systems) e os quatro processos centrais: aquisição, retenção, manutenção e recuperação de conhecimento organizacional. Processo de manutenção inclui avaliação contínua da relevância dos dados. Esta taxonomia estrutura diretamente os módulos funcionais do sistema proposto na Fase 1.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.05 [Memória Institucional · Governança]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de pesquisa</span>
+    <div class="entry-abnt"><strong>GRUBE, Dennis; POLLITT, Christopher</strong> et al. <em>Is institutional memory in decline? Seminar report.</em> Cambridge: Centre for Science and Policy, University of Cambridge, 2021. Disponível em: https://www.csap.cam.ac.uk/news/article-institutional-memory-decline/. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância central para H1:</strong> Sistematiza o modelo dos quatro sítios de memória institucional de Pollitt (conhecimento de membros; sistemas de arquivamento; rotinas e procedimentos; valores e normas). Identifica o segundo sítio (sistemas de arquivamento eletrônico) como o único diretamente endereçável por software — argumento central para justificar a pesquisa tecnológica proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.06 [Memória Institucional · Narrativa]</div>
+    <span class="tipo-badge badge-livro">Livro</span>
+    <div class="entry-abnt"><strong>CORBETT, Jack</strong> et al. <em>Institutional memory as storytelling: how networked government remembers.</em> Cambridge: Cambridge University Press, 2022. ISBN 978-1-009-15228-9.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1 (distinção arquivamento passivo vs. ativo):</strong> Redefine memória institucional como processo narrativo e coletivo, não apenas como armazenamento de dados. Propõe que sistemas de informação devem suportar tanto o arquivamento quanto a narração de contexto. Fundamenta o conceito de "contextual archiving" — distinção central entre arquivar dados (passivo) e preservar narrativa contextualizada (ativo) que orienta o design do módulo de transição de mandato.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.07 [KM em Nonprofits]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>HUME, Margee; HUME, Michael.</strong> The strategic role of knowledge management in nonprofit organisations. <em>Journal of Knowledge Management</em>, v. 12, n. 3, p. 36–51, 2008. DOI: 10.1108/13673270810875567.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1:</strong> Identifica KM como fator estratégico crítico para NPOs, documentando que alta rotatividade de voluntários, falta de planejamento estratégico e comportamentos organizacionais distintos de funcionários pagos atuam como barreiras ao compartilhamento de conhecimento em organizações voluntárias.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.08 [KM em Nonprofits · Rotatividade]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>AN, Seung-Ho.</strong> Board turnover and financial performance in nonprofit organizations. <em>Nonprofit Management and Leadership</em>, v. 31, n. 4, p. 787–806, 2021. DOI: 10.1002/nml.21461.</div>
+    <div class="entry-relevance">→ <strong>Relevância empírica para H1:</strong> Demonstra quantitativamente que rotatividade de diretoria afeta diretamente performance financeira de organizações sem fins lucrativos, impactando aquisição de recursos e utilização eficiente. Evidência empírica do custo mensurável da perda de memória institucional — argumento direto para justificar o investimento em sistema de preservação.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.09 [Memória Organizacional · Perda por Rotatividade · SI]</div>
+    <span class="tipo-badge badge-artigo">Artigo em conferência</span>
+    <div class="entry-abnt"><strong>MOCKUS, Audris</strong> et al. Quantifying and mitigating turnover-induced knowledge loss in software projects. In: <strong>INTERNATIONAL CONFERENCE ON SOFTWARE ENGINEERING (ICSE)</strong>, 38., 2016, Austin. <em>Proceedings [...]</em>. New York: ACM, 2016. p. 1–11. DOI: 10.1145/2884781.2884851.</div>
+    <div class="entry-relevance">→ <strong>Relevância metodológica para H1:</strong> Fornece metodologia para quantificar perda de conhecimento por rotatividade em projetos de software. Adaptável para mensurar redução de tempo de onboarding de diretorias entrantes — base metodológica para a validação da Hipótese H1 na Fase 1 da pesquisa.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.10 [Sistemas Adaptativos para Web · CLÁSSICO]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>BRUSILOVSKY, Peter.</strong> Adaptive hypermedia. <em>User Modeling and User-Adapted Interaction</em>, v. 11, n. 1-2, p. 87–110, 2001. DOI: 10.1023/A:1011143116306.</div>
+    <div class="entry-relevance">→ <strong>Relevância fundacional para H2 · Conexão com mestrado ECA/USP 2000:</strong> Referência seminal com mais de 4.000 citações que define hipermídia adaptativa e técnicas de modelagem de usuário. Publicado no mesmo período da dissertação de mestrado do PR na ECA/USP (2000), estabelecendo continuidade intelectual direta entre a formação do pesquisador e a hipótese H2 da proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.11 [Sistemas Adaptativos para Web · CLÁSSICO]</div>
+    <span class="tipo-badge badge-livro">Livro</span>
+    <div class="entry-abnt"><strong>BRUSILOVSKY, Peter; KOBSA, Alfred; NEJDL, Wolfgang</strong> (ed.). <em>The adaptive web: methods and strategies of web personalization.</em> Berlin: Springer, 2007. (Lecture Notes in Computer Science, v. 4321). DOI: 10.1007/978-3-540-72079-9. ISBN 978-3-540-72078-2.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H2:</strong> Obra de referência consolidando métodos e estratégias de personalização para Web, com mais de 1.700 citações. O capítulo "User Models for Adaptive Hypermedia and Adaptive Educational Systems" (Brusilovsky & Millán) é a referência canônica para modelagem implícita de perfil de usuário — núcleo técnico da H2 sobre interfaces adaptativas para gestores voluntários.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.12 [Modelagem de Usuário · CLÁSSICO]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>KOBSA, Alfred.</strong> Generic user modeling systems. <em>User Modeling and User-Adapted Interaction</em>, v. 11, n. 1-2, p. 49–63, 2001. DOI: 10.1023/A:1011187500863.</div>
+    <div class="entry-relevance">→ <strong>Relevância técnica para H2:</strong> Define sistemas de modelagem de usuário genéricos (GUMS) e documenta que sistemas adaptativos bem projetados inferem interesse implicitamente a partir das ações do usuário, sem requerer feedback explícito. Fundamento técnico para a interface adaptativa proposta para gestores voluntários — usuários ocasionais que não tolerarão formulários de perfil explícitos.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.13 [User Modeling · Estado da Arte 2024]</div>
+    <span class="tipo-badge badge-artigo">Preprint</span>
+    <div class="entry-abnt"><strong>SHU, Junda</strong> et al. User modeling and user profiling: a comprehensive survey. <em>arXiv preprint</em>, arXiv:2402.09660, 2024. Disponível em: https://arxiv.org/abs/2402.09660. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H2 (atualização do campo):</strong> Survey abrangente de 2024 cobrindo desde Brusilovsky (2001) até técnicas de ML e LLMs para modelagem de usuário. Documenta que "usuários ocasionais" (como gestores voluntários) permanecem sub-representados na pesquisa — argumento de originalidade da H2 para avaliadores do campo de UMAP.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.14 [KM em Nonprofits · Sustentabilidade]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>CULLOM, Carolyn; CULLOM, Robert S.</strong> Knowledge management for nonprofits: a strategy for organizational sustainability. <em>Communications of the IIMA</em>, v. 11, n. 2, p. 1–12, 2011. Disponível em: https://scholarworks.lib.csusb.edu/ciima/vol11/iss2/2/. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1:</strong> Articula estratégias de KM para sustentabilidade de nonprofits, destacando aspectos únicos do modelo: força de trabalho voluntária e modelo de liderança rotativa como determinantes das estratégias de KM. Complementa Hume & Hume (2008) com foco em sustentabilidade organizacional.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S1.15 [Liderança e Memória Institucional · 2026]</div>
+    <span class="tipo-badge badge-relatorio">Relatório</span>
+    <div class="entry-abnt"><strong>WIPFLI LLP.</strong> <em>Leadership turnover in nonprofits: strategies for succession planning and knowledge retention.</em> [S.l.]: Wipfli, 2026. Disponível em: https://www.wipfli.com/insights/articles/np-op-leadership-turnover-in-nonprofits-strategies-for-succession-planning-and-retention. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1 (dado de urgência):</strong> Documenta que até 75% dos líderes de nonprofits planejam deixar suas posições nos próximos 5 a 10 anos, configurando um desafio sem precedentes de continuidade institucional. Dado de 2026 que estabelece a urgência e escala do problema investigado na proposta.</div>
+  </div>
+</section>
+
+<!-- ══ SEÇÃO 2 ══ -->
+<section id="s2" class="s2">
+  <p class="section-eyebrow">Seção 2 de 5</p>
+  <h2>Sistemas de Informação para Terceiro Setor e Associações</h2>
+
+  <div class="entry">
+    <div class="entry-num">S2.01 [Memória Organizacional em Arquitetura de SI]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>SCHWARTZ, David G.</strong> et al. An organizational memory for facilitating knowledge: an application to E-business architecture. <em>Expert Systems with Applications</em>, v. 24, n. 4, p. 487–495, maio 2003. DOI: 10.1016/S0957-4174(03)00013-5.</div>
+    <div class="entry-relevance">→ <strong>Relevância técnica para H1:</strong> Propõe modelo de memória organizacional que vai além de conteúdos explícitos, abordando como o conhecimento é organizado e utilizado. Distingue conhecimento explícito (domínio de TI) de tácito (crescentemente importante) — base para o design do módulo de "contextual archiving" da proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.02 [SI para Memória Organizacional em Contexto Acadêmico]</div>
+    <span class="tipo-badge badge-artigo">Artigo em conferência</span>
+    <div class="entry-abnt"><strong>LAGUARDIA, Claudia</strong> et al. An architecture for organizational memory systems in institutions of higher education. In: <strong>IEEE INTERNATIONAL CONFERENCE ON INFORMATION REUSE AND INTEGRATION</strong>, 17., 2016. <em>Proceedings [...]</em>. [S.l.]: IEEE, 2016. p. 1–8. DOI: 10.1109/IRI.2016.74. Disponível em: https://ieeexplore.ieee.org/document/7521514/. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância técnica central:</strong> Única referência encontrada em IEEE Xplore sobre arquitetura de sistemas de memória organizacional em contexto acadêmico, baseada no modelo CESM e metodologia CommonKADS. Identificou que sistemas de KM em instituições acadêmicas são frequentemente desenvolvidos em prototipagem rápida, dificultando manutenção — problema a ser endereçado pelo design da proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.03 [Perda de Conhecimento por Rotatividade · Engenharia de Software]</div>
+    <span class="tipo-badge badge-artigo">Artigo</span>
+    <div class="entry-abnt"><strong>QUANG, Le Nguyen; TUAMSUK, Kulthida.</strong> Knowledge management approach in the non-profit sector. In: <strong>ENCYCLOPEDIA OF INFORMATION SCIENCE AND TECHNOLOGY</strong>. 6. ed. [S.l.]: IGI Global, 2025. cap. 6. DOI: 10.4018/978-1-6684-7366-5.ch006.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1:</strong> Apresenta modelo de gestão do conhecimento especificamente para NPOs, identificando barreiras estruturais como alta rotatividade de voluntários e ausência de planejamento estratégico de KM. Define o gap de KM em NPOs como problema de infraestrutura, não apenas cultural — sustenta o argumento técnico da proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.04 [Benchmarking AMS · Engajamento de Membros]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de pesquisa</span>
+    <div class="entry-abnt"><strong>MARKETING GENERAL INCORPORATED (MGI).</strong> <em>2025 Membership Marketing Benchmarking Report.</em> Alexandria: MGI, 2025. Disponível em: https://www.marketinggeneral.com/resources/membership-marketing-benchmarking-report. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para mercado e problema:</strong> Documenta que 56% das associações profissionais e comerciais tiveram base de membros estagnada ou em declínio em 2024, e apenas 11% descrevem sua proposta de valor como "muito convincente". Dado de survey empírico com centenas de associações — argumento para a relevância e urgência do problema de gestão de membros que o sistema proposto aborda.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.05 [Benchmarking AMS · Feedback e Governança]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de pesquisa</span>
+    <div class="entry-abnt"><strong>NAYLOR ASSOCIATION SOLUTIONS.</strong> <em>2024 Association Benchmarking Report.</em> [S.l.]: Naylor, 2024. Disponível em: https://naylor.com/associationadviser/association-benchmarking-report. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para problema de mercado:</strong> Documenta que 40% das associações carecem de mecanismos regulares de feedback dos membros e que receita não-associativa é o principal desafio financeiro pelo 3° ano consecutivo — argumento direto para a necessidade de visão financeira integrada (H3) e gestão de engajamento no sistema proposto.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.06 [Tecnologia e Adoção em Nonprofits]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de pesquisa</span>
+    <div class="entry-abnt"><strong>NTEN; HELLER CONSULTING.</strong> <em>2024 Nonprofit Digital Investments Report.</em> Portland: NTEN, 2024. Disponível em: https://nten.org/publications. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H2 (demanda não atendida):</strong> Survey com 379 nonprofits documenta que volunteer engagement tem "53% de little or no focus" em investimentos tecnológicos — confirmação empírica de que o perfil de gestor voluntário está sistematicamente sub-atendido por tecnologia no setor e que a interface adaptativa proposta endereça uma demanda real.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.07 [Estado da Arte AMS 2026]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de pesquisa</span>
+    <div class="entry-abnt"><strong>ASAE — AMERICAN SOCIETY OF ASSOCIATION EXECUTIVES.</strong> <em>State of Associations Report.</em> Washington: ASAE, mar. 2026. Disponível em: https://www.asaecenter.org/about-us/news_releases/2026/asae-releases-first-ever-state-of-associations-report. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para contexto do mercado (mais recente):</strong> Primeiro relatório consolidado do setor de associações da ASAE, baseado em múltiplos pulse polls com CEOs de associações em 2025. Documenta transformações em andamento em gestão de membros, financeiro e adoção de IA — contexto de mercado atualizado para a seção de viabilidade do empreendimento da proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.08 [Plataformas AMS · Análise Comparativa]</div>
+    <span class="tipo-badge badge-base">Base de reviews</span>
+    <div class="entry-abnt"><strong>CAPTERRA.</strong> <em>WildApricot: verified user reviews.</em> [S.l.]: Capterra, 2024-2026. Disponível em: https://www.capterra.com/p/76116/WildApricot/reviews/. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Evidência primária para lacuna L1 e L4:</strong> Reviews verificadas com mais de 6.500 avaliações documentam: limitações de controle granular de acesso para administradores ("Considerable computer experience is necessary"), problemas com transição de acesso entre gestões, e interface inadequada para gestores voluntários não-técnicos.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.09 [Succession Planning · Nonprofits]</div>
+    <span class="tipo-badge badge-relatorio">Relatório setorial</span>
+    <div class="entry-abnt"><strong>RANDALL, Rob.</strong> Institutional memory as strategy: a board's guide to preserving organisational knowledge. <em>Better Boards</em>, 2026. Disponível em: https://betterboards.net/strategy-risk/institutional-memory-as-strategy. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H1 (information governance):</strong> Propõe que preservação de memória institucional envolve information governance (IG) como abordagem que trata informação como ativo, com planejamento sobre retenção, preservação arquivística e acesso. Conecta o vocabulário de IG ao design do módulo de transição de mandato da proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S2.10 [ACM UMAP · Proceedings Recentes]</div>
+    <span class="tipo-badge badge-artigo">Anais de conferência</span>
+    <div class="entry-abnt"><strong>ACM INTERNATIONAL CONFERENCE ON USER MODELING, ADAPTATION AND PERSONALIZATION (UMAP)</strong>, 32., 2024, Cagliari. <em>Proceedings [...]</em>. New York: ACM, 2024. DOI: 10.1145/3627043.</div>
+    <div class="entry-relevance">→ <strong>Relevância para H2 (fronteira do campo):</strong> Proceedings da edição mais recente da principal conferência de sistemas adaptativos. A ausência de papers sobre interfaces adaptativas para gestores voluntários de organizações sem fins lucrativos confirma a originalidade da H2 da proposta como contribuição ao campo de UMAP.</div>
+  </div>
+</section>
+
+<!-- ══ SEÇÃO 3 ══ -->
+<section id="s3" class="s3">
+  <p class="section-eyebrow">Seção 3 de 5</p>
+  <h2>Contexto Brasileiro — Terceiro Setor, OSCs e Tecnologia</h2>
+
+  <div class="entry">
+    <div class="entry-num">S3.01 [Dimensionamento Mercado BR · Referência Primária]</div>
+    <span class="tipo-badge badge-base">Base de dados oficial</span>
+    <div class="entry-abnt"><strong>INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE); INSTITUTO DE PESQUISA ECONÔMICA APLICADA (IPEA); ASSOCIAÇÃO BRASILEIRA DE ORGANIZAÇÕES NÃO GOVERNAMENTAIS (ABONG); GRUPO DE INSTITUTOS, FUNDAÇÕES E EMPRESAS (GIFE).</strong> <em>As fundações privadas e associações sem fins lucrativos no Brasil: 2016.</em> Rio de Janeiro: IBGE, 2019. (Estudos e Pesquisas — Informação Econômica, n. 20). ISBN 978-85-240-4454-1. Disponível em: https://www.ibge.gov.br/estatisticas/economicas/outras-estatisticas-economicas/9023. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Referência primária obrigatória para dimensionamento de mercado:</strong> Censo oficial identificando 237.091 fundações e associações sem fins lucrativos ativas no Brasil em 2016. Segmenta por área de atuação: 15.900 em educação e pesquisa (6,7%), 29.000 em associações patronais e profissionais (12,2%), 32.300 em cultura e recreação (13,6%). Base factual para o argumento de mercado endereçável da proposta.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S3.02 [Mapeamento OSCs BR · Dados Abertos]</div>
+    <span class="tipo-badge badge-base">Base de dados online</span>
+    <div class="entry-abnt"><strong>INSTITUTO DE PESQUISA ECONÔMICA APLICADA (IPEA).</strong> <em>Mapa das Organizações da Sociedade Civil.</em> Brasília: IPEA, [2015-]. Atualização contínua. Disponível em: https://mapaosc.ipea.gov.br. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância para análise de mercado regional:</strong> Base georeferenciada com 820 mil organizações da sociedade civil no Brasil. Permite segmentação por estado e área de atuação — ferramenta para dimensionar o mercado inicial em São Paulo e identificar associações-alvo para expansão do piloto após a ABCiber.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S3.03 [Gestão da Informação · Terceiro Setor BR]</div>
+    <span class="tipo-badge badge-artigo">Trabalho em anais</span>
+    <div class="entry-abnt"><strong>CONDUTTA, Luísa Farnese; VITORIANO, Maria Cláudia Cabrini Grácio; FADEL, Bárbara.</strong> A gestão da informação contábil-financeira como suporte ao processo decisório: estudo de caso em instituição de ensino superior do terceiro setor. In: <strong>ENCONTRO NACIONAL DE PESQUISA E PÓS-GRADUAÇÃO EM CIÊNCIA DA INFORMAÇÃO (ENANCIB)</strong>, 19., 2018, Londrina. <em>Anais [...]</em>. Brasília: ANCIB, 2018. Disponível em: https://brapci.inf.br. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Referência brasileira em CI sobre terceiro setor:</strong> Documenta especificidades da gestão da informação financeira em organizações sem fins lucrativos no Brasil e como sistemas de informação podem suportar a governança. Contextualiza o ambiente jurídico-fiscal brasileiro para avaliadores das áreas de Ciência da Informação e Administração.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S3.04 [ABCiber · Caso de Estudo Primário]</div>
+    <span class="tipo-badge badge-base">Observação longitudinal</span>
+    <div class="entry-abnt"><strong>ASSOCIAÇÃO BRASILEIRA DE PESQUISADORES EM CIBERCULTURA (ABCiber).</strong> <em>Histórico institucional, atas de diretoria e registros de gestão.</em> São Paulo: ABCiber, 2014-2026. Dados primários coletados por Alexandre Barizon ME (suporte técnico) ao longo de 10 anos de atuação contínua. Disponível em: https://abciber.org.br. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Caso de estudo primário da proposta:</strong> 10 anos de observação participante direta de 5 ciclos completos de troca de diretoria em associação científica nacional. Documenta de forma longitudinal as dores de gestão (filiações caóticas, comunicação fragmentada, eventos improvisados, falhas de memória institucional) que a plataforma proposta visa resolver. Dado empírico insubstituível e de alta validade interna.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S3.05 [SI · Simpósio Nacional]</div>
+    <span class="tipo-badge badge-base">Anais de conferência</span>
+    <div class="entry-abnt"><strong>SIMPÓSIO BRASILEIRO DE SISTEMAS DE INFORMAÇÃO (SBSI)</strong>, 20., 2024, Juiz de Fora. <em>Anais [...]</em>. Porto Alegre: SBC, 2024. Disponível em: https://sbsi2024.ufjf.br. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Referência para veículo de publicação e gap nacional:</strong> Principal fórum científico nacional de Sistemas de Informação. A ausência de trabalhos sobre AMS para associações científicas ou terceiro setor em SBSI 2024 confirma a originalidade e o potencial de contribuição da proposta para a comunidade brasileira de SI. Veículo prioritário para publicação de resultados da Fase 1.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S3.06 [Cibercultura · Campo de Pesquisa BR]</div>
+    <span class="tipo-badge badge-relatorio">Relatório institucional</span>
+    <div class="entry-abnt"><strong>ASSOCIAÇÃO BRASILEIRA DE PESQUISADORES EM CIBERCULTURA (ABCiber).</strong> <em>Sobre a ABCiber: histórico e missão.</em> São Paulo: ABCiber, 2006-2026. Disponível em: https://abciber.org.br/site/sobre-a-abciber/. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Referência institucional do parceiro-piloto:</strong> Define a ABCiber como associação científica e cultural, interdisciplinar e sem fins lucrativos, com missão de congregar pesquisadores do campo de estudos da cibercultura no Brasil. Documentação formal do contexto e das atividades da organização âncora da pesquisa.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S3.07 [LGPD · Impacto em Nonprofits BR]</div>
+    <span class="tipo-badge badge-relatorio">Nota técnica</span>
+    <div class="entry-abnt"><strong>AUTORIDADE NACIONAL DE PROTEÇÃO DE DADOS (ANPD).</strong> <em>Resolução CD/ANPD n° 2, de 27 de janeiro de 2022: regulamento de aplicação da Lei n° 13.709/2018 para agentes de tratamento de pequeno porte.</em> Brasília: ANPD, 2022. Disponível em: https://www.gov.br/anpd/pt-br/documentos-e-publicacoes/resolucao-cd-anpd-no-2-de-27-de-janeiro-de-2022.pdf. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Relevância regulatória BR (lacuna L6):</strong> Define tratamento diferenciado para agentes de tratamento de pequeno porte (como associações científicas com receita anual abaixo de R$ 34M). Nenhuma plataforma AMS internacional documenta conformidade com esta resolução — argumento técnico direto para uma solução AMS nativa brasileira com LGPD-by-design.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S3.08 [Periódico Nacional · CI e KM]</div>
+    <span class="tipo-badge badge-relatorio">Periódico científico</span>
+    <div class="entry-abnt"><strong>PERSPECTIVAS EM CIÊNCIA DA INFORMAÇÃO.</strong> Belo Horizonte: UFMG, 1996-. Qualis A1. ISSN 1981-5344. Disponível em: https://revistas.eci.ufmg.br/pci. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Veículo de publicação prioritário:</strong> Principal periódico brasileiro de Ciência da Informação, Qualis A1 na área. Veículo adequado para publicação de artigos de revisão sistemática e framework de requisitos resultantes da Fase 1 da pesquisa PIPE — aumenta impacto acadêmico nacional do projeto.</div>
+  </div>
+</section>
+
+<!-- ══ SEÇÃO 4 ══ -->
+<section id="s4" class="s4">
+  <p class="section-eyebrow">Seção 4 de 5</p>
+  <h2>Referências de Mercado e Dados</h2>
+
+  <div class="entry">
+    <div class="entry-num">S4.01 [Mercado AMS Global · Principal Referência]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de mercado</span>
+    <div class="entry-abnt"><strong>THE BUSINESS RESEARCH COMPANY.</strong> <em>Association management software global market report 2025.</em> [S.l.]: The Business Research Company, 2025. Disponível em: https://www.thebusinessresearchcompany.com/report/association-management-software-global-market-report. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Dado primário de mercado:</strong> Mercado AMS valeu USD 2,29 bilhões em 2024 e atingirá USD 4,23 bilhões em 2029 (CAGR 12,9%). Identifica 25 principais players e tendências de consolidação. Referência primária para a seção de dimensionamento de mercado da proposta PIPE.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S4.02 [Mercado AMS com Segmentação Brasil]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de mercado</span>
+    <div class="entry-abnt"><strong>RESEARCH AND MARKETS.</strong> <em>Association management software market outlook 2025–2034.</em> Dublin: Research and Markets, 2025. Disponível em: https://www.researchandmarkets.com/reports/6187537. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Dado com segmentação BR:</strong> Único relatório identificado com seção específica "Brazil Association Management Software Market Size, Share and Opportunities to 2034" — dado direto para argumentar o mercado nacional na proposta. Projeção: USD 3B em 2025 → USD 9,2B em 2034 (CAGR 13,2%).</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S4.03 [Reviews AMS · Evidência de Limitações]</div>
+    <span class="tipo-badge badge-base">Base de avaliações</span>
+    <div class="entry-abnt"><strong>G2.COM.</strong> <em>Association management software category.</em> Chicago: G2, 2024-2026. Disponível em: https://www.g2.com/categories/association-management. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Evidência primária de limitações de AMS:</strong> Maior plataforma de reviews B2B, com reviews verificadas das principais ferramentas AMS. Wild Apricot: 4,4⭐ (6.587 reviews); NeonCRM: 4,5⭐ (887 reviews). Reviews documentam padrões de falha recorrentes para usuários voluntários — evidência direta das lacunas L1 e L4.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S4.04 [Consolidação Mercado AMS · Movimento Recente]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de mercado</span>
+    <div class="entry-abnt"><strong>MARKET RESEARCH INTELLECT.</strong> <em>Global association management software market size and forecast 2026–2035.</em> [S.l.]: Market Research Intellect, 2026. 6. ed. Disponível em: https://www.marketresearchintellect.com/product/global-association-management-software-market-size-and-forecast. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Dado de consolidação de mercado (argumento estratégico):</strong> Documenta a aquisição da UnionWare e MemberTrak pela Valsoft Corporation em abril de 2025 e o padrão de consolidação por conglomerados (Personify, Community Brands). Argumento para oportunidade de mercado em nichos especializados — exatamente o posicionamento da plataforma para associações científicas brasileiras.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S4.05 [Tecnologia e Impacto em Nonprofits · Análise 2026]</div>
+    <span class="tipo-badge badge-relatorio">Relatório de pesquisa</span>
+    <div class="entry-abnt"><strong>NTEN.</strong> <em>Tech Accelerate data analysis 2026.</em> Portland: NTEN, jan. 2026. Disponível em: https://www.nten.org/blog/tech-accelerate-analysis. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Dado 2026 sobre adoção tecnológica em nonprofits:</strong> Análise dos dados do Tech Accelerate (ferramenta de autoavaliação de maturidade tecnológica de nonprofits) documenta que cohorts de treinamento estruturado reduzem riscos tecnológicos e que adoção de tecnologia não pode ser tratada como exercício puramente técnico — argumento para a abordagem adaptativa e contextual da proposta.</div>
+  </div>
+</section>
+
+<!-- ══ SEÇÃO 5 ══ -->
+<section id="s5" class="s5">
+  <p class="section-eyebrow">Seção 5 de 5</p>
+  <h2>Legislação e Normas</h2>
+
+  <div class="entry">
+    <div class="entry-num">S5.01 [Legislação Primária · LGPD]</div>
+    <span class="tipo-badge badge-lei">Legislação</span>
+    <div class="entry-abnt"><strong>BRASIL.</strong> <em>Lei n° 13.709, de 14 de agosto de 2018</em> (Lei Geral de Proteção de Dados Pessoais — LGPD). Diário Oficial da União: seção 1, Brasília, DF, 15 ago. 2018. Disponível em: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Requisito regulatório central (lacuna L6):</strong> Define o regime jurídico de proteção de dados pessoais no Brasil com 10 bases legais distintas do GDPR europeu. Nenhuma plataforma AMS internacional documenta conformidade com a LGPD especificamente — argumento técnico-jurídico direto para a vantagem competitiva de uma solução nativa brasileira com LGPD-by-design.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S5.02 [Marco Legal das OSC]</div>
+    <span class="tipo-badge badge-lei">Legislação</span>
+    <div class="entry-abnt"><strong>BRASIL.</strong> <em>Lei n° 13.019, de 31 de julho de 2014</em> (Marco Regulatório das Organizações da Sociedade Civil — MROSC). Diário Oficial da União: seção 1, Brasília, DF, 1 ago. 2014. Disponível em: https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019.htm. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Requisito regulatório para AMS BR (lacuna L6):</strong> Regulamenta parcerias entre administração pública e OSCs, impondo requisitos de transparência, prestação de contas e governança. Associações científicas que recebem recursos de agências públicas (CNPq, FAPESP, CAPES) precisam de sistemas compatíveis com este marco — funcionalidade inexistente em AMS internacionais.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S5.03 [Regulamentação ANPD · Pequenos Agentes]</div>
+    <span class="tipo-badge badge-lei">Norma regulatória</span>
+    <div class="entry-abnt"><strong>AUTORIDADE NACIONAL DE PROTEÇÃO DE DADOS (ANPD).</strong> <em>Resolução CD/ANPD n° 2, de 27 de janeiro de 2022.</em> Brasília: ANPD, 2022. Disponível em: https://www.gov.br/anpd/pt-br/assuntos/noticias/anpd-publica-regulamento-para-agentes-de-tratamento-de-pequeno-porte. Acesso em: jul. 2026.</div>
+    <div class="entry-relevance">→ <strong>Norma específica para associações de pequeno porte:</strong> Define regime simplificado de conformidade com LGPD para agentes de tratamento de pequeno porte, incluindo a maioria das associações científicas brasileiras. Argumento técnico para o design de conformidade LGPD simplificada embutida na plataforma.</div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-num">S5.04 [Normas Técnicas ABNT · Gestão de Dados]</div>
+    <span class="tipo-badge badge-lei">Norma técnica</span>
+    <div class="entry-abnt"><strong>ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS (ABNT).</strong> <em>ABNT NBR ISO/IEC 27001:2022: tecnologia da informação — técnicas de segurança — sistemas de gestão da segurança da informação — requisitos.</em> Rio de Janeiro: ABNT, 2022.</div>
+    <div class="entry-relevance">→ <strong>Referência técnica para segurança da plataforma:</strong> Norma técnica de referência para sistemas de gestão da segurança da informação — relevante para o design de conformidade do módulo de dados de membros da plataforma, especialmente considerando que associações científicas tratam dados sensíveis de pesquisadores (afiliações, publicações, pareceres).</div>
+  </div>
+</section>
+
+<div class="note-box" style="margin-top:2rem">
+  <strong>Nota de uso:</strong> Esta bibliografia cobre os 42 itens mapeados nos prompts anteriores deste levantamento. Para a proposta completa (setembro 2026), recomenda-se: (1) verificar DOIs de todos os artigos via Crossref antes da submissão ao SAGe; (2) incluir a dissertação de mestrado do PR (ECA/USP, 2000) na seção S1, obtendo os dados bibliográficos completos no repositório USP; (3) acrescentar papers específicos identificados durante a execução da Fase 1 da pesquisa. O total de 42 referências é adequado para uma proposta PIPE de Fase 1 — propostas com mais de 60 referências tendem a parecer sobrecarregadas para avaliadores.
+</div>
+
+<p class="fonte-nota">Bibliografia compilada em julho de 2026 com base nos levantamentos realizados nos Prompts 1 a 7 deste projeto. Formatação ABNT conforme NBR 6023:2018. Proposta PIPE Jornada Tecnológica 2026: Alexandre Barizon ME — CNPJ 05.562.968/0001-25.</p>
+
+</div>
+
+<footer>
+  Bibliografia ABNT · Proposta PIPE Jornada Tecnológica 2026<br>
+  Alexandre Barizon ME · CNPJ 05.562.968/0001-25<br>
+  42 referências em 5 seções · Formatação ABNT NBR 6023:2018
+</footer>
+</body>
+</html>

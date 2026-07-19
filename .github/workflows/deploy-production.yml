@@ -1,0 +1,169 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - assapp
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/*.md'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-server
+  cancel-in-progress: false
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME_BACKEND: ${{ secrets.DOCKER_USERNAME }}/assapp-backend
+  IMAGE_NAME_FRONTEND: ${{ secrets.DOCKER_USERNAME }}/assapp-frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ] || [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+            echo "❌ DOCKER_USERNAME / DOCKER_PASSWORD não configurados"
+            echo "Veja: .github/CHECKLIST_SECRETS.md"
+            exit 1
+          fi
+          echo "✅ Secrets de registry OK"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME_BACKEND }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest
+
+      - name: Extract metadata (frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME_FRONTEND }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          target: production
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          target: production
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Check deploy secrets
+        id: check-secrets
+        run: |
+          if [ -n "${{ secrets.DO_HOST }}" ] && [ -n "${{ secrets.DO_USER }}" ] && [ -n "${{ secrets.DO_SSH_KEY }}" ]; then
+            echo "deploy_enabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "deploy_enabled=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to DigitalOcean (Production)
+        if: steps.check-secrets.outputs.deploy_enabled == 'true'
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          script: |
+            set -e
+            APP_DIR="/opt/assapp"
+            USER_NAME="${{ secrets.DO_USER }}"
+            if [ "$USER_NAME" = "root" ]; then SUDO_CMD=""; else SUDO_CMD="sudo"; fi
+
+            if [ -n "${{ secrets.G_TOKEN_DEPLOY }}" ]; then
+              REPO_URL="https://${{ secrets.G_TOKEN_DEPLOY }}@github.com/${{ github.repository }}.git"
+            else
+              REPO_URL="https://github.com/${{ github.repository }}.git"
+            fi
+
+            $SUDO_CMD mkdir -p "$APP_DIR"
+            if [ "$USER_NAME" != "root" ]; then
+              $SUDO_CMD chown "$USER_NAME:$USER_NAME" "$APP_DIR" || true
+            fi
+
+            if [ ! -d "$APP_DIR/.git" ]; then
+              cd /tmp && rm -rf assapp-temp
+              git clone "$REPO_URL" assapp-temp
+              $SUDO_CMD cp -a assapp-temp/. "$APP_DIR/"
+              rm -rf assapp-temp
+            fi
+
+            git config --global --add safe.directory "$APP_DIR" || true
+            cd "$APP_DIR"
+            if [ -n "${{ secrets.G_TOKEN_DEPLOY }}" ]; then
+              git remote set-url origin "https://${{ secrets.G_TOKEN_DEPLOY }}@github.com/${{ github.repository }}.git" || true
+            fi
+            git fetch origin
+            git checkout assapp 2>/dev/null || git checkout -b assapp origin/assapp
+            git pull origin assapp
+
+            if [ ! -f .env.production ]; then
+              cp env.production.example .env.production
+              echo "⚠️  .env.production criado a partir do example — ajuste senhas no servidor"
+            fi
+
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+            export COMPOSE_DOCKER_CLI_BUILD=0
+            export DOCKER_BUILDKIT=0
+            export IMAGE_TAG=latest
+            export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
+
+            if [ -f scripts/deploy.sh ]; then
+              chmod +x scripts/deploy.sh
+              ./scripts/deploy.sh production
+            elif [ -f docker-compose.prod.yml ]; then
+              docker compose -f docker-compose.prod.yml pull
+              docker compose -f docker-compose.prod.yml up -d
+            else
+              echo "⚠️  scripts/deploy.sh e docker-compose.prod.yml ainda não existem."
+              echo "    Imagens foram publicadas no Docker Hub com tag latest."
+              echo "    Complete o compose de produção conforme docs/guias/DEPLOY_DIGITALOCEAN.md"
+            fi
+
+      - name: Skip deploy (secrets not configured)
+        if: steps.check-secrets.outputs.deploy_enabled == 'false'
+        run: |
+          echo "⚠️  Deploy SSH pulado — imagens buildadas e enviadas ao Hub."
+          echo "Configure DO_HOST, DO_USER, DO_SSH_KEY quando o droplet estiver pronto."

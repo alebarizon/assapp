@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gap Analysis · AMS + Memória Institucional · Associações Científicas</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0f0f1a;
+    --ink-mid:    #2e2e4a;
+    --ink-muted:  #6b6b8c;
+    --field:      #f2f2f8;
+    --white:      #ffffff;
+    --accent:     #2d1b6b;
+    --accent-lt:  #edeaf8;
+    --rule:       #c8c4e0;
+    --red:        #7a1b1b;
+    --red-lt:     #fdf0f0;
+    --amber:      #7a3800;
+    --amber-lt:   #fdf3e0;
+    --green:      #1b5c2e;
+    --green-lt:   #edf7f0;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--field); color: var(--ink); line-height: 1.75; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #1a0a4a 0%, #2d1b6b 100%);
+    color: #fff;
+    padding: 3.5rem 2rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 40px;
+    background: var(--field);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+  .header-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    opacity: 0.6; margin-bottom: 1rem;
+  }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    font-weight: 300; line-height: 1.15;
+    max-width: 700px; margin-bottom: 1.25rem;
+  }
+  header h1 em { font-style: italic; }
+  .header-meta { font-size: 13px; opacity: 0.72; display: flex; gap: 2rem; flex-wrap: wrap; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+    gap: 1px; background: var(--rule);
+    border: 1px solid var(--rule); border-radius: 12px;
+    overflow: hidden; margin-top: 2.5rem;
+  }
+  .stat { background: var(--white); padding: 1.1rem 1.4rem; }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem; font-weight: 300;
+    color: var(--accent); line-height: 1; margin-bottom: 4px;
+  }
+  .stat-label { font-size: 11px; color: var(--ink-muted); line-height: 1.4; }
+
+  /* LAYOUT */
+  .page { max-width: 860px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+  /* TOC */
+  .toc {
+    background: var(--white); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 1.25rem 1.5rem; margin-top: 2.5rem;
+  }
+  .toc-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-muted); margin-bottom: 0.75rem;
+  }
+  .toc ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; }
+  .toc a { font-size: 13px; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+  .toc a::before { content: '→'; font-size: 11px; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* SECTION */
+  section { margin-top: 3.5rem; }
+  .section-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.5rem;
+  }
+  section h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.65rem; font-weight: 600; color: var(--ink);
+    border-bottom: 1.5px solid var(--rule);
+    padding-bottom: 0.6rem; margin-bottom: 1.5rem;
+  }
+  p { margin-bottom: 1rem; color: var(--ink-mid); font-size: 15px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* LACUNA CARD */
+  .lacuna-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .lacuna-card.alta { border-left-color: #b71c1c; }
+  .lacuna-card.media { border-left-color: #e65100; }
+  .lacuna-card h3 {
+    font-size: 15px; font-weight: 500; color: var(--ink);
+    margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 10px;
+  }
+  .lacuna-num {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem; font-weight: 300; color: var(--rule);
+    line-height: 1; flex-shrink: 0; margin-top: -4px;
+  }
+  .lacuna-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  @media (max-width:620px) { .lacuna-meta { grid-template-columns: 1fr; } }
+  .lacuna-meta-item {
+    background: var(--field);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+  }
+  .lacuna-meta-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-muted); margin-bottom: 4px;
+  }
+  .lacuna-meta-text { font-size: 12px; color: var(--ink-mid); line-height: 1.5; }
+  .badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 4px; margin-bottom: 0.5rem;
+  }
+  .badge.alta { background: #fde8e8; color: #b71c1c; }
+  .badge.media { background: #fdf3e0; color: #e65100; }
+
+  /* OPEN PROBLEMS */
+  .problem-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+  .problem-item {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    display: flex; gap: 1rem;
+  }
+  .problem-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--accent-lt); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .problem-content h4 { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .problem-content p { font-size: 13px; color: var(--ink-muted); margin: 0; line-height: 1.6; }
+
+  /* LIMITATIONS TABLE */
+  .lim-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 13px; }
+  .lim-table thead tr { background: var(--accent); color: #fff; }
+  .lim-table thead th { padding: 0.65rem 1rem; text-align: left; font-weight: 500; font-size: 12px; }
+  .lim-table tbody tr:nth-child(even) { background: var(--accent-lt); }
+  .lim-table tbody tr:nth-child(odd)  { background: var(--white); }
+  .lim-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--rule); color: var(--ink-mid); vertical-align: top; }
+  .lim-table td:first-child { font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+  .dot.red    { background: #e53935; }
+  .dot.amber  { background: #fb8c00; }
+  .dot.green  { background: #43a047; }
+
+  /* QUOTE BLOCK */
+  .quote-block {
+    background: var(--field);
+    border-left: 3px solid var(--rule);
+    border-radius: 0 8px 8px 0;
+    padding: 0.9rem 1.2rem;
+    margin: 0.75rem 0;
+    font-size: 13px; color: var(--ink-muted); font-style: italic;
+    line-height: 1.65;
+  }
+  .quote-source {
+    font-style: normal;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--accent);
+    margin-top: 4px; display: block;
+  }
+
+  /* OPPORTUNITY CARDS */
+  .opp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+  @media (max-width: 580px) { .opp-grid { grid-template-columns: 1fr; } }
+  .opp-card {
+    background: var(--green-lt);
+    border: 1px solid #a8d5b5;
+    border-radius: 10px;
+    padding: 1.25rem 1.4rem;
+  }
+  .opp-card h4 { font-size: 14px; font-weight: 500; color: var(--green); margin-bottom: 0.5rem; }
+  .opp-card p { font-size: 13px; color: var(--ink-mid); margin: 0; line-height: 1.6; }
+  .opp-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 0.4rem; display: block;
+  }
+
+  /* FONTE NOTA */
+  .fonte-nota {
+    font-size: 12px; color: var(--ink-muted); font-style: italic;
+    margin-top: 1.25rem; border-top: 1px solid var(--rule); padding-top: 0.75rem;
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 4rem; padding: 2rem; text-align: center;
+    border-top: 1px solid var(--rule);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--ink-muted); letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="header-tag">Gap Analysis · Prompt 2 · Julho 2026</p>
+    <h1><em>Lacunas, Problemas Abertos</em><br>e Limitações de AMS para<br>Associações Científicas</h1>
+    <div class="header-meta">
+      <span>🔍 6 lacunas de pesquisa identificadas</span>
+      <span>⚠️ 5 problemas abertos documentados</span>
+      <span>📊 6 plataformas AMS analisadas</span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num">30–90</div>
+      <div class="stat-label">dias de onboarding típico em AMS existentes, sem suporte à transição de diretoria</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">plataformas AMS líderes com suporte nativo à LGPD brasileira ou NF de serviços</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">56%</div>
+      <div class="stat-label">das associações com membros estagnados ou em declínio por falta de engajamento</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">AMS com módulo nativo de submissão/pareceristas para eventos científicos</div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <p class="toc-label">Seções deste documento</p>
+    <ul>
+      <li><a href="#lacunas">6 Lacunas de pesquisa</a></li>
+      <li><a href="#problemas">Problemas abertos</a></li>
+      <li><a href="#limitacoes">Limitações documentadas das AMS</a></li>
+      <li><a href="#oportunidades">Oportunidades arquiteturais</a></li>
+    </ul>
+  </div>
+
+  <!-- LACUNAS -->
+  <section id="lacunas">
+    <p class="section-eyebrow">Dimensão 1</p>
+    <h2>Lacunas de Pesquisa Genuínas</h2>
+    <p style="margin-bottom:1.5rem">Seis lacunas identificadas por ausência documentável em ACM DL, IEEE Xplore e Google Scholar, ordenadas por relevância para a proposta PIPE:</p>
+
+    <!-- L1 -->
+    <div class="lacuna-card alta">
+      <span class="badge alta">Alta prioridade · Lacuna 01</span>
+      <h3>
+        <span class="lacuna-num">L1</span>
+        Modelagem de transições de mandato como evento arquitetural de primeira classe em sistemas AMS
+      </h3>
+      <p>Nenhum sistema AMS existente modela a transição de gestão como um processo com requisitos arquiteturais próprios. A troca de diretoria é tratada como mera atualização de credenciais de acesso — não como um evento transacional que deve preservar, transferir e contextualizar o conhecimento acumulado. A literatura de sistemas de informação trata o problema de continuidade como desafio organizacional, não tecnológico. O resultado é o "recomeço do zero" a cada ciclo de mandato, fenômeno documentado em múltiplos estudos sobre nonprofits e associações.</p>
+      <div class="lacuna-meta">
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Evidência de que é real</div>
+          <div class="lacuna-meta-text">Busca em ACM DL com "mandate transition" AND "association management" retorna zero resultados. Reviews em Capterra/G2 de Wild Apricot, MemberClicks e NeonCRM não mencionam qualquer feature de transferência de contexto entre gestões.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Por que não foi resolvida</div>
+          <div class="lacuna-meta-text">Os AMS foram desenvolvidos para associações profissionais americanas com equipes permanentes. O modelo de gestão rotativa voluntária (comum em associações científicas brasileiras) não foi o caso de uso de referência no design dessas plataformas.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Oportunidade para esta pesquisa</div>
+          <div class="lacuna-meta-text">Definir e implementar o conceito de "mandate event" como entidade de primeira classe no esquema de dados: com timestamp, snapshot de estado, checklist de transferência e anotações contextuais vinculadas a cada transição.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L2 -->
+    <div class="lacuna-card alta">
+      <span class="badge alta">Alta prioridade · Lacuna 02</span>
+      <h3>
+        <span class="lacuna-num">L2</span>
+        Requisitos funcionais específicos para AMS em associações científicas com governança democrática
+      </h3>
+      <p>A literatura de engenharia de software para associações científicas é praticamente inexistente como campo autônomo. Os requisitos de sistemas para associações científicas diferem estruturalmente dos de associações comerciais em pelo menos três dimensões: (1) o ciclo de publicação acadêmica integrado à gestão de eventos; (2) a natureza voluntária e rotativa da liderança; (3) as métricas de sucesso não-financeiras (produção científica, engajamento de pesquisadores, impacto bibliométrico). Nenhum framework de requisitos documenta essas diferenças.</p>
+      <div class="lacuna-meta">
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Evidência de que é real</div>
+          <div class="lacuna-meta-text">Busca sistemática em IEEE Xplore com "requirements" AND "scientific association" AND "software" retorna resultados sobre software científico em geral, não sobre sistemas de gestão de associações científicas. O campo é virtualmente inexplorado.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Por que não foi resolvida</div>
+          <div class="lacuna-meta-text">Associações científicas são mercado pequeno e fragmentado. Fornecedores de AMS preferem segmentos maiores (saúde, direito, engenharia) com orçamentos maiores e demandas mais padronizadas. A pesquisa acadêmica segue o mercado.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Oportunidade para esta pesquisa</div>
+          <div class="lacuna-meta-text">Produzir o primeiro framework de requisitos para AMS voltado a associações científicas brasileiras, baseado em estudo de caso longitudinal da ABCiber (10 anos de observação direta), com validação em entrevistas com gestores de 5–8 associações científicas paulistas.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L3 -->
+    <div class="lacuna-card alta">
+      <span class="badge alta">Alta prioridade · Lacuna 03</span>
+      <h3>
+        <span class="lacuna-num">L3</span>
+        Preservação ativa de contexto entre gestões vs. arquivamento passivo de dados
+      </h3>
+      <p>A distinção entre arquivamento passivo (guardar dados) e preservação ativa de contexto (tornar o histórico compreensível e acionável para uma nova gestão) não aparece na literatura de AMS nem na de gestão do conhecimento aplicada a nonprofits. Pollitt (2009) identifica os "sistemas de arquivamento" como um dos quatro sítios de memória institucional, mas não investiga como tornar esse arquivamento ativo — ou seja, capaz de responder perguntas como "por que essa decisão foi tomada?" ou "o que aconteceu na última edição do congresso?" sem depender de documentação manual pelos gestores saintes.</p>
+      <div class="lacuna-meta">
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Evidência de que é real</div>
+          <div class="lacuna-meta-text">Revisão de 15 artigos sobre "organizational memory" AND "information systems" em Semantic Scholar: todos tratam de captura e armazenamento, nenhum trata de recuperação contextualizada orientada a transições de liderança.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Por que não foi resolvida</div>
+          <div class="lacuna-meta-text">A fronteira entre gestão do conhecimento e design de sistemas de informação raramente é cruzada na pesquisa. Cada campo pressupõe que o outro resolverá o problema.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Oportunidade para esta pesquisa</div>
+          <div class="lacuna-meta-text">Desenvolver e validar um modelo de "contextual archiving" — onde ações no sistema geram automaticamente anotações de contexto vinculadas a cada ciclo de gestão, consultáveis pela diretoria entrante via interface guiada.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L4 -->
+    <div class="lacuna-card media">
+      <span class="badge media">Média prioridade · Lacuna 04</span>
+      <h3>
+        <span class="lacuna-num">L4</span>
+        Modelagem de usuário adaptativa para gestores voluntários com uso ocasional e perfis técnicos variáveis
+      </h3>
+      <p>O campo ACM UMAP (User Modeling, Adaptation and Personalization) foca predominantemente em usuários frequentes de plataformas digitais de consumo — streaming, e-commerce, e-learning. O perfil do gestor voluntário de uma associação científica é estruturalmente diferente: uso ocasional (poucas vezes por mês), contexto altamente variável (início de mandato vs. período de congresso vs. renovação de anuidades), e perfil técnico heterogêneo (de pesquisadores seniores com baixa familiaridade com sistemas a jovens pesquisadores nativos digitais). Nenhum paper do ACM UMAP investiga esse perfil de usuário.</p>
+      <div class="lacuna-meta">
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Evidência de que é real</div>
+          <div class="lacuna-meta-text">Revisão dos proceedings do ACM UMAP 2022–2025: nenhum paper trata de adaptive interfaces para voluntary/occasional organizational users. O perfil mais próximo são sistemas para elderly users, mas com premissas diferentes.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Por que não foi resolvida</div>
+          <div class="lacuna-meta-text">O mercado de AMS não tem tradição de investimento em pesquisa de usuário aprofundada. E a academia de UMAP não tem acesso fácil ao contexto específico de associações científicas.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Oportunidade para esta pesquisa</div>
+          <div class="lacuna-meta-text">Aplicar técnicas de modelagem de usuário implícita (inferência de perfil por comportamento de navegação, sem formulários explícitos) ao contexto de gestores voluntários — conectando diretamente à dissertação de mestrado ECA/USP 2000 sobre sistemas adaptativos para Web.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L5 -->
+    <div class="lacuna-card media">
+      <span class="badge media">Média prioridade · Lacuna 05</span>
+      <h3>
+        <span class="lacuna-num">L5</span>
+        Integração nativa entre gestão associativa e fluxos de publicação acadêmica (call for papers, pareceristas, anais)
+      </h3>
+      <p>Existem sistemas especializados de gestão de submissões acadêmicas (EasyChair, ConfTool, OJS/PKP) e sistemas de gestão de membros (AMS). Não existe plataforma que integre nativamente os dois fluxos — de forma que a inscrição de um membro como autor submissário, parecerista e participante do congresso seja gerenciada em um único sistema com histórico unificado. Essa fragmentação é documentada na literatura de conference management systems (Pesenhofer et al., 2006; CONFIOUS, 2005) mas nunca abordada do ponto de vista da gestão associativa integrada.</p>
+      <div class="lacuna-meta">
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Evidência de que é real</div>
+          <div class="lacuna-meta-text">Nenhum dos 130+ AMS listados no mercado em 2026 oferece módulo de call for papers com gestão de pareceristas. EasyChair e ConfTool, por sua vez, não têm gestão de membros. A integração é sempre feita por exportação manual de planilhas.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Por que não foi resolvida</div>
+          <div class="lacuna-meta-text">Os dois mercados (conference management e association management) evoluíram em silos, com fornecedores distintos e bases de usuários que raramente se comunicam. A dor da fragmentação é absorvida pelos gestores voluntários como "normal".</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Oportunidade para esta pesquisa</div>
+          <div class="lacuna-meta-text">Projetar e validar um módulo de eventos acadêmicos integrado ao AMS que gerencie nativamente: submissão de trabalhos, atribuição de pareceristas, notificações de aceite/recusa, geração de anais e emissão de certificados — tudo vinculado ao perfil de membro.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L6 -->
+    <div class="lacuna-card media">
+      <span class="badge media">Média prioridade · Lacuna 06</span>
+      <h3>
+        <span class="lacuna-num">L6</span>
+        Requisitos de AMS para o contexto jurídico-fiscal do terceiro setor brasileiro (LGPD, Marco Legal das OSC, NF de serviços)
+      </h3>
+      <p>Todas as plataformas AMS líderes foram desenvolvidas para o contexto norte-americano ou europeu. O contexto jurídico-fiscal brasileiro para associações sem fins lucrativos envolve especificidades sem equivalente direto: CNPJ de associação, isenções tributárias condicionais, Marco Legal das OSC (Lei 13.019/2014), LGPD com 10 bases legais distintas do GDPR, emissão de NF de serviços municipal, e CPF/CNPJ como identificadores únicos. Nenhum paper científico ou benchmark de mercado mapeia esse conjunto de requisitos para sistemas AMS.</p>
+      <div class="lacuna-meta">
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Evidência de que é real</div>
+          <div class="lacuna-meta-text">Wild Apricot, MemberClicks, NeonCRM, Raklet: nenhum oferece suporte nativo à LGPD, suporte em português ou integração com NF de serviços. LGPD tem 10 bases legais distintas do GDPR — organizações que assumem equivalência total estão em risco regulatório documentado (ANPD, 2024).</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Por que não foi resolvida</div>
+          <div class="lacuna-meta-text">O mercado brasileiro de AMS é atendido por soluções genéricas (Sympla, Eventbrite) ou por desenvolvimento customizado. A demanda por uma solução especializada existe mas nunca foi articulada como requisito de pesquisa.</div>
+        </div>
+        <div class="lacuna-meta-item">
+          <div class="lacuna-meta-label">Oportunidade para esta pesquisa</div>
+          <div class="lacuna-meta-text">Produzir o primeiro mapeamento de requisitos LGPD + Marco Legal das OSC para sistemas AMS no Brasil, como contribuição científica original com impacto direto no mercado de 237 mil organizações sem fins lucrativos ativas.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEMAS ABERTOS -->
+  <section id="problemas">
+    <p class="section-eyebrow">Dimensão 2</p>
+    <h2>Problemas Abertos sem Solução Consolidada</h2>
+    <p style="margin-bottom:1rem">O que a literatura identifica como desafio mas ainda não resolveu:</p>
+    <div class="problem-list">
+
+      <div class="problem-item">
+        <div class="problem-icon">🔄</div>
+        <div class="problem-content">
+          <h4>Como transferir conhecimento tácito de gestores saintes sem depender de sua cooperação ativa</h4>
+          <p>A literatura de KM em nonprofits identifica o conhecimento tácito como o mais crítico e o mais difícil de capturar. As soluções propostas (entrevistas de saída, mentoria, documentação manual) dependem da disponibilidade e motivação do gestor sainte — que frequentemente está esgotado ao final do mandato. Não há solução sistêmica que capture conhecimento tácito passivamente durante o exercício do mandato.</p>
+        </div>
+      </div>
+
+      <div class="problem-item">
+        <div class="problem-icon">📊</div>
+        <div class="problem-content">
+          <h4>Como medir engajamento real de membros em associações científicas vs. apenas atividade transacional</h4>
+          <p>O <em>2024 Association Benchmarking Report</em> documenta que 40% das associações carecem de mecanismos de feedback dos membros. Os AMS existentes medem transações (renovações, inscrições em eventos, pagamentos), mas não engajamento qualitativo — participação em debates, contribuição para publicações, mentorias. Para associações científicas, onde o valor da membresia é majoritariamente intangível, essa lacuna é ainda mais crítica.</p>
+        </div>
+      </div>
+
+      <div class="problem-item">
+        <div class="problem-icon">🔐</div>
+        <div class="problem-content">
+          <h4>Como projetar controle de acesso granular que funcione para gestores voluntários sem perfil técnico</h4>
+          <p>Reviews verificadas do Wild Apricot em Capterra (2024–2025) documentam explicitamente o problema: "Admin access needs to be more granular. Giving someone admin access exposes major parts of the system. Our need is to limit admin access to a specific event or event grouping. Considerable computer experience is necessary to manage the system and our volunteers don't all have the same level required." O campo de HCI não investigou o design de sistemas de permissões para usuários voluntários não-técnicos.</p>
+          <div class="quote-block">
+            "Considerable computer experience is necessary to manage the system and our volunteers don't all have the same level required. This puts the system at risk of unintended damage."
+            <span class="quote-source">Review verificada Wild Apricot · Capterra, 2024–2025</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="problem-item">
+        <div class="problem-icon">🌐</div>
+        <div class="problem-content">
+          <h4>Como garantir continuidade de dados e processos numa troca de AMS (vendor lock-in em associações pequenas)</h4>
+          <p>A literatura de sistemas de informação documenta vendor lock-in como problema geral, mas não investiga especificamente o impacto em associações com liderança rotativa. Uma nova diretoria que decide trocar de plataforma enfrenta: migração de dados históricos, retraining de novos gestores, e perda do contexto acumulado no sistema anterior — um custo cognitivo e operacional que raramente é mensurado na avaliação de AMS.</p>
+        </div>
+      </div>
+
+      <div class="problem-item">
+        <div class="problem-icon">🤖</div>
+        <div class="problem-content">
+          <h4>Como aplicar IA/ML em associações com datasets pequenos e histórico fragmentado</h4>
+          <p>As plataformas AMS mais recentes (Member Lounge, 2026; i4a, 2026) anunciam "AI-assisted reporting and insights" e "AI personalizes content for individual members" — mas essas funcionalidades pressupõem grandes volumes de dados comportamentais contínuos. Associações científicas pequenas (200–500 membros) com histórico fragmentado por trocas de sistema têm datasets insuficientes para modelos de ML convencionais. A literatura de federated learning e few-shot learning não foi aplicada a esse contexto.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LIMITAÇÕES AMS -->
+  <section id="limitacoes">
+    <p class="section-eyebrow">Dimensão 3</p>
+    <h2>Limitações Documentadas das Soluções AMS Existentes</h2>
+    <p style="margin-bottom:1rem">Avaliação das principais plataformas frente às necessidades específicas de associações científicas com governança democrática rotativa. Fontes: reviews verificadas em Capterra, G2, SoftwareAdvice, ITQlick (2024–2026) e benchmarks de mercado.</p>
+
+    <table class="lim-table">
+      <thead>
+        <tr>
+          <th>Plataforma</th>
+          <th>Transição de diretoria</th>
+          <th>Fluxo acadêmico</th>
+          <th>Brasil / LGPD</th>
+          <th>Usuário voluntário</th>
+          <th>Limitação crítica documentada</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Wild Apricot</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Sem suporte BR</td>
+          <td><span class="dot amber"></span>Interface confusa</td>
+          <td>"Considerable computer experience necessary. Volunteers don't all have the same level." Sem granularidade de acesso. Membro não pode ter mais de uma categoria simultânea.</td>
+        </tr>
+        <tr>
+          <td>MemberClicks</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Sem suporte BR</td>
+          <td><span class="dot red"></span>Alta curva de aprendizado</td>
+          <td>"Bare bones association management with bare minimum features." "Poor web design." Curva de aprendizado elevada para não-técnicos. Custo a partir de USD 200/mês.</td>
+        </tr>
+        <tr>
+          <td>NeonCRM</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Sem suporte BR</td>
+          <td><span class="dot amber"></span>Moderado</td>
+          <td>Focado em fundraising e doações — modelo de negócio inadequado para associações científicas sem captação de recursos. Recursos de eventos básicos.</td>
+        </tr>
+        <tr>
+          <td>Raklet</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot amber"></span>Parcial (GDPR)</td>
+          <td><span class="dot green"></span>Interface simples</td>
+          <td>GDPR compliance, mas sem LGPD específica. Sem NF de serviços. Sem suporte ao modelo de mandato rotativo. Recursos limitados para eventos complexos.</td>
+        </tr>
+        <tr>
+          <td>YourMembership</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot red"></span>Sem suporte BR</td>
+          <td><span class="dot amber"></span>Moderado</td>
+          <td>Voltado para associações profissionais americanas de médio-grande porte. Preço elevado, sem versão para mercado BR.</td>
+        </tr>
+        <tr>
+          <td>Sympla / Eventbrite (BR)</td>
+          <td><span class="dot red"></span>Não aplicável</td>
+          <td><span class="dot red"></span>Não suporta</td>
+          <td><span class="dot green"></span>Nativo BR</td>
+          <td><span class="dot green"></span>Fácil</td>
+          <td>Plataformas de eventos, não AMS. Sem gestão de membros, sem histórico de filiações, sem financeiro integrado. Solução parcial usada como gambiarra.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:var(--red-lt);border:1px solid #e8b4b4;border-radius:10px;padding:1.25rem 1.5rem;margin-top:1.25rem;">
+      <p style="font-size:14px;color:var(--red);margin:0"><strong>Conclusão da análise comparativa:</strong> Nenhuma das plataformas AMS disponíveis no mercado em 2026 foi projetada para o caso de uso específico de associações científicas com governança democrática rotativa e contexto jurídico-fiscal brasileiro. A combinação de quatro requisitos — transição de diretoria, fluxo acadêmico, LGPD/BR e interface para voluntários não-técnicos — não é endereçada por nenhum player existente. Este é o espaço de mercado e de pesquisa que a proposta PIPE se propõe a ocupar.</p>
+    </div>
+  </section>
+
+  <!-- OPORTUNIDADES -->
+  <section id="oportunidades">
+    <p class="section-eyebrow">Dimensão 4</p>
+    <h2>Oportunidades Arquiteturais</h2>
+    <p style="margin-bottom:1rem">Onde uma arquitetura especializada pode oferecer vantagem estrutural sobre soluções genéricas:</p>
+
+    <div class="opp-grid">
+      <div class="opp-card">
+        <span class="opp-tag">Oportunidade 01 · Memória institucional</span>
+        <h4>Ciclos de mandato com histórico auditável e contextualizado</h4>
+        <p>Modelar cada mandato como uma entidade temporal no banco de dados, com início, fim, gestores responsáveis, decisões tomadas e processos executados — consultável pela diretoria entrante via interface de "onboarding histórico". Reduz em pelo menos 50% o tempo de onboarding estimado (H1 da proposta).</p>
+      </div>
+
+      <div class="opp-card">
+        <span class="opp-tag">Oportunidade 02 · Experiência do usuário</span>
+        <h4>Onboarding guiado e adaptativo para diretorias entrantes</h4>
+        <p>Interface que detecta quando um usuário assume um novo cargo e ativa automaticamente um fluxo de onboarding contextualizado — apresentando o histórico relevante para aquela função, pendências do mandato anterior e checklist de primeiras ações. Conecta diretamente ao campo de sistemas adaptativos (L4 e mestrado ECA/USP 2000).</p>
+      </div>
+
+      <div class="opp-card">
+        <span class="opp-tag">Oportunidade 03 · Fluxo acadêmico</span>
+        <h4>Integração nativa call for papers + gestão de membros</h4>
+        <p>Módulo de eventos acadêmicos integrado ao perfil de membro: um pesquisador que submete um trabalho, avalia como parecerista e se inscreve no congresso tem toda essa atividade vinculada ao seu histórico de membro. Gera anais automáticos com DOI e emite certificados digitais — fluxo inexistente em qualquer AMS atual.</p>
+      </div>
+
+      <div class="opp-card">
+        <span class="opp-tag">Oportunidade 04 · Contexto brasileiro</span>
+        <h4>Compliance nativo com LGPD e legislação de OSC brasileira</h4>
+        <p>Primeira plataforma AMS projetada nativamente para o contexto brasileiro: LGPD com as 10 bases legais específicas, Marco Legal das OSC (Lei 13.019/2014), integração com NF de serviços municipal, CPF/CNPJ como identificadores, suporte completo em português e precificação em BRL. Vantagem competitiva estrutural sobre todos os concorrentes internacionais.</p>
+      </div>
+    </div>
+
+    <p class="fonte-nota">Gap analysis realizado com buscas em: ACM Digital Library, IEEE Xplore, Google Scholar, Semantic Scholar, Capterra, G2, SoftwareAdvice, ITQlick, Spotsaas (2024–2026). Legislação: LGPD (Lei 13.709/2018), Marco Legal das OSC (Lei 13.019/2014), resoluções ANPD 2024. Proposta PIPE: Alexandre Barizon ME — CNPJ 05.562.968/0001-25.</p>
+  </section>
+
+</div>
+
+<footer>
+  Gap Analysis · SaaS para Associações Científicas · Proposta PIPE Jornada Tecnológica 2026<br>
+  Alexandre Barizon ME · CNPJ 05.562.968/0001-25 · Fontes: ACM DL · IEEE Xplore · Capterra · G2 · ANPD · IBGE
+</footer>
+
+</body>
+</html>

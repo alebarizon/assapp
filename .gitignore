@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.sqlite3
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Docker
+postgres_data/
+
+# Media / static
+backend/media/
+backend/staticfiles/
+backend/logs/
+
+# Research data (LGPD)
+research/dados/*.json
+research/dados/*.csv
+!research/dados/.gitkeep
+
+# Prisma (documentação only — não gera client)
+node_modules/.prisma/
+
+# Coverage
+htmlcov/
+.coverage
+.pytest_cache/

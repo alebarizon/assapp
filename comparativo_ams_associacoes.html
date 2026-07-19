@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativo AMS · Associações Científicas Brasileiras · 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #0f0f1a;
+  --ink-mid:   #2e2e4a;
+  --ink-muted: #6b6b8c;
+  --field:     #f2f2f8;
+  --white:     #ffffff;
+  --accent:    #2d1b6b;
+  --accent-lt: #edeaf8;
+  --rule:      #c8c4e0;
+  --green:     #1b5c2e;
+  --green-lt:  #edf7f0;
+  --green-mid: #a8d5b5;
+  --amber:     #7a3800;
+  --amber-lt:  #fdf3e0;
+  --amber-mid: #e8c490;
+  --red:       #7a1b1b;
+  --red-lt:    #fdf0f0;
+  --red-mid:   #e8b4b4;
+  --gray:      #4a4a6a;
+  --gray-lt:   #f0f0f5;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; scroll-behavior: smooth; }
+body { font-family: 'IBM Plex Sans', sans-serif; background: var(--field); color: var(--ink); line-height: 1.7; }
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #1a0a4a 0%, #2d1b6b 60%, #3d2080 100%);
+  color: #fff; padding: 3.5rem 2rem 3.5rem; position: relative; overflow: hidden;
+}
+header::before {
+  content: ''; position: absolute; top: -100px; right: -100px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+}
+header::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 40px; background: var(--field);
+  clip-path: ellipse(55% 100% at 50% 100%);
+}
+.header-inner { max-width: 980px; margin: 0 auto; padding: 0 1.5rem; }
+.header-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  opacity: 0.6; margin-bottom: 1rem;
+}
+header h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+  font-weight: 300; line-height: 1.15;
+  max-width: 700px; margin-bottom: 1rem;
+}
+header h1 em { font-style: italic; }
+.header-meta { font-size: 13px; opacity: 0.72; display: flex; gap: 2rem; flex-wrap: wrap; margin-top: .5rem; }
+
+/* LEGEND */
+.legend {
+  display: flex; flex-wrap: wrap; gap: .5rem 1.5rem;
+  margin: 2rem 0 1rem; align-items: center;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-mid); }
+.pill {
+  display: inline-block; padding: 2px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.pill.full    { background: var(--green-lt);  color: var(--green); border: 1px solid var(--green-mid); }
+.pill.partial { background: var(--amber-lt);  color: var(--amber); border: 1px solid var(--amber-mid); }
+.pill.no      { background: var(--red-lt);    color: var(--red);   border: 1px solid var(--red-mid); }
+.pill.nd      { background: var(--gray-lt);   color: var(--gray);  border: 1px dashed #a0a0c0; }
+
+/* PAGE */
+.page { max-width: 980px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+/* TOC */
+.toc {
+  background: var(--white); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 1.25rem 1.5rem; margin-top: 2.5rem;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-muted); margin-bottom: .75rem;
+}
+.toc ul { list-style: none; display: flex; flex-wrap: wrap; gap: .4rem 1.5rem; }
+.toc a { font-size: 13px; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+.toc a::before { content: '→'; font-size: 11px; }
+.toc a:hover { text-decoration: underline; }
+
+/* SECTION */
+section { margin-top: 3rem; }
+.section-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: .5rem;
+}
+section h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.55rem; font-weight: 600; color: var(--ink);
+  border-bottom: 1.5px solid var(--rule);
+  padding-bottom: .6rem; margin-bottom: 1.5rem;
+}
+p { margin-bottom: 1rem; color: var(--ink-mid); font-size: 14px; }
+
+/* TOOL HEADER */
+.tool-block { margin-bottom: 2.5rem; }
+.tool-header {
+  display: flex; align-items: flex-start; gap: 1rem;
+  background: var(--white); border: 1px solid var(--rule);
+  border-radius: 10px 10px 0 0; padding: 1.25rem 1.5rem;
+  border-bottom: none;
+}
+.tool-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--accent-lt); display: flex; align-items: center;
+  justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.tool-name { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.tool-sub { font-size: 12px; color: var(--ink-muted); }
+.tool-price {
+  margin-left: auto; text-align: right; flex-shrink: 0;
+}
+.tool-price-val {
+  font-family: 'Fraunces', serif; font-size: 1.25rem;
+  font-weight: 300; color: var(--accent); line-height: 1;
+}
+.tool-price-label { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+/* CRITERIA TABLE */
+.criteria-table {
+  width: 100%; border-collapse: collapse;
+  border: 1px solid var(--rule); border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+.criteria-table th {
+  background: var(--field); padding: .6rem 1rem;
+  text-align: left; font-size: 11px; font-weight: 500;
+  color: var(--ink-muted); letter-spacing: .05em; text-transform: uppercase;
+  border-bottom: 1px solid var(--rule);
+}
+.criteria-table td {
+  padding: .7rem 1rem; border-bottom: 1px solid var(--rule);
+  font-size: 13px; vertical-align: top;
+}
+.criteria-table tr:last-child td { border-bottom: none; }
+.criteria-table td:first-child { color: var(--ink-mid); font-weight: 500; width: 200px; }
+.criteria-table td:nth-child(2) { width: 130px; }
+.criteria-table tr:nth-child(even) td { background: rgba(200,196,224,0.08); }
+.crit-note { font-size: 12px; color: var(--ink-muted); margin-top: 3px; line-height: 1.5; }
+.group-header td {
+  background: var(--accent) !important;
+  color: #fff !important; font-size: 11px !important;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: .5rem 1rem !important; font-weight: 500 !important;
+}
+
+/* MATRIX */
+.matrix-wrap { overflow-x: auto; margin-top: 1rem; }
+.matrix {
+  width: 100%; border-collapse: collapse;
+  font-size: 12px; min-width: 700px;
+}
+.matrix th {
+  background: var(--accent); color: #fff;
+  padding: .6rem .75rem; text-align: center;
+  font-weight: 500; font-size: 11px;
+}
+.matrix th:first-child { text-align: left; min-width: 160px; }
+.matrix td {
+  padding: .55rem .75rem; border: 1px solid var(--rule);
+  text-align: center; vertical-align: middle;
+}
+.matrix td:first-child { text-align: left; font-weight: 500; color: var(--ink); background: var(--field); }
+.matrix tr:nth-child(even) td:not(:first-child) { background: rgba(200,196,224,0.1); }
+.matrix .group-row td {
+  background: var(--accent-lt) !important;
+  font-size: 10px !important; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--accent) !important;
+  font-weight: 500 !important; text-align: left !important;
+  padding: .4rem .75rem !important;
+}
+.m-full    { color: var(--green); font-size: 16px; }
+.m-partial { color: #e65100;     font-size: 16px; }
+.m-no      { color: var(--red);  font-size: 16px; }
+.m-nd      { color: #a0a0c0;     font-size: 14px; }
+
+/* CONCLUSION BOX */
+.conclusion {
+  background: var(--red-lt); border: 1px solid var(--red-mid);
+  border-left: 4px solid var(--red);
+  border-radius: 10px; padding: 1.5rem 1.75rem; margin-top: 1.5rem;
+}
+.conclusion h3 {
+  font-size: 14px; font-weight: 500; color: var(--red); margin-bottom: .75rem;
+}
+.conclusion ul { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+.conclusion li {
+  font-size: 13px; color: var(--ink-mid);
+  display: flex; gap: 8px; line-height: 1.5;
+}
+.conclusion li::before { content: '✗'; color: var(--red); flex-shrink: 0; font-weight: 500; }
+
+.opportunity {
+  background: var(--green-lt); border: 1px solid var(--green-mid);
+  border-left: 4px solid var(--green);
+  border-radius: 10px; padding: 1.5rem 1.75rem; margin-top: 1rem;
+}
+.opportunity h3 { font-size: 14px; font-weight: 500; color: var(--green); margin-bottom: .75rem; }
+.opportunity ul { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+.opportunity li {
+  font-size: 13px; color: var(--ink-mid);
+  display: flex; gap: 8px; line-height: 1.5;
+}
+.opportunity li::before { content: '✓'; color: var(--green); flex-shrink: 0; font-weight: 500; }
+
+.fonte-nota {
+  font-size: 12px; color: var(--ink-muted); font-style: italic;
+  margin-top: 1.5rem; border-top: 1px solid var(--rule); padding-top: .75rem;
+}
+
+footer {
+  margin-top: 4rem; padding: 2rem; text-align: center;
+  border-top: 1px solid var(--rule);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--ink-muted); letter-spacing: .05em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="header-tag">Comparativo de ferramentas · Prompt 3 · Julho 2026</p>
+    <h1>Comparativo AMS:<br><em>6 Plataformas vs. Necessidades de<br>Associações Científicas Brasileiras</em></h1>
+    <div class="header-meta">
+      <span>📊 6 plataformas analisadas</span>
+      <span>🔍 6 critérios · 18 subcritérios</span>
+      <span>📅 Fontes verificadas: Capterra, G2, SoftwareAdvice, ITQlick · Julho 2026</span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <div class="legend">
+    <span style="font-size:12px;color:var(--ink-muted);font-weight:500;margin-right:.5rem">Legenda:</span>
+    <div class="legend-item"><span class="pill full">Atende plenamente</span></div>
+    <div class="legend-item"><span class="pill partial">Atende parcialmente</span></div>
+    <div class="legend-item"><span class="pill no">Não atende</span></div>
+    <div class="legend-item"><span class="pill nd">Não documentado</span></div>
+  </div>
+
+  <div class="toc">
+    <p class="toc-label">Navegação rápida</p>
+    <ul>
+      <li><a href="#wild">Wild Apricot</a></li>
+      <li><a href="#memberpress">MemberPress</a></li>
+      <li><a href="#raklet">Raklet</a></li>
+      <li><a href="#neoncrm">NeonCRM</a></li>
+      <li><a href="#memberclicks">MemberClicks</a></li>
+      <li><a href="#brasil">Soluções BR</a></li>
+      <li><a href="#matriz">Matriz comparativa</a></li>
+      <li><a href="#conclusao">Conclusão</a></li>
+    </ul>
+  </div>
+
+  <!-- ══ WILD APRICOT ══ -->
+  <section id="wild">
+    <p class="section-eyebrow">Ferramenta 01 de 06</p>
+    <h2>Wild Apricot (Personify)</h2>
+    <div class="tool-block">
+      <div class="tool-header">
+        <div class="tool-icon">🍏</div>
+        <div>
+          <div class="tool-name">Wild Apricot</div>
+          <div class="tool-sub">Personify · Ontario, Canadá · Cloud SaaS · 15.000+ organizações</div>
+        </div>
+        <div class="tool-price">
+          <div class="tool-price-val">USD 48–350/mês</div>
+          <div class="tool-price-label">por faixa de contatos (100 a 50k)</div>
+        </div>
+      </div>
+      <table class="criteria-table">
+        <thead><tr><th>Critério</th><th>Classificação</th><th>Detalhamento</th></tr></thead>
+        <tbody>
+          <tr class="group-header"><td colspan="3">A · Gestão de ciclos de mandato e transição de diretoria</td></tr>
+          <tr><td>Transferência de acesso entre gestões</td><td><span class="pill partial">Parcialmente</span></td><td>Troca de admin via e-mail diferente obrigatório. Sem fluxo de onboarding para gestão entrante. <span class="crit-note">Review Capterra 2024: "Adding another administrator was frustrating. The system requires a completely separate email address for an additional admin account."</span></td></tr>
+          <tr><td>Histórico auditável por gestão</td><td><span class="pill no">Não atende</span></td><td>Sem audit log estruturado por ciclo de mandato. Logs genéricos de sistema disponíveis apenas em planos superiores, sem organização temporal por gestão.</td></tr>
+          <tr><td>Onboarding para diretoria entrante</td><td><span class="pill no">Não atende</span></td><td>Nenhum módulo específico. "Onboarding automates administrative emails like confirmations but doesn't prompt newcomers to connect with others." (GroupApp Review 2026)</td></tr>
+          <tr class="group-header"><td colspan="3">B · Preservação de memória institucional</td></tr>
+          <tr><td>Arquivamento contextualizado</td><td><span class="pill no">Não atende</span></td><td>Sem mecanismo de anotações contextuais vinculadas a ciclos temporais. Dados armazenados sem estrutura narrativa.</td></tr>
+          <tr><td>Histórico de comunicações com membros</td><td><span class="pill partial">Parcialmente</span></td><td>E-mails enviados são registrados no perfil do contato, mas sem contextualização por gestão ou período de mandato.</td></tr>
+          <tr><td>Documentação de regras e processos</td><td><span class="pill no">Não atende</span></td><td>Sem módulo de knowledge base ou documentação interna. Informações institucionais não têm local designado no sistema.</td></tr>
+          <tr class="group-header"><td colspan="3">C · Aderência ao contexto científico-acadêmico</td></tr>
+          <tr><td>Módulo de submissão / call for papers</td><td><span class="pill no">Não atende</span></td><td>Evento científico gerenciado apenas como evento genérico. Sem campos de submissão de trabalhos, pareceristas ou avaliação.</td></tr>
+          <tr><td>Gestão de pareceristas</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente. Integração com EasyChair/ConfTool requer exportação manual de dados.</td></tr>
+          <tr><td>Integração com publicação (anais, DOI)</td><td><span class="pill no">Não atende</span></td><td>Sem integração documentada com OJS, CrossRef ou sistemas de publicação acadêmica.</td></tr>
+          <tr class="group-header"><td colspan="3">D · Adequação ao terceiro setor brasileiro</td></tr>
+          <tr><td>CNPJ de associação / contexto BR</td><td><span class="pill no">Não atende</span></td><td>Desenvolvido para o mercado norte-americano. Sem campos para CPF/CNPJ como identificadores únicos.</td></tr>
+          <tr><td>NF de serviços / gestão fiscal BR</td><td><span class="pill no">Não atende</span></td><td>Integração apenas com QuickBooks e Excel. Sem suporte a nota fiscal de serviços municipal brasileira.</td></tr>
+          <tr><td>Conformidade com LGPD</td><td><span class="pill no">Não atende</span></td><td>Política de privacidade alinhada ao GDPR europeu, não à LGPD brasileira (10 bases legais distintas, requisitos ANPD, DPO).</td></tr>
+          <tr><td>Suporte em português / atendimento BR</td><td><span class="pill no">Não atende</span></td><td>Interface e suporte apenas em inglês. Servidores fora do Brasil. Review Capterra: "Support was also out of our timezone."</td></tr>
+          <tr class="group-header"><td colspan="3">E · Adaptabilidade a perfis técnicos variáveis</td></tr>
+          <tr><td>Interface para gestores não-técnicos</td><td><span class="pill partial">Parcialmente</span></td><td>"Considerable computer experience is necessary to manage the system and our volunteers don't all have the same level required. This puts the system at risk of unintended damage." (Capterra 2024). Interface mais intuitiva para usuários finais do que para administradores.</td></tr>
+          <tr><td>Personalização sem desenvolvedor</td><td><span class="pill partial">Parcialmente</span></td><td>Website builder disponível, mas customizações avançadas são "time-intensive" e a aparência final frequentemente difere do preview.</td></tr>
+          <tr><td>Curva de aprendizado para nova diretoria</td><td><span class="pill partial">Parcialmente</span></td><td>Onboarding inicial disponível (coaches). Porém sem fluxo específico para substituição de gestores durante o uso contínuo.</td></tr>
+          <tr class="group-header"><td colspan="3">F · Custo e modelo de licenciamento</td></tr>
+          <tr><td>Custo para 200–500 membros</td><td><span class="pill partial">Parcialmente</span></td><td>USD 120–200/mês (BRL 600–1.000/mês em câmbio atual). Custo em dólar é particularmente oneroso para associações científicas brasileiras com orçamento em reais.</td></tr>
+          <tr><td>Limitações em planos básicos</td><td><span class="pill partial">Parcialmente</span></td><td>Todos os planos incluem os mesmos recursos; diferença apenas no número de contatos. Sem gateway de pagamento nacional.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ MEMBERPRESS ══ -->
+  <section id="memberpress">
+    <p class="section-eyebrow">Ferramenta 02 de 06</p>
+    <h2>MemberPress (WordPress)</h2>
+    <div class="tool-block">
+      <div class="tool-header">
+        <div class="tool-icon">🔌</div>
+        <div>
+          <div class="tool-name">MemberPress</div>
+          <div class="tool-sub">Plugin WordPress · EUA · Requer WordPress auto-hospedado</div>
+        </div>
+        <div class="tool-price">
+          <div class="tool-price-val">USD 199–500/ano</div>
+          <div class="tool-price-label">Launch / Growth / Scale (+ hospedagem WP)</div>
+        </div>
+      </div>
+      <table class="criteria-table">
+        <thead><tr><th>Critério</th><th>Classificação</th><th>Detalhamento</th></tr></thead>
+        <tbody>
+          <tr class="group-header"><td colspan="3">A · Gestão de ciclos de mandato e transição de diretoria</td></tr>
+          <tr><td>Transferência de acesso entre gestões</td><td><span class="pill no">Não atende</span></td><td>Gerenciamento de administradores via WordPress nativo, sem fluxo específico para transição de diretoria. Exige acesso ao painel wp-admin.</td></tr>
+          <tr><td>Histórico auditável por gestão</td><td><span class="pill no">Não atende</span></td><td>Sem audit trail integrado. Logs do WordPress disponíveis via plugins adicionais, mas não estruturados por ciclos de mandato.</td></tr>
+          <tr><td>Onboarding para diretoria entrante</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente. Nova diretoria precisaria de treinamento técnico em WordPress para operar o sistema.</td></tr>
+          <tr class="group-header"><td colspan="3">B · Preservação de memória institucional</td></tr>
+          <tr><td>Arquivamento contextualizado</td><td><span class="pill no">Não atende</span></td><td>Plugin focado em controle de acesso e assinaturas, não em gestão de conhecimento institucional.</td></tr>
+          <tr><td>Histórico de comunicações</td><td><span class="pill partial">Parcialmente</span></td><td>Reminders automáticos registrados, mas histórico de comunicações depende de integração com Mailchimp/ActiveCampaign.</td></tr>
+          <tr><td>Documentação de regras e processos</td><td><span class="pill no">Não atende</span></td><td>Sem módulo específico. Requer plugin adicional de knowledge base.</td></tr>
+          <tr class="group-header"><td colspan="3">C · Aderência ao contexto científico-acadêmico</td></tr>
+          <tr><td>Módulo de submissão / call for papers</td><td><span class="pill no">Não atende</span></td><td>Não desenvolvido para esse propósito. Eventos são gerenciados via plugins WordPress adicionais (The Events Calendar, etc.).</td></tr>
+          <tr><td>Gestão de pareceristas</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente nativamente. Requereria desenvolvimento customizado complexo.</td></tr>
+          <tr><td>Integração com publicação acadêmica</td><td><span class="pill no">Não atende</span></td><td>Sem integração com OJS, CrossRef, DOI ou sistemas de anais científicos.</td></tr>
+          <tr class="group-header"><td colspan="3">D · Adequação ao terceiro setor brasileiro</td></tr>
+          <tr><td>CNPJ / contexto BR</td><td><span class="pill partial">Parcialmente</span></td><td>WordPress permite customização de campos, mas não há suporte nativo a CPF/CNPJ ou estruturas fiscais brasileiras.</td></tr>
+          <tr><td>NF de serviços / gestão fiscal BR</td><td><span class="pill no">Não atende</span></td><td>Sem suporte a NF-e ou nota fiscal de serviços. Integração com gateways brasileiros (PagSeguro, Mercado Pago) requer plugins de terceiros.</td></tr>
+          <tr><td>Conformidade com LGPD</td><td><span class="pill nd">Não documentado</span></td><td>LGPD não mencionada na documentação oficial. Reviews internacionais mencionam dificuldades com leis locais de privacidade. G2 review: "It isn't for Hungarian language, and the legislation is very complicated."</td></tr>
+          <tr><td>Suporte em português</td><td><span class="pill no">Não atende</span></td><td>Interface traduzível via WordPress, mas suporte oficial apenas em inglês. Comunidade BR limitada.</td></tr>
+          <tr class="group-header"><td colspan="3">E · Adaptabilidade a perfis técnicos variáveis</td></tr>
+          <tr><td>Interface para gestores não-técnicos</td><td><span class="pill no">Não atende</span></td><td>Requer conhecimento de WordPress para operação administrativa. "Initial setup was difficult." (G2, 2026). Gestores não-técnicos terão grande dificuldade.</td></tr>
+          <tr><td>Personalização sem desenvolvedor</td><td><span class="pill partial">Parcialmente</span></td><td>Modular approach dá controle total, mas "also means more maintenance and potential technical issues." (GroupApp Review 2026)</td></tr>
+          <tr><td>Curva de aprendizado</td><td><span class="pill no">Não atende</span></td><td>Alta curva de aprendizado. "MemberPress may not be the best fit if you're looking for a simple, all-in-one solution." Para gestores voluntários sem perfil técnico: inviável sem suporte TI permanente.</td></tr>
+          <tr class="group-header"><td colspan="3">F · Custo e licenciamento</td></tr>
+          <tr><td>Custo para 200–500 membros</td><td><span class="pill full">Atende plenamente</span></td><td>USD 199–350/ano (BRL 1.000–1.750/ano) é o mais acessível do comparativo para volume de membros. Sem limite de contatos.</td></tr>
+          <tr><td>Limitações em planos básicos</td><td><span class="pill partial">Parcialmente</span></td><td>Launch (USD 199/ano) limita a Stripe como único gateway. Renovação anual salta para preço cheio sem aviso claro: "renewals jump to the full price, which isn't always obvious upfront." (G2)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ RAKLET ══ -->
+  <section id="raklet">
+    <p class="section-eyebrow">Ferramenta 03 de 06</p>
+    <h2>Raklet</h2>
+    <div class="tool-block">
+      <div class="tool-header">
+        <div class="tool-icon">🚀</div>
+        <div>
+          <div class="tool-name">Raklet</div>
+          <div class="tool-sub">Techstars / Microsoft Ventures · Fundada 2013 · App-store model · Plano gratuito até 1.000 contatos</div>
+        </div>
+        <div class="tool-price">
+          <div class="tool-price-val">Gratuito – USD ~49/mês</div>
+          <div class="tool-price-label">contato-based pricing · free até 1k contatos</div>
+        </div>
+      </div>
+      <table class="criteria-table">
+        <thead><tr><th>Critério</th><th>Classificação</th><th>Detalhamento</th></tr></thead>
+        <tbody>
+          <tr class="group-header"><td colspan="3">A · Gestão de ciclos de mandato e transição de diretoria</td></tr>
+          <tr><td>Transferência de acesso entre gestões</td><td><span class="pill partial">Parcialmente</span></td><td>Role-based access permite configurar diferentes níveis de admin. Sem fluxo específico de transição de mandato ou onboarding para novo gestor.</td></tr>
+          <tr><td>Histórico auditável por gestão</td><td><span class="pill nd">Não documentado</span></td><td>Dashboard com timeline de atividade recente, mas sem estruturação por ciclos de mandato. Audit log completo não documentado nas reviews verificadas.</td></tr>
+          <tr><td>Onboarding para diretoria entrante</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente. Plataforma focada em engajamento de membros, não em transições de liderança interna.</td></tr>
+          <tr class="group-header"><td colspan="3">B · Preservação de memória institucional</td></tr>
+          <tr><td>Arquivamento contextualizado</td><td><span class="pill no">Não atende</span></td><td>Sem mecanismo de preservação de contexto entre gestões. Dados de membros e atividades armazenados, mas sem narrativa temporal por mandato.</td></tr>
+          <tr><td>Histórico de comunicações</td><td><span class="pill partial">Parcialmente</span></td><td>Histórico de e-mails e SMS enviados disponível. AI tools para drafting de comunicações (engagement prompts baseados em atividade do membro).</td></tr>
+          <tr><td>Documentação de processos</td><td><span class="pill no">Não atende</span></td><td>Sem módulo de knowledge base ou documentação interna de processos organizacionais.</td></tr>
+          <tr class="group-header"><td colspan="3">C · Aderência ao contexto científico-acadêmico</td></tr>
+          <tr><td>Módulo de submissão / call for papers</td><td><span class="pill no">Não atende</span></td><td>Eventos gerenciados de forma básica. Sem campos específicos para submissão de trabalhos científicos ou call for papers.</td></tr>
+          <tr><td>Gestão de pareceristas</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente. Smart forms para coleta de dados, mas sem fluxo de revisão por pares.</td></tr>
+          <tr><td>Integração com publicação acadêmica</td><td><span class="pill no">Não atende</span></td><td>Sem integração com sistemas de publicação científica (OJS, DOI, CrossRef).</td></tr>
+          <tr class="group-header"><td colspan="3">D · Adequação ao terceiro setor brasileiro</td></tr>
+          <tr><td>CNPJ / contexto BR</td><td><span class="pill nd">Não documentado</span></td><td>Plataforma internacional sem referência específica ao mercado brasileiro em documentação pública.</td></tr>
+          <tr><td>NF de serviços / gestão fiscal BR</td><td><span class="pill no">Não atende</span></td><td>Sem integração com nota fiscal de serviços ou sistemas fiscais brasileiros.</td></tr>
+          <tr><td>Conformidade com LGPD</td><td><span class="pill partial">Parcialmente</span></td><td>GDPR compliance documentado. LGPD não mencionada explicitamente. "Data stored with Raklet is secure and kept private" — mas especificidades brasileiras (ANPD, 10 bases legais) não endereçadas.</td></tr>
+          <tr><td>Suporte em português</td><td><span class="pill nd">Não documentado</span></td><td>Suporte por e-mail e telefone disponível, mas idioma de atendimento não documentado para português brasileiro.</td></tr>
+          <tr class="group-header"><td colspan="3">E · Adaptabilidade a perfis técnicos variáveis</td></tr>
+          <tr><td>Interface para gestores não-técnicos</td><td><span class="pill partial">Parcialmente</span></td><td>"Simple and easy to use" para operações básicas. "Customization is uneven in places... some admins find forms, layouts, branding options harder to modify without technical knowledge." (Capterra 2026)</td></tr>
+          <tr><td>Personalização sem desenvolvedor</td><td><span class="pill partial">Parcialmente</span></td><td>App-store model permite plug-and-play de módulos. Customizações avançadas de layout e formulários requerem habilidades técnicas ou planos superiores.</td></tr>
+          <tr><td>Curva de aprendizado</td><td><span class="pill partial">Parcialmente</span></td><td>"It took a bit of time to get used to everything. There's definitely a learning curve, but once we got the hang of it, the platform started working really well." (Capterra verified review)</td></tr>
+          <tr class="group-header"><td colspan="3">F · Custo e licenciamento</td></tr>
+          <tr><td>Custo para 200–500 membros</td><td><span class="pill full">Atende plenamente</span></td><td>Plano gratuito suporta até 1.000 contatos com funcionalidades básicas — melhor custo-benefício do comparativo para associações pequenas. Planos pagos acessíveis.</td></tr>
+          <tr><td>Limitações em planos básicos</td><td><span class="pill partial">Parcialmente</span></td><td>Plano gratuito com funcionalidades suficientes para gestão básica. Taxa de transação cobrada sobre pagamentos recebidos na plataforma em todos os planos.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ NEONCRM ══ -->
+  <section id="neoncrm">
+    <p class="section-eyebrow">Ferramenta 04 de 06</p>
+    <h2>NeonCRM (Neon One)</h2>
+    <div class="tool-block">
+      <div class="tool-header">
+        <div class="tool-icon">💚</div>
+        <div>
+          <div class="tool-name">NeonCRM</div>
+          <div class="tool-sub">Neon One · EUA · 35.000+ organizações · Revenue-based pricing</div>
+        </div>
+        <div class="tool-price">
+          <div class="tool-price-val">USD 99–409/mês</div>
+          <div class="tool-price-label">Essentials / Impact / Empower + add-ons</div>
+        </div>
+      </div>
+      <table class="criteria-table">
+        <thead><tr><th>Critério</th><th>Classificação</th><th>Detalhamento</th></tr></thead>
+        <tbody>
+          <tr class="group-header"><td colspan="3">A · Gestão de ciclos de mandato e transição de diretoria</td></tr>
+          <tr><td>Transferência de acesso entre gestões</td><td><span class="pill partial">Parcialmente</span></td><td>Access controls e permissions disponíveis. Sem fluxo específico para transição de mandato. Foco em transição de dados de doadores, não de liderança interna.</td></tr>
+          <tr><td>Histórico auditável por gestão</td><td><span class="pill partial">Parcialmente</span></td><td>Reporting e dashboards robustos. "Board-ready reports in minutes." Mas sem estruturação temporal por mandato de diretoria.</td></tr>
+          <tr><td>Onboarding para diretoria entrante</td><td><span class="pill no">Não atende</span></td><td>Onboarding voltado para equipe técnica da organização, não para substituição de gestores voluntários durante o uso.</td></tr>
+          <tr class="group-header"><td colspan="3">B · Preservação de memória institucional</td></tr>
+          <tr><td>Arquivamento contextualizado</td><td><span class="pill partial">Parcialmente</span></td><td>Perfil 360° de cada supporter com histórico integrado (doações, eventos, voluntariado). Mas contexto organizacional interno (decisões, processos) não é endereçado.</td></tr>
+          <tr><td>Histórico de comunicações</td><td><span class="pill full">Atende plenamente</span></td><td>Comunicações integradas ao perfil do contato. Automações de welcome journey, thank-you, re-engagement bem documentadas.</td></tr>
+          <tr><td>Documentação de processos internos</td><td><span class="pill no">Não atende</span></td><td>Sem módulo de documentação institucional. Foco em relacionamento externo (donors/members), não em memória organizacional interna.</td></tr>
+          <tr class="group-header"><td colspan="3">C · Aderência ao contexto científico-acadêmico</td></tr>
+          <tr><td>Módulo de submissão / call for papers</td><td><span class="pill no">Não atende</span></td><td>Eventos gerenciados com ticketing customizável. Sem módulo específico para submissão de trabalhos científicos.</td></tr>
+          <tr><td>Gestão de pareceristas</td><td><span class="pill no">Não atende</span></td><td>Gestão de voluntários disponível, mas sem fluxo de revisão por pares ou atribuição de pareceristas para eventos acadêmicos.</td></tr>
+          <tr><td>Integração com publicação acadêmica</td><td><span class="pill no">Não atende</span></td><td>Integrações com Mailchimp, QuickBooks, Eventbrite. Sem integração com sistemas de publicação científica.</td></tr>
+          <tr class="group-header"><td colspan="3">D · Adequação ao terceiro setor brasileiro</td></tr>
+          <tr><td>CNPJ / contexto BR</td><td><span class="pill no">Não atende</span></td><td>Desenvolvido para nonprofit americano (501c3). Sem suporte a estruturas jurídicas brasileiras de associações.</td></tr>
+          <tr><td>NF de serviços / gestão fiscal BR</td><td><span class="pill no">Não atende</span></td><td>Integração com QuickBooks e NeonPay (gateway americano). Sem NF-e ou fiscal BR.</td></tr>
+          <tr><td>Conformidade com LGPD</td><td><span class="pill no">Não atende</span></td><td>PCI-DSS Level 1 compliance documentado. LGPD não mencionada. Modelo americano de privacidade não equivalente à LGPD.</td></tr>
+          <tr><td>Suporte em português</td><td><span class="pill no">Não atende</span></td><td>Suporte via live chat, e-mail e telefone, mas apenas em inglês. U.S.-based support hub.</td></tr>
+          <tr class="group-header"><td colspan="3">E · Adaptabilidade a perfis técnicos variáveis</td></tr>
+          <tr><td>Interface para gestores não-técnicos</td><td><span class="pill partial">Parcialmente</span></td><td>"The interface can be overwhelming for users without a tech background." (SoftwareFinder 2026). Curva de aprendizado citada em múltiplas reviews.</td></tr>
+          <tr><td>Personalização sem desenvolvedor</td><td><span class="pill partial">Parcialmente</span></td><td>Formulários customizáveis, workflows de automação, campos personalizados. Alguns recursos avançados requerem configuração técnica.</td></tr>
+          <tr><td>Curva de aprendizado</td><td><span class="pill partial">Parcialmente</span></td><td>"There's a bit of a learning curve at the beginning." Vídeos, webinars e documentação disponíveis. Suporte responsivo elogiado.</td></tr>
+          <tr class="group-header"><td colspan="3">F · Custo e licenciamento</td></tr>
+          <tr><td>Custo para 200–500 membros</td><td><span class="pill partial">Parcialmente</span></td><td>USD 99/mês base + add-ons de Memberships (+10%), Events (+20%), Volunteers (+10%). Custo real pode atingir USD 150–200/mês para recursos completos. Revenue-based pricing beneficia organizações menores.</td></tr>
+          <tr><td>Limitações em planos básicos</td><td><span class="pill partial">Parcialmente</span></td><td>Live chat e telefone bloqueados no Essentials (só ticket support). Módulos de Memberships e Events são add-ons pagos separadamente.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ MEMBERCLICKS ══ -->
+  <section id="memberclicks">
+    <p class="section-eyebrow">Ferramenta 05 de 06</p>
+    <h2>MemberClicks</h2>
+    <div class="tool-block">
+      <div class="tool-header">
+        <div class="tool-icon">🖱️</div>
+        <div>
+          <div class="tool-name">MemberClicks</div>
+          <div class="tool-sub">Personify · EUA · Para associações profissionais e câmaras de comércio de médio porte</div>
+        </div>
+        <div class="tool-price">
+          <div class="tool-price-val">USD 200+/mês</div>
+          <div class="tool-price-label">a partir de 500 contatos · preço sob consulta</div>
+        </div>
+      </div>
+      <table class="criteria-table">
+        <thead><tr><th>Critério</th><th>Classificação</th><th>Detalhamento</th></tr></thead>
+        <tbody>
+          <tr class="group-header"><td colspan="3">A · Gestão de ciclos de mandato e transição de diretoria</td></tr>
+          <tr><td>Transferência de acesso entre gestões</td><td><span class="pill partial">Parcialmente</span></td><td>Permission-based group management disponível. Sem fluxo específico para transição de mandato de diretoria voluntária.</td></tr>
+          <tr><td>Histórico auditável por gestão</td><td><span class="pill nd">Não documentado</span></td><td>Reporting financeiro e de engajamento disponível. Audit log estruturado por ciclos de mandato não documentado.</td></tr>
+          <tr><td>Onboarding para diretoria entrante</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente. Foco em onboarding de novos membros, não em transição de líderes internos.</td></tr>
+          <tr class="group-header"><td colspan="3">B · Preservação de memória institucional</td></tr>
+          <tr><td>Arquivamento contextualizado</td><td><span class="pill no">Não atende</span></td><td>Sem mecanismo de preservação de contexto entre gestões.</td></tr>
+          <tr><td>Histórico de comunicações</td><td><span class="pill partial">Parcialmente</span></td><td>CMS integrado com histórico de publicações. E-mails registrados por contato.</td></tr>
+          <tr><td>Documentação de processos</td><td><span class="pill no">Não atende</span></td><td>Sem módulo específico. Website CMS pode ser usado informalmente para isso, mas sem estrutura de knowledge base.</td></tr>
+          <tr class="group-header"><td colspan="3">C · Aderência ao contexto científico-acadêmico</td></tr>
+          <tr><td>Módulo de submissão / call for papers</td><td><span class="pill no">Não atende</span></td><td>"Bare bones association management system that offers bare minimum in features." (SoftwareAdvice verified review). Sem módulo acadêmico.</td></tr>
+          <tr><td>Gestão de pareceristas</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente.</td></tr>
+          <tr><td>Integração com publicação acadêmica</td><td><span class="pill no">Não atende</span></td><td>Integrações com QuickBooks, MailChimp, Google Analytics. Sem integração com sistemas acadêmicos.</td></tr>
+          <tr class="group-header"><td colspan="3">D · Adequação ao terceiro setor brasileiro</td></tr>
+          <tr><td>CNPJ / contexto BR</td><td><span class="pill no">Não atende</span></td><td>Focado em associações profissionais americanas. Sem adaptação ao contexto jurídico brasileiro.</td></tr>
+          <tr><td>NF de serviços / gestão fiscal BR</td><td><span class="pill no">Não atende</span></td><td>Sem integração fiscal brasileira.</td></tr>
+          <tr><td>Conformidade com LGPD</td><td><span class="pill no">Não atende</span></td><td>Não documentado para LGPD.</td></tr>
+          <tr><td>Suporte em português</td><td><span class="pill no">Não atende</span></td><td>Suporte apenas em inglês.</td></tr>
+          <tr class="group-header"><td colspan="3">E · Adaptabilidade a perfis técnicos variáveis</td></tr>
+          <tr><td>Interface para gestores não-técnicos</td><td><span class="pill no">Não atende</span></td><td>"Most web pages are managed through MemberClicks, which leaves a very unappealing user experience and poor web design." (SoftwareAdvice). Alta curva de aprendizado documentada.</td></tr>
+          <tr><td>Personalização sem desenvolvedor</td><td><span class="pill partial">Parcialmente</span></td><td>Robust customization features — mas "can be more complex to set up and use for beginners." (ITQlick 2026)</td></tr>
+          <tr><td>Curva de aprendizado</td><td><span class="pill no">Não atende</span></td><td>User sentiment score 75/100 (vs. Wild Apricot 85/100). Curva de aprendizado elevada frequentemente citada.</td></tr>
+          <tr class="group-header"><td colspan="3">F · Custo e licenciamento</td></tr>
+          <tr><td>Custo para 200–500 membros</td><td><span class="pill no">Não atende</span></td><td>USD 200+/mês é o mais caro do comparativo para associações pequenas. "MemberClick was outside of our budget." (review verificada WildApricot)</td></tr>
+          <tr><td>Limitações em planos básicos</td><td><span class="pill no">Não atende</span></td><td>Pricing apenas sob consulta. Para pequenas associações científicas, custo-benefício desfavorável.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ BRASIL ══ -->
+  <section id="brasil">
+    <p class="section-eyebrow">Ferramenta 06 de 06</p>
+    <h2>Soluções Brasileiras Genéricas (Sympla, Eventbrite BR, sistemas customizados)</h2>
+    <div class="tool-block">
+      <div class="tool-header">
+        <div class="tool-icon">🇧🇷</div>
+        <div>
+          <div class="tool-name">Sympla / Eventbrite / Sistemas customizados</div>
+          <div class="tool-sub">Soluções de eventos · Brasil · Uso como "gambiarra" de AMS</div>
+        </div>
+        <div class="tool-price">
+          <div class="tool-price-val">Gratuito + % por ingresso</div>
+          <div class="tool-price-label">ou custo variável de desenvolvimento</div>
+        </div>
+      </div>
+      <table class="criteria-table">
+        <thead><tr><th>Critério</th><th>Classificação</th><th>Detalhamento</th></tr></thead>
+        <tbody>
+          <tr class="group-header"><td colspan="3">A · Gestão de ciclos de mandato e transição de diretoria</td></tr>
+          <tr><td>Transferência de acesso entre gestões</td><td><span class="pill no">Não atende</span></td><td>Plataformas de eventos sem conceito de gestão interna de diretoria. Sistemas customizados: depende inteiramente do escopo desenvolvido.</td></tr>
+          <tr><td>Histórico auditável por gestão</td><td><span class="pill no">Não atende</span></td><td>Sympla/Eventbrite: relatórios de eventos, sem gestão de mandatos. Sistemas customizados: possível mas raramente implementado.</td></tr>
+          <tr><td>Onboarding para diretoria entrante</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente em Sympla/Eventbrite. Em sistemas customizados: depende do escopo e orçamento do projeto.</td></tr>
+          <tr class="group-header"><td colspan="3">B · Preservação de memória institucional</td></tr>
+          <tr><td>Arquivamento contextualizado</td><td><span class="pill no">Não atende</span></td><td>Sympla/Eventbrite: dados de eventos isolados. Sem visão longitudinal. Sistemas customizados: raramente no escopo de projetos de TI convencionais.</td></tr>
+          <tr><td>Histórico de comunicações</td><td><span class="pill partial">Parcialmente</span></td><td>Sympla: comunicações com inscritos disponíveis por evento. Sem histórico de relacionamento com membro ao longo do tempo.</td></tr>
+          <tr><td>Documentação de processos</td><td><span class="pill no">Não atende</span></td><td>Fora do escopo de plataformas de eventos. Em sistemas customizados: módulo adicional raramente solicitado.</td></tr>
+          <tr class="group-header"><td colspan="3">C · Aderência ao contexto científico-acadêmico</td></tr>
+          <tr><td>Módulo de submissão / call for papers</td><td><span class="pill no">Não atende</span></td><td>Sympla/Eventbrite: formulários de inscrição customizáveis mas sem fluxo de submissão científica. Sistemas customizados: possível com desenvolvimento específico.</td></tr>
+          <tr><td>Gestão de pareceristas</td><td><span class="pill no">Não atende</span></td><td>Funcionalidade inexistente nativamente. Sempre exige integração com EasyChair/ConfTool ou desenvolvimento customizado.</td></tr>
+          <tr><td>Integração com publicação acadêmica</td><td><span class="pill no">Não atende</span></td><td>Sem integração nativa com sistemas de publicação científica.</td></tr>
+          <tr class="group-header"><td colspan="3">D · Adequação ao terceiro setor brasileiro</td></tr>
+          <tr><td>CNPJ / contexto BR</td><td><span class="pill full">Atende plenamente</span></td><td>Sympla/Eventbrite BR: desenvolvidos para o mercado brasileiro, com CPF/CNPJ como campos nativos.</td></tr>
+          <tr><td>NF de serviços / gestão fiscal BR</td><td><span class="pill partial">Parcialmente</span></td><td>Sympla emite NF para a plataforma (não para a associação). Sistemas customizados: integração fiscal brasileira é possível mas onerosa.</td></tr>
+          <tr><td>Conformidade com LGPD</td><td><span class="pill partial">Parcialmente</span></td><td>Sympla: política de privacidade com menção à LGPD. Mas como plataforma de eventos, não de gestão de membros, o escopo de dados pessoais tratados é diferente.</td></tr>
+          <tr><td>Suporte em português</td><td><span class="pill full">Atende plenamente</span></td><td>Interface e suporte nativamente em português brasileiro. Fuso horário alinhado.</td></tr>
+          <tr class="group-header"><td colspan="3">E · Adaptabilidade a perfis técnicos variáveis</td></tr>
+          <tr><td>Interface para gestores não-técnicos</td><td><span class="pill full">Atende plenamente</span></td><td>Sympla/Eventbrite: interfaces altamente simplificadas, pensadas para qualquer usuário criar eventos sem habilidades técnicas.</td></tr>
+          <tr><td>Personalização sem desenvolvedor</td><td><span class="pill partial">Parcialmente</span></td><td>Sympla: formulários e páginas de evento customizáveis. Sistemas customizados: qualquer mudança requer desenvolvedor.</td></tr>
+          <tr><td>Curva de aprendizado</td><td><span class="pill full">Atende plenamente</span></td><td>Sympla/Eventbrite: curva mínima. Amplamente conhecidos no Brasil. Sem treinamento necessário para criação de eventos.</td></tr>
+          <tr class="group-header"><td colspan="3">F · Custo e licenciamento</td></tr>
+          <tr><td>Custo para 200–500 membros</td><td><span class="pill partial">Parcialmente</span></td><td>Sympla: gratuito para eventos gratuitos; taxa de ~10% sobre ingressos pagos. Gestão de membros (anuidades) não é o modelo de negócio nativo — exige adaptação.</td></tr>
+          <tr><td>Limitações em planos básicos</td><td><span class="pill no">Não atende</span></td><td>Sympla/Eventbrite não são AMS. Usar como substituto de AMS gera fragmentação de dados, sem visão integrada de membro ao longo do tempo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ MATRIZ ══ -->
+  <section id="matriz">
+    <p class="section-eyebrow">Consolidação</p>
+    <h2>Matriz Comparativa</h2>
+    <p>Visão consolidada dos 18 subcritérios para as 6 plataformas analisadas:</p>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Critério</th>
+            <th>Wild Apricot</th>
+            <th>MemberPress</th>
+            <th>Raklet</th>
+            <th>NeonCRM</th>
+            <th>MemberClicks</th>
+            <th>Soluções BR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group-row"><td colspan="7">A · Gestão de mandato e transição de diretoria</td></tr>
+          <tr>
+            <td>Transferência de acesso entre gestões</td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Histórico auditável por gestão</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-nd">?</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-nd">?</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Onboarding para diretoria entrante</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr class="group-row"><td colspan="7">B · Preservação de memória institucional</td></tr>
+          <tr>
+            <td>Arquivamento contextualizado</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Histórico de comunicações com membros</td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-full">✓</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+          </tr>
+          <tr>
+            <td>Documentação de regras e processos</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr class="group-row"><td colspan="7">C · Aderência ao contexto científico-acadêmico</td></tr>
+          <tr>
+            <td>Módulo de submissão / call for papers</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Gestão de pareceristas</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Integração com publicação (anais, DOI)</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+          <tr class="group-row"><td colspan="7">D · Adequação ao terceiro setor brasileiro</td></tr>
+          <tr>
+            <td>CNPJ de associação / contexto BR</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-nd">?</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-full">✓</span></td>
+          </tr>
+          <tr>
+            <td>NF de serviços / gestão fiscal BR</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+          </tr>
+          <tr>
+            <td>Conformidade com LGPD</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-nd">?</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+          </tr>
+          <tr>
+            <td>Suporte em português / atendimento BR</td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-nd">?</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-full">✓</span></td>
+          </tr>
+          <tr class="group-row"><td colspan="7">E · Adaptabilidade a perfis técnicos variáveis</td></tr>
+          <tr>
+            <td>Interface para gestores não-técnicos</td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-full">✓</span></td>
+          </tr>
+          <tr>
+            <td>Personalização sem desenvolvedor</td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+          </tr>
+          <tr>
+            <td>Curva de aprendizado para nova diretoria</td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-full">✓</span></td>
+          </tr>
+          <tr class="group-row"><td colspan="7">F · Custo e licenciamento</td></tr>
+          <tr>
+            <td>Custo mensal 200–500 membros</td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-full">✓</span></td>
+            <td><span class="m-full">✓</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-partial">◑</span></td>
+          </tr>
+          <tr>
+            <td>Funcionalidades completas nos planos básicos</td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-partial">◑</span></td>
+            <td><span class="m-no">✗</span></td>
+            <td><span class="m-no">✗</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:.75rem;font-size:12px;color:var(--ink-muted)">
+      <strong>✓</strong> Atende plenamente &nbsp;|&nbsp; <strong>◑</strong> Atende parcialmente &nbsp;|&nbsp; <strong>✗</strong> Não atende &nbsp;|&nbsp; <strong>?</strong> Não documentado
+    </div>
+  </section>
+
+  <!-- ══ CONCLUSAO ══ -->
+  <section id="conclusao">
+    <p class="section-eyebrow">Conclusão da análise</p>
+    <h2>O que nenhuma ferramenta atende adequadamente</h2>
+
+    <div class="conclusion">
+      <h3>Necessidades de associações científicas brasileiras NÃO endereçadas por nenhuma plataforma</h3>
+      <ul>
+        <li><strong>Onboarding guiado para diretoria entrante:</strong> Nenhuma das 6 plataformas possui fluxo específico para transição de mandato de diretoria voluntária. A troca de gestão é sempre um evento traumático de perda de dados e contexto.</li>
+        <li><strong>Módulo de call for papers + pareceristas integrado ao AMS:</strong> Zero plataformas integram nativamente submissão de trabalhos científicos, atribuição de pareceristas e geração de anais com o perfil de membro. A fragmentação com EasyChair/ConfTool é universal.</li>
+        <li><strong>Preservação ativa de memória institucional por ciclo de mandato:</strong> Nenhuma plataforma estrutura dados historicamente por período de gestão, com contexto consultável pela diretoria entrante.</li>
+        <li><strong>Documentação integrada de regras e processos institucionais:</strong> Zero plataformas possuem módulo de knowledge base organizacional vinculado à gestão de membros.</li>
+        <li><strong>Conformidade nativa com LGPD (Lei 13.709/2018):</strong> Nenhuma das plataformas internacionais foi projetada para os requisitos específicos da LGPD (10 bases legais, ANPD, DPO obrigatório para controladores). Soluções BR têm conformidade parcial apenas para eventos.</li>
+        <li><strong>Integração com NF de serviços municipal brasileira:</strong> Nenhuma plataforma internacional integra emissão de nota fiscal de serviços, obrigatória para associações que recebem anuidades e inscrições em eventos no Brasil.</li>
+        <li><strong>Gestão financeira específica para OSCIP/associações sem fins lucrativos BR:</strong> O modelo financeiro americano (fundraising, donations) não corresponde à estrutura financeira brasileira de associações (anuidades, inscrições em eventos, patrocínios, prestação de contas para agências de fomento).</li>
+      </ul>
+    </div>
+
+    <div class="opportunity">
+      <h3>Oportunidade de mercado resultante desta análise</h3>
+      <ul>
+        <li>A combinação de <strong>4 requisitos simultâneos</strong> — transição de diretoria + fluxo acadêmico + LGPD/BR + interface para voluntários — não é atendida por nenhuma plataforma existente.</li>
+        <li>O <strong>mercado-alvo imediato</strong> (associações científicas) é o nicho de maior dor documentada e menor oferta especializada, constituindo o laboratório de pesquisa ideal para a proposta PIPE.</li>
+        <li>O <strong>mercado endereçável total</strong> — 237 mil associações e fundações ativas no Brasil (IBGE/FASFIL 2016) — justifica o empreendimento além do nicho científico.</li>
+        <li>A <strong>vantagem competitiva estrutural</strong> de uma solução nativa brasileira (LGPD, NF-e, CPF/CNPJ, suporte em português) é impossível de replicar rapidamente por players internacionais.</li>
+        <li>O <strong>caso da ABCiber</strong> — 10 anos de observação direta, dores documentadas em 5 ciclos de mandato, usuário-âncora acessível — constitui a base empírica mais sólida possível para a Fase 1 da pesquisa.</li>
+      </ul>
+    </div>
+
+    <p class="fonte-nota">Fontes: Capterra (reviews verificadas 2024–2026), G2 (reviews verificadas 2025–2026), SoftwareAdvice (reviews 2024–2026), ITQlick (comparativos 2026), SaaSworthy (2026), GroupApp Blog (2026), sites oficiais das plataformas. Legislação: LGPD (Lei 13.709/2018), Marco Legal das OSC (Lei 13.019/2014), IBGE/FASFIL 2016. Proposta PIPE: Alexandre Barizon ME — CNPJ 05.562.968/0001-25 · Julho 2026.</p>
+  </section>
+
+</div>
+
+<footer>
+  Comparativo AMS · Associações Científicas Brasileiras · Proposta PIPE Jornada Tecnológica 2026<br>
+  Alexandre Barizon ME · CNPJ 05.562.968/0001-25 · Fontes: Capterra · G2 · SoftwareAdvice · ITQlick · Sites oficiais
+</footer>
+
+</body>
+</html>

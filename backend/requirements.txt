@@ -1,0 +1,126 @@
+# Requirements do Backend Django - Wellnz SaaS
+#
+# ⚠️ IMPORTANTE: Versões FIXAS para segurança e estabilidade
+# Atualizado: 10 de Janeiro de 2026
+#
+# Instalação:
+#   pip install -r requirements.txt
+#
+# Verificação de vulnerabilidades:
+#   pip install safety
+#   safety check
+#
+# ============================================================================
+# Django e Django REST Framework
+# ============================================================================
+
+Django==4.2.11
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+
+# ============================================================================
+# django-tenants para multi-tenancy
+# ============================================================================
+
+django-tenants==3.7.0
+
+# ============================================================================
+# PostgreSQL adapter
+# ============================================================================
+
+psycopg2-binary==2.9.9
+
+# ============================================================================
+# Gunicorn (servidor WSGI)
+# ============================================================================
+
+gunicorn==21.2.0
+
+# ============================================================================
+# Validação e utilitários
+# ============================================================================
+
+python-decouple==3.8
+python-dotenv==1.0.1
+django-countries==7.6.1
+
+# ============================================================================
+# CORS
+# ============================================================================
+
+django-cors-headers==4.3.1
+
+# ============================================================================
+# Validação de email
+# ============================================================================
+
+email-validator==2.1.0
+
+# ============================================================================
+# Utilitários
+# ============================================================================
+
+Pillow==10.2.0
+requests==2.31.0
+cryptography==42.0.2
+stripe==9.5.0
+
+# ============================================================================
+# Google API (para integração com Google Calendar)
+# ============================================================================
+
+google-auth==2.27.0
+google-auth-oauthlib==1.2.0
+google-api-python-client==2.116.0
+
+# ============================================================================
+# PDF Generation
+# ============================================================================
+
+reportlab==4.0.9
+
+# ============================================================================
+# Rate Limiting (SEGURANÇA)
+# ============================================================================
+
+django-ratelimit==4.1.0
+
+# ============================================================================
+# Testes
+# ============================================================================
+
+pytest==7.4.4
+pytest-django==4.7.0
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+factory-boy==3.3.0
+
+# ============================================================================
+# Desenvolvimento (opcional - descomente se necessário)
+# ============================================================================
+
+# ipython==8.26.0
+# django-debug-toolbar==4.2.0
+
+# ============================================================================
+# NOTAS:
+# ============================================================================
+#
+# 1. Todas as versões estão FIXAS (sem >= ou ~=) para:
+#    - Evitar atualizações automáticas que podem quebrar o sistema
+#    - Garantir reprodutibilidade em diferentes ambientes
+#    - Facilitar auditoria de segurança
+#
+# 2. Antes de atualizar qualquer dependência:
+#    - Verificar changelog da biblioteca
+#    - Testar em ambiente de staging
+#    - Executar suite completa de testes
+#    - Verificar vulnerabilidades: safety check
+#
+# 3. Vulnerabilidades conhecidas:
+#    - Verificar regularmente: https://pyup.io/safety/
+#    - Manter Django atualizado na série 4.2.x LTS
+#
+# 4. Próxima revisão recomendada: Março de 2026
+#
+# ============================================================================

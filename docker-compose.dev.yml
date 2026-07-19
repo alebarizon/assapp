@@ -1,0 +1,45 @@
+# Docker Compose — Desenvolvimento com Hot Reload
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  backend:
+    volumes:
+      - ./backend:/app
+      - ./backend/tenants/migrations:/app/tenants/migrations
+      - ./backend/accounts/migrations:/app/accounts/migrations
+      - ./backend/mandatos/migrations:/app/mandatos/migrations
+      - ./backend/memoria/migrations:/app/memoria/migrations
+      - ./backend/eventos/migrations:/app/eventos/migrations
+      - ./backend/membros/migrations:/app/membros/migrations
+      - /app/venv
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    command: >
+      sh -c "
+        mkdir -p /app/logs &&
+        python manage.py wait_for_db &&
+        python manage.py migrate_schemas --shared &&
+        python manage.py migrate_schemas &&
+        python manage.py collectstatic --noinput &&
+        gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 1 --reload --timeout 120 --access-logfile - --error-logfile -
+      "
+    environment:
+      DEBUG: "True"
+      GUNICORN_RELOAD: "True"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    image: assapp-frontend-dev:local
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
+      - ./frontend/public:/app/public
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-5174}:3000"

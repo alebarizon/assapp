@@ -1,0 +1,377 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Alinhado ao WellSaaS — paleta warm do shell autenticado */
+:root {
+  --assapp-bg: #f6f6f3;
+  --assapp-surface: #ffffff;
+  --assapp-text: #131313;
+  --assapp-muted: #666666;
+  --assapp-border: #ecebe6;
+  --assapp-accent: #9a6a0b;
+  --assapp-accent-soft: #c79b45;
+  --assapp-nav-active: #efe9dc;
+}
+
+body {
+  margin: 0;
+  background-color: var(--assapp-bg);
+  color: var(--assapp-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Extras AssApp (status, listas, abas) — complementam Dashboard.css */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f5f4ef;
+  color: #464646;
+  border: 1px solid #ecebe6;
+}
+
+.status-badge-ativo,
+.status-badge-aceito,
+.status-badge-ativa {
+  background: #ecfdf3;
+  color: #027a48;
+  border-color: #abefc6;
+}
+
+.status-badge-transicao,
+.status-badge-em_avaliacao,
+.status-badge-pendente {
+  background: #fffaeb;
+  color: #b54708;
+  border-color: #fedf89;
+}
+
+.status-badge-encerrado,
+.status-badge-arquivado,
+.status-badge-inativa {
+  background: #f5f4ef;
+  color: #667085;
+}
+
+.status-badge-rascunho,
+.status-badge-planejado {
+  background: #f0f4ff;
+  color: #3538cd;
+  border-color: #c7d2fe;
+}
+
+.list-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.list-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #ffffff;
+  border: 1px solid #ecebe6;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(19, 19, 19, 0.04);
+}
+
+.list-card:hover {
+  border-color: #e8e0cd;
+  background: #fcfbf8;
+}
+
+.list-card-title {
+  font-weight: 600;
+  color: #131313;
+  margin: 0;
+}
+
+.list-card-meta {
+  font-size: 0.875rem;
+  color: #666666;
+  margin: 0.35rem 0 0;
+}
+
+.highlight-banner {
+  padding: 1rem 1.25rem;
+  background: #faf8f2;
+  border: 1px solid #e8e0cd;
+  border-radius: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.highlight-banner-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9a6a0b;
+  margin: 0 0 0.25rem;
+}
+
+.highlight-banner-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #131313;
+  margin: 0;
+}
+
+.highlight-banner-meta {
+  font-size: 0.875rem;
+  color: #666666;
+  margin: 0.35rem 0 0;
+}
+
+.alert-banner {
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.alert-banner-info {
+  background: #fffaeb;
+  border: 1px solid #fedf89;
+  color: #b54708;
+}
+
+.alert-banner-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b42318;
+}
+
+.alert-banner-success {
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+  color: #027a48;
+}
+
+.dashboard-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid #ecebe6;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-tab {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #666666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+
+.dashboard-tab:hover {
+  color: #131313;
+}
+
+.dashboard-tab.active {
+  color: #131313;
+  border-bottom-color: #c79b45;
+  font-weight: 600;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+
+.filters-row .form-input,
+.filters-row .form-select,
+.page-form .form-select,
+.form-select {
+  min-width: 0;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #ecebe6;
+  border-radius: 0.65rem;
+  background: #ffffff;
+  color: #131313;
+  font-size: 0.9rem;
+}
+
+.filters-row .form-input:focus,
+.filters-row .form-select:focus {
+  outline: none;
+  border-color: #e8e0cd;
+  box-shadow: 0 0 0 2px rgba(199, 155, 69, 0.2);
+}
+
+.setup-steps {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.setup-step {
+  flex: 1;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.65rem 0.5rem;
+  border-radius: 0.75rem;
+  background: #f5f4ef;
+  color: #a0a0a0;
+  border: 1px solid #ecebe6;
+}
+
+.setup-step.active {
+  background: #131313;
+  color: #ffffff;
+  border-color: #131313;
+}
+
+.setup-step.done {
+  background: #efe9dc;
+  color: #131313;
+  border-color: #e8e0cd;
+}
+
+.inline-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #ecebe6;
+  border-radius: 0.75rem;
+  background: #ffffff;
+}
+
+.btn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.login-hero-fallback {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(160deg, rgba(19, 19, 19, 0.55), rgba(19, 19, 19, 0.78)),
+    radial-gradient(circle at 20% 20%, #c79b45 0%, transparent 45%),
+    radial-gradient(circle at 80% 80%, #9a6a0b 0%, transparent 40%),
+    #2a2418;
+}
+
+.login-signup-prompt {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #717182;
+}
+
+.login-signup-link {
+  color: #131313;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-signup-link:hover {
+  text-decoration: underline;
+}
+
+.login-hint {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #a0a0a0;
+}
+
+.login-hint code {
+  background: #f3f3f5;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+}
+
+.signup-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.signup-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.signup-fieldset legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #131313;
+  margin-bottom: 0.25rem;
+}
+
+.signup-plan-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #ecebe6;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  background: #ffffff;
+}
+
+.signup-plan-card.selected {
+  border-color: #e8e0cd;
+  background: #faf8f2;
+  box-shadow: inset 0 0 0 1px #e8e0cd;
+}
+
+.signup-plan-name {
+  font-weight: 600;
+  color: #131313;
+  display: block;
+}
+
+.signup-plan-desc {
+  font-size: 0.8rem;
+  color: #666666;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .form-row-2,
+  .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .list-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

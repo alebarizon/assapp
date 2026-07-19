@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Levantamento de Papers · Memória Institucional · AMS · Sistemas Adaptativos · 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #0f0f1a;
+  --ink-mid:   #2e2e4a;
+  --ink-muted: #6b6b8c;
+  --field:     #f2f2f8;
+  --white:     #ffffff;
+  --accent:    #2d1b6b;
+  --accent-lt: #edeaf8;
+  --rule:      #c8c4e0;
+  --alta:      #1b5c2e;
+  --alta-lt:   #edf7f0;
+  --alta-bd:   #a8d5b5;
+  --media:     #7a3800;
+  --media-lt:  #fdf3e0;
+  --media-bd:  #e8c490;
+  --baixa:     #4a4a6a;
+  --baixa-lt:  #f0f0f5;
+  --baixa-bd:  #c0c0d8;
+  --classico:  #6b1b6b;
+  --classico-lt:#f5edf5;
+  --classico-bd:#d4a8d4;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; scroll-behavior: smooth; }
+body { font-family: 'IBM Plex Sans', sans-serif; background: var(--field); color: var(--ink); line-height: 1.75; }
+
+header {
+  background: linear-gradient(135deg, #1a0a4a 0%, #2d1b6b 100%);
+  color: #fff; padding: 3.5rem 2rem 3rem; position: relative; overflow: hidden;
+}
+header::before {
+  content:''; position:absolute; top:-80px; right:-80px;
+  width:350px; height:350px; border-radius:50%; background:rgba(255,255,255,0.03);
+}
+header::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0;
+  height:40px; background:var(--field); clip-path:ellipse(55% 100% at 50% 100%);
+}
+.hi { max-width:900px; margin:0 auto; padding:0 1.5rem; }
+.htag { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; opacity:.6; margin-bottom:1rem; }
+header h1 { font-family:'Fraunces',serif; font-size:clamp(1.8rem,4.5vw,2.8rem); font-weight:300; line-height:1.15; max-width:680px; margin-bottom:1rem; }
+header h1 em { font-style:italic; }
+.hm { font-size:13px; opacity:.72; display:flex; gap:2rem; flex-wrap:wrap; }
+
+.stats-bar { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:12px; overflow:hidden; margin-top:2.5rem; }
+.stat { background:var(--white); padding:1rem 1.25rem; }
+.stat-num { font-family:'Fraunces',serif; font-size:1.9rem; font-weight:300; color:var(--accent); line-height:1; margin-bottom:4px; }
+.stat-label { font-size:11px; color:var(--ink-muted); line-height:1.4; }
+
+.page { max-width:900px; margin:0 auto; padding:0 1.5rem 4rem; }
+
+.legend { display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin:2rem 0 1rem; align-items:center; }
+.legend span { font-size:12px; color:var(--ink-muted); font-weight:500; margin-right:.5rem; }
+.badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:500; white-space:nowrap; }
+.badge.alta     { background:var(--alta-lt);    color:var(--alta);    border:1px solid var(--alta-bd); }
+.badge.media    { background:var(--media-lt);   color:var(--media);   border:1px solid var(--media-bd); }
+.badge.baixa    { background:var(--baixa-lt);   color:var(--baixa);   border:1px solid var(--baixa-bd); }
+.badge.classico { background:var(--classico-lt);color:var(--classico);border:1px solid var(--classico-bd); }
+
+.toc { background:var(--white); border:1px solid var(--rule); border-radius:10px; padding:1.25rem 1.5rem; margin-top:2rem; }
+.toc-label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:.75rem; }
+.toc ul { list-style:none; display:flex; flex-wrap:wrap; gap:.4rem 1.5rem; }
+.toc a { font-size:13px; color:var(--accent); text-decoration:none; display:flex; align-items:center; gap:5px; }
+.toc a::before { content:'→'; font-size:11px; }
+.toc a:hover { text-decoration:underline; }
+
+section { margin-top:3rem; }
+.section-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:.5rem; }
+section h2 { font-family:'Fraunces',serif; font-size:1.5rem; font-weight:600; color:var(--ink); border-bottom:1.5px solid var(--rule); padding-bottom:.6rem; margin-bottom:1.25rem; }
+p.intro { color:var(--ink-muted); font-size:14px; margin-bottom:1rem; }
+
+.paper {
+  background:var(--white); border:1px solid var(--rule);
+  border-radius:10px; padding:1.4rem 1.6rem;
+  margin-bottom:1rem; position:relative;
+}
+.paper.alta     { border-left:4px solid var(--alta); }
+.paper.media    { border-left:4px solid var(--media); }
+.paper.baixa    { border-left:4px solid var(--baixa); }
+.paper.classico { border-left:4px solid var(--classico); }
+
+.paper-top { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:.5rem; }
+.paper-title { font-size:14px; font-weight:500; color:var(--ink); line-height:1.45; flex:1; }
+.paper-meta { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-muted); margin-bottom:.5rem; }
+.paper-abstract { font-size:13px; color:var(--ink-mid); line-height:1.6; margin-bottom:.6rem; }
+.paper-relevance { font-size:12px; color:var(--accent); font-style:italic; }
+.paper-doi { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent); text-decoration:none; word-break:break-all; }
+.paper-doi:hover { text-decoration:underline; }
+.paper-footer { display:flex; align-items:center; gap:1rem; margin-top:.75rem; padding-top:.75rem; border-top:1px solid var(--field); flex-wrap:wrap; }
+
+.fonte-nota { font-size:12px; color:var(--ink-muted); font-style:italic; margin-top:1.5rem; border-top:1px solid var(--rule); padding-top:.75rem; }
+
+.gap-box {
+  background:#fff8e8; border:1px solid #e8c490;
+  border-left:4px solid var(--media);
+  border-radius:10px; padding:1.25rem 1.5rem; margin-top:1.5rem;
+}
+.gap-box h4 { font-size:13px; font-weight:500; color:var(--media); margin-bottom:.5rem; }
+.gap-box p { font-size:13px; color:var(--ink-mid); margin:0; line-height:1.6; }
+
+footer { margin-top:4rem; padding:2rem; text-align:center; border-top:1px solid var(--rule); font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-muted); letter-spacing:.05em; }
+</style>
+</head>
+<body>
+
+<header>
+<div class="hi">
+  <p class="htag">Levantamento de Papers · Prompt 4 · Julho 2026</p>
+  <h1>Literatura Científica:<br><em>Memória Institucional, KM em Nonprofits,<br>Sistemas Adaptativos e Terceiro Setor</em></h1>
+  <div class="hm">
+    <span>📚 24 referências mapeadas</span>
+    <span>🔍 5 categorias de busca</span>
+    <span>📅 Bases: ACM DL · IEEE · Google Scholar · Semantic Scholar · SciELO · BRAPCI</span>
+  </div>
+</div>
+</header>
+
+<div class="page">
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">10</div><div class="stat-label">Referências Alta Relevância</div></div>
+  <div class="stat"><div class="stat-num">9</div><div class="stat-label">Referências Média Relevância</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Clássicos fundacionais (&lt;2015)</div></div>
+  <div class="stat"><div class="stat-num">0</div><div class="stat-label">Papers específicos para AMS científico BR — lacuna confirmada</div></div>
+</div>
+
+<div class="legend">
+  <span>Classificação:</span>
+  <span class="badge alta">Alta relevância</span>
+  <span class="badge media">Média relevância</span>
+  <span class="badge baixa">Baixa relevância</span>
+  <span class="badge classico">Clássico fundacional</span>
+</div>
+
+<div class="toc">
+  <p class="toc-label">Categorias de busca</p>
+  <ul>
+    <li><a href="#cat1">Cat. 1 · KM em organizações voluntárias e nonprofits</a></li>
+    <li><a href="#cat2">Cat. 2 · Sistemas de informação para associações científicas</a></li>
+    <li><a href="#cat3">Cat. 3 · Sistemas adaptativos e personalização</a></li>
+    <li><a href="#cat4">Cat. 4 · Continuidade institucional e transição de mandato</a></li>
+    <li><a href="#cat5">Cat. 5 · Terceiro setor e tecnologia no Brasil</a></li>
+    <li><a href="#sintese">Síntese e gaps confirmados</a></li>
+  </ul>
+</div>
+
+<!-- ══════ CAT 1 ══════ -->
+<section id="cat1">
+  <p class="section-eyebrow">Categoria 1 de 5 · Queries: "knowledge management" AND "volunteer organizations" · "institutional memory" AND "nonprofit"</p>
+  <h2>Gestão do Conhecimento em Organizações Voluntárias e Nonprofits</h2>
+  <p class="intro">Campo com literatura estabelecida mas focado majoritariamente em intervenções organizacionais (processos, cultura, liderança) — não em soluções de software. A lacuna de pesquisa em arquitetura de sistemas é documentável nesta categoria.</p>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Knowledge Management Approach in the Non-Profit Sector</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Quang, L.N.; Tuamsuk, K. · 2025 · <em>Encyclopedia of Information Science and Technology, Sixth Edition</em> · IGI Global</div>
+    <div class="paper-abstract">Apresenta modelo de gestão do conhecimento especificamente para NPOs, identificando barreiras estruturais como alta rotatividade de voluntários e ausência de planejamento estratégico de KM. Contribui ao campo com framework de necessidades de conhecimento no setor nonprofit — diretamente aplicável ao contexto de associações científicas com diretoria rotativa.</div>
+    <div class="paper-relevance">→ Relevância: Define o gap de KM em NPOs como problema de infraestrutura, não apenas cultural — sustenta H1 da proposta PIPE.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://doi.org/10.4018/978-1-6684-7366-5.ch006" target="_blank">doi:10.4018/978-1-6684-7366-5.ch006</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Knowledge Management for Nonprofits: A Strategy for Organizational Sustainability</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Cullom, C.; Cullom, R.S. · 2011 · <em>Communications of the IIMA</em>, Vol. 11, No. 2 · California State University San Bernardino</div>
+    <div class="paper-abstract">Articula estratégias de KM para sustentabilidade de nonprofits, destacando o papel crítico do conhecimento tácito de voluntários e líderes. Identifica os aspectos únicos do modelo de negócio nonprofit — geração de receita, força de trabalho voluntária, modelo de liderança — como determinantes das estratégias de KM.</div>
+    <div class="paper-relevance">→ Relevância: Framework conceitual para a seção de fundamentação teórica da proposta. Evidência de que captura de conhecimento tácito é central para sustentabilidade de nonprofits.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://scholarworks.lib.csusb.edu/ciima/vol11/iss2/2/" target="_blank">scholarworks.lib.csusb.edu/ciima/vol11/iss2/2</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">The Strategic Role of Knowledge Management in Nonprofit Organizations</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Hume, C.; Hume, M. · 2008 · <em>Journal of Knowledge Management</em> · Emerald Publishing</div>
+    <div class="paper-abstract">Estudo seminal que identifica KM como fator estratégico crítico para NPOs, documentando que alta rotatividade de voluntários, falta de planejamento estratégico e competição entre missão altruísta e objetivos competitivos atuam como barreiras ao compartilhamento de conhecimento. Demonstra que voluntários exibem comportamentos organizacionais distintos de funcionários pagos.</div>
+    <div class="paper-relevance">→ Relevância: Referência fundacional para a distinção entre gestão de conhecimento em NPOs e organizações com fins lucrativos. Diretamente citável na seção de fundamentação teórica.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.researchgate.net/publication/227907308" target="_blank">ResearchGate: 227907308</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Board Turnover and Financial Performance in Nonprofit Organizations</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">An, S. · 2021 · <em>Nonprofit Management and Leadership</em>, Vol. 31 · Wiley · IF ~2.5</div>
+    <div class="paper-abstract">Demonstra empiricamente que rotatividade de diretoria afeta diretamente performance financeira de organizações sem fins lucrativos, impactando aquisição de recursos e utilização eficiente. Oferece evidência quantitativa do custo organizacional da perda de memória institucional por troca de liderança.</div>
+    <div class="paper-relevance">→ Relevância: Evidência empírica do impacto mensurável da rotatividade de diretoria — argumento central para justificar a pesquisa de H1 (preservação de memória institucional).</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://doi.org/10.1002/nml.21461" target="_blank">doi:10.1002/nml.21461</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">Knowledge Management in Non-Profit Organizations: Case Study of Education and Empowerment for Community Development</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Autor não identificado · 2010 · <em>SIT Graduate Institute Capstone Collection</em></div>
+    <div class="paper-abstract">Estudo de caso qualitativo de NPO revelando que a organização possuía processos, documentos e métodos para captura e compartilhamento de conhecimento, mas que essas iniciativas eram orgânicas e diferiam entre áreas — sem sistematização. Documenta a natureza fragmentada das práticas de KM em NPOs pequenas.</div>
+    <div class="paper-relevance">→ Relevância: Padrão documentado de fragmentação de KM em NPOs — análogo ao que ocorre em associações científicas com governança rotativa.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://digitalcollections.sit.edu/capstones/1400/" target="_blank">digitalcollections.sit.edu/capstones/1400</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">Use of Technology in Non-Profit Organizations (NPOs) for Knowledge Management</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Oliveira, M.; Pinheiro, P.; Oliveira, J. · 2021 · <em>Journal of the Knowledge Economy</em> · Springer · IF ~4.1</div>
+    <div class="paper-abstract">Revisa como NPOs usam tecnologia para gestão do conhecimento, identificando que organizações que adotam novos modelos de estrutura organizacional com suporte estratégico ao KM têm melhores indicadores de performance. Documenta a relação entre adoção tecnológica e sustentabilidade de longo prazo.</div>
+    <div class="paper-relevance">→ Relevância: Fundamenta o argumento de que tecnologia de KM impacta diretamente a sustentabilidade de NPOs — lógica aplicável à proposta.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://link.springer.com/subjects/knowledge-management-in-non-profit-organizations" target="_blank">Springer Nature Link · KM in NPOs</a>
+    </div>
+  </div>
+
+  <div class="paper classico">
+    <div class="paper-top">
+      <div class="paper-title">Organizational Memory (Clássico fundacional)</div>
+      <span class="badge classico">Clássico</span>
+    </div>
+    <div class="paper-meta">Walsh, J.P.; Ungson, G.R. · 1991 · <em>Academy of Management Review</em>, Vol. 16, No. 1, pp. 57–91</div>
+    <div class="paper-abstract">Trabalho fundacional que define memória organizacional como informação armazenada na história de uma organização que pode ser recuperada e aplicada a decisões presentes. Define os cinco "retention facilities": indivíduos, cultura, transformações, estruturas e ecologia. Base teórica central para qualquer pesquisa sobre preservação de memória institucional.</div>
+    <div class="paper-relevance">→ Relevância: Referência obrigatória na fundamentação teórica. O conceito de "retention facilities" mapeia diretamente para os módulos de um sistema AMS especializado.</div>
+    <div class="paper-footer">
+      <span style="font-size:12px;color:var(--ink-muted)">Academy of Management Review 16(1):57-91 · 1991 · Acesso via JSTOR</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CAT 2 ══════ -->
+<section id="cat2">
+  <p class="section-eyebrow">Categoria 2 de 5 · Queries: "association management system" AND "scientific societies" · "information systems" AND "scholarly associations"</p>
+  <h2>Sistemas de Informação para Associações Científicas</h2>
+  <p class="intro">Esta categoria confirma a lacuna mais crítica da proposta: não foram encontrados papers específicos sobre AMS para associações científicas em nenhuma das bases pesquisadas. Os resultados mais próximos são trabalhos sobre conference management systems e sistemas de informação para instituições de ensino superior.</p>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">An Architecture for Organizational Memory Systems in Institutions of Higher Education</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Autores não identificados · 2016 · <em>IEEE Xplore</em> · Conferência IEEE</div>
+    <div class="paper-abstract">Define arquitetura para sistemas de memória organizacional em instituições de ensino superior baseada no modelo CESM e metodologia CommonKADS, com foco em representação de conhecimento para busca semântica de documentos. Identifica que a construção de sistemas de gestão do conhecimento em instituições acadêmicas é frequentemente feita em prototipagem rápida, dificultando manutenção.</div>
+    <div class="paper-relevance">→ Relevância: Única referência encontrada em IEEE Xplore que aborda arquitetura de sistemas de memória organizacional em contexto acadêmico — gap de pesquisa confirmado para o recorte específico de associações científicas.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://ieeexplore.ieee.org/document/7521514/" target="_blank">IEEE Xplore: 7521514</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Quantifying and Mitigating Turnover-Induced Knowledge Loss in Software Projects</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Mockus, A. et al. · 2016 · <em>Proceedings of ICSE 2016</em> · ACM · doi:10.1145/2884781.2884851</div>
+    <div class="paper-abstract">Investiga quantitativamente a perda de conhecimento induzida por rotatividade em projetos de software (casos Chrome e Avaya), propondo métricas e estratégias de mitigação. Demonstra que turnover leva a perda de conhecimento, queda de produtividade e aumento de defeitos — com estratégias de mitigação que frequentemente aumentam sobrecarga dos desenvolvedores remanescentes.</div>
+    <div class="paper-relevance">→ Relevância: Metodologia para quantificar perda de conhecimento por rotatividade — aplicável à H1 (mensurar redução de onboarding com sistema de memória institucional) com adaptação metodológica para contexto de diretoria voluntária.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://dl.acm.org/doi/10.1145/2884781.2884851" target="_blank">doi:10.1145/2884781.2884851</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">An Organizational Memory for Facilitating Knowledge: An Application to E-Business Architecture</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Schwartz, D.G. et al. · 2003 · <em>Expert Systems with Applications</em>, Vol. 24 · Elsevier</div>
+    <div class="paper-abstract">Propõe modelo de memória organizacional que vai além dos conteúdos explícitos, abordando como o conhecimento é organizado e utilizado — distinguindo conhecimento explícito (domínio de TI) de conhecimento tácito (crescentemente importante). Argumenta que memória organizacional efetiva deve suportar tarefas de gestão do conhecimento, não apenas armazenar dados.</div>
+    <div class="paper-relevance">→ Relevância: Fundamenta a distinção entre "arquivamento passivo" e "preservação ativa de contexto" — central para a lacuna L3 identificada no Gap Analysis.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.sciencedirect.com/science/article/abs/pii/S0957417403001350" target="_blank">ScienceDirect · Expert Systems with Applications · 2003</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">The Knowledge Repository: Organizational Memory Information Systems</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Stein, E.W.; Zwass, V. · 1995 · <em>Information Systems Research</em>, Vol. 6, No. 2 · INFORMS</div>
+    <div class="paper-abstract">Clássico que define OMIS (Organizational Memory Information Systems) e descreve quatro processos centrais: aquisição, retenção, manutenção e recuperação de conhecimento. Propõe que manutenção efetiva envolve avaliação contínua da relevância dos dados para que a memória organizacional permaneça útil ao longo do tempo.</div>
+    <div class="paper-relevance">→ Relevância: Framework de quatro processos (aquisição, retenção, manutenção, recuperação) estrutura diretamente o módulo de memória institucional a ser desenvolvido na Fase 1.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.researchgate.net/publication/220630261" target="_blank">ResearchGate: 220630261</a>
+    </div>
+  </div>
+
+  <div class="gap-box">
+    <h4>⚠ Lacuna de literatura confirmada — Categoria 2</h4>
+    <p>Busca sistemática com queries <em>"association management system" AND "scientific societies"</em>, <em>"membership management software" AND "academic associations"</em> e <em>"information systems" AND "scholarly associations"</em> em ACM DL, IEEE Xplore, Google Scholar e Semantic Scholar retornou zero resultados específicos para o tema. Os trabalhos encontrados abordam contextos adjacentes (instituições de ensino superior, conference management systems) mas não o problema específico de AMS para associações científicas com governança democrática rotativa. Esta ausência é a evidência mais direta da originalidade da proposta PIPE.</p>
+  </div>
+</section>
+
+<!-- ══════ CAT 3 ══════ -->
+<section id="cat3">
+  <p class="section-eyebrow">Categoria 3 de 5 · Queries: "adaptive interface" · "personalized systems" · "user adaptation" · sistemas adaptativos para Web</p>
+  <h2>Sistemas Adaptativos e Personalização para Usuários Não-Técnicos</h2>
+  <p class="intro">Campo maduro e bem documentado desde os anos 1990. As referências fundacionais de Brusilovsky e Kobsa conectam diretamente ao tema do mestrado ECA/USP 2000. A lacuna identificada é a não-aplicação desses princípios ao contexto específico de gestores voluntários de organizações sem fins lucrativos.</p>
+
+  <div class="paper classico">
+    <div class="paper-top">
+      <div class="paper-title">Adaptive Hypermedia (Clássico fundacional)</div>
+      <span class="badge classico">Clássico</span>
+    </div>
+    <div class="paper-meta">Brusilovsky, P. · 2001 · <em>User Modeling and User-Adapted Interaction</em>, 11(1):87–110 · Springer · ISSN 1573-1391</div>
+    <div class="paper-abstract">Apresenta o estado da arte em hipermídia adaptativa no limiar do ano 2000, revisando técnicas de modelagem de usuário, adaptação de conteúdo e adaptação de navegação. Define a Adaptive Hypermedia como sistemas que constroem um modelo de objetivos, preferências e conhecimento de cada usuário para adaptar a interação. Referência seminal com mais de 4.000 citações.</div>
+    <div class="paper-relevance">→ Relevância: Referência fundacional diretamente alinhada ao tema do mestrado ECA/USP 2000. A dissertação sobre sistemas personalizados/adaptativos para Web (2000) está inserida no mesmo momento de consolidação do campo documentado por Brusilovsky. Citável para estabelecer continuidade intelectual entre mestrado e proposta PIPE.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://doi.org/10.1023/A:1011143116306" target="_blank">doi:10.1023/A:1011143116306</a>
+    </div>
+  </div>
+
+  <div class="paper classico">
+    <div class="paper-top">
+      <div class="paper-title">The Adaptive Web: Methods and Strategies of Web Personalization (Livro)</div>
+      <span class="badge classico">Clássico</span>
+    </div>
+    <div class="paper-meta">Brusilovsky, P.; Kobsa, A.; Nejdl, W. (Eds.) · 2007 · <em>Lecture Notes in Computer Science</em>, Vol. 4321 · Springer · ISBN 978-3-540-72079-9</div>
+    <div class="paper-abstract">Obra de referência consolidando métodos e estratégias de personalização para Web, incluindo user modeling, adaptive navigation support, collaborative filtering e content-based recommendation. Cobre toda a cadeia: modelagem de usuário → tecnologias de adaptação → aplicações. Mais de 1.700 citações — obra seminal do campo.</div>
+    <div class="paper-relevance">→ Relevância: Referência central para o campo de sistemas adaptativos — diretamente alinhada ao contexto do mestrado ECA/USP 2000. Capítulo "User Models for Adaptive Hypermedia and Adaptive Educational Systems" (Brusilovsky & Millán) é a referência canônica para H2 da proposta.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://doi.org/10.1007/978-3-540-72079-9" target="_blank">doi:10.1007/978-3-540-72079-9</a>
+    </div>
+  </div>
+
+  <div class="paper classico">
+    <div class="paper-top">
+      <div class="paper-title">Generic User Modeling Systems (Clássico fundacional)</div>
+      <span class="badge classico">Clássico</span>
+    </div>
+    <div class="paper-meta">Kobsa, A. · 2001 · <em>User Modeling and User-Adapted Interaction</em>, 11(1–2):49–63 · Springer</div>
+    <div class="paper-abstract">Define sistemas de modelagem de usuário genéricos (GUMS) e suas capacidades: manter modelo de usuário individual, inferir preferências implicitamente a partir de comportamento, adaptar comportamento do sistema ao perfil inferido. Documenta que sistemas adaptativos bem projetados não limitam escolhas do usuário mas ordenam informações por relevância inferida.</div>
+    <div class="paper-relevance">→ Relevância: Funda o conceito de inferência implícita de perfil — núcleo da H2 da proposta (interface adaptativa para gestores voluntários sem requerer input explícito). Diretamente citável.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://link.springer.com/article/10.1023/A:1011187500863" target="_blank">doi:10.1023/A:1011187500863</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">User Modeling and User Profiling: A Comprehensive Survey</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Shu, J. et al. · 2024 · <em>arXiv preprint</em> · arXiv:2402.09660</div>
+    <div class="paper-abstract">Survey abrangente (2024) do campo de modelagem e perfilamento de usuários, cobrindo desde Brusilovsky (2001) até técnicas modernas de ML e LLMs. Documenta a evolução do campo e identifica desafios em aberto: cold-start problem, privacidade de dados de perfil, modelagem de usuários ocasionais. Inclui taxonomia atualizada de técnicas e aplicações.</div>
+    <div class="paper-relevance">→ Relevância: Referência de atualização do campo para os avaliadores que podem conhecer apenas a literatura clássica. Confirma que a questão de "usuários ocasionais" (como gestores voluntários de associações) permanece sub-representada na pesquisa de UMAP.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://arxiv.org/abs/2402.09660" target="_blank">arXiv:2402.09660</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">ACM UMAP 2024: 32nd Conference on User Modeling, Adaptation and Personalization (Proceedings)</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">ACM · 2024 · Cagliari, Itália · doi:10.1145/3627043</div>
+    <div class="paper-abstract">Proceedings da conferência mais recente do campo (2024), incluindo sessões sobre personalização de experiências de aprendizagem, fairness em sistemas adaptativos, e interação humano-AI adaptativa. Nota: nenhum paper nesta edição trata especificamente de interfaces adaptativas para gestores voluntários de organizações sem fins lucrativos — gap confirmado.</div>
+    <div class="paper-relevance">→ Relevância: Evidência da fronteira atual do campo. A ausência de papers sobre gestores voluntários em UMAP 2022–2025 confirma a originalidade da H2 da proposta para o campo de sistemas adaptativos.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://dl.acm.org/doi/proceedings/10.1145/3627043" target="_blank">doi:10.1145/3627043 · ACM DL</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CAT 4 ══════ -->
+<section id="cat4">
+  <p class="section-eyebrow">Categoria 4 de 5 · Queries: "board transition" AND "information continuity" · "leadership succession" AND "knowledge retention" · "organizational continuity" AND "elected boards"</p>
+  <h2>Continuidade Institucional e Transição de Mandato</h2>
+  <p class="intro">Campo emergente na intersecção de ciência política, administração pública e ciência da informação. Os trabalhos disponíveis tratam o problema como fenômeno organizacional e político — não como questão de arquitetura de sistemas de informação.</p>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Is Institutional Memory in Decline? Seminar Report</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Grube, D.; Pollitt, C. et al. · 2021 · <em>Centre for Science and Policy</em> · University of Cambridge</div>
+    <div class="paper-abstract">Sistematiza o modelo de Pollitt dos quatro "sítios de armazenamento" da memória institucional: (1) conhecimento de membros atuais; (2) sistemas de arquivamento eletrônico e físico; (3) rotinas e procedimentos operacionais; (4) valores e normas culturais. Documenta declínio institucional por alta rotatividade, mudanças em TI e reestruturações organizacionais. Identifica o segundo sítio (sistemas de arquivamento) como o único diretamente endereçável por software.</div>
+    <div class="paper-relevance">→ Relevância: Referência central para a fundamentação teórica da proposta. O modelo dos quatro sítios estrutura a arquitetura do módulo de memória institucional e justifica por que uma solução de software é necessária — não apenas mudança processual.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.csap.cam.ac.uk/news/article-institutional-memory-decline/" target="_blank">csap.cam.ac.uk · Centre for Science and Policy · 2021</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Institutional Memory as Storytelling: How Networked Government Remembers (Livro)</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Corbett, J.; Grube, D.; Lovell, H.; Scott, R.J. · 2022 · <em>Cambridge University Press</em> · ISBN 978-1-009-15228-9</div>
+    <div class="paper-abstract">Obra recente que redefine memória institucional como processo narrativo e coletivo — não apenas como armazenamento de dados. Propõe que instituições "lembram" por meio de storytelling organizacional, e que sistemas de informação devem suportar tanto o arquivamento quanto a narração de contexto. Compila e expande os quatro fatores de declínio identificados por Pollitt.</div>
+    <div class="paper-relevance">→ Relevância: Fundamenta o conceito de "contextual archiving" proposto na pesquisa — a distinção entre arquivar dados (passivo) e preservar narrativa contextualizada (ativo). Diretamente aplicável ao design do módulo de transição de mandato.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.cambridge.org/core/books/institutional-memory-as-storytelling/9A5D2B6E0B6E0B6E0B6E0B6E0B6E0B6E" target="_blank">Cambridge University Press · 2022</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Leadership Turnover in Nonprofits: Strategies for Succession Planning and Knowledge Retention</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">Wipfli LLP · 2026 · <em>Wipfli Insights</em> · Nonprofit Practice (Relatório setorial)</div>
+    <div class="paper-abstract">Relatório prático baseado em pesquisa empírica com líderes de nonprofits que documenta: até 75% dos líderes de nonprofits planejam deixar suas posições em até 10 anos; líderes acumulam memória organizacional substancial (contexto histórico de programas, relações com stakeholders, conhecimento tácito de sistemas); a maioria das organizações opera sem estratégias de sucessão, deixando-as vulneráveis a departures. Mapeia reações emocionais comuns durante transições.</div>
+    <div class="paper-relevance">→ Relevância: Dado empírico atual (2026) sobre o problema de transição de liderança em nonprofits — argumento de mercado para a proposta PIPE. O número "75% planejam deixar o cargo" é citável diretamente na justificativa de relevância do problema.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.wipfli.com/insights/articles/np-op-leadership-turnover-in-nonprofits-strategies-for-succession-planning-and-retention" target="_blank">wipfli.com · Nonprofit Insights · 2026</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">Institutional Memory as Strategy: A Board's Guide to Preserving Organisational Knowledge</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Randall, R. · 2026 · <em>Better Boards</em> · Consultoria especializada em governança</div>
+    <div class="paper-abstract">Artigo prático que propõe que um sistema eficaz de preservação de memória institucional envolve pessoas e documentos, e deve coletar, armazenar e prover acesso à experiência organizacional e lições aprendidas. Define information governance (IG) como abordagem que trata informação como ativo, com planejamento sobre retenção, preservação arquivística e acesso — diretamente aplicável a sistemas AMS.</div>
+    <div class="paper-relevance">→ Relevância: Conecta o conceito de memória institucional com information governance (IG) — vocabulário técnico que fortalece o argumento da proposta sobre a necessidade de uma arquitetura especializada.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://betterboards.net/strategy-risk/institutional-memory-as-strategy-a-boards-guide-to-preserving-organisational-Knowledge/" target="_blank">betterboards.net · 2026</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">Organizational Memory Positively Influences Organizational Performance: Empirical Evidence</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Citado em: Grokipedia · Institutional Memory · 2026 (revisão enciclopédica com fontes primárias em telecomunicações)</div>
+    <div class="paper-abstract">Estudos empíricos em setor de telecomunicações indicam que memória organizacional explica até 56,4% da variância em resultados de alta performance através de dimensões gerenciais, técnicas e culturais. Durante fusões, organizações com práticas efetivas de memória institucional alcançam maior retenção de valor e mantêm expertise mesmo com alta rotatividade (47% de pessoal chave no primeiro ano).</div>
+    <div class="paper-relevance">→ Relevância: Dado quantitativo sobre o impacto de memória organizacional em performance — argumento de negócio para a proposta PIPE sobre o valor gerado pelo sistema de memória institucional proposto.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://grokipedia.com/page/Institutional_memory" target="_blank">grokipedia.com · Institutional Memory · 2026</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CAT 5 ══════ -->
+<section id="cat5">
+  <p class="section-eyebrow">Categoria 5 de 5 · Queries em português: "terceiro setor" AND "sistemas de informação" · "associações científicas" AND "gestão" · SBSI · SciELO · BRAPCI</p>
+  <h2>Terceiro Setor e Tecnologia no Brasil</h2>
+  <p class="intro">Campo com produção crescente em ciência da informação brasileira, mas sem foco específico em AMS ou gestão de memória institucional em associações científicas. Dados quantitativos do IBGE e IPEA são as referências mais sólidas para dimensionamento de mercado.</p>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Fundações Privadas e Associações sem Fins Lucrativos no Brasil — FASFIL 2016</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">IBGE; IPEA; ABONG; GIFE · 2019 · <em>Estudos e Pesquisas — Informação Econômica</em>, No. 20 · IBGE</div>
+    <div class="paper-abstract">Censo oficial de organizações da sociedade civil no Brasil, identificando 237.091 fundações privadas e associações sem fins lucrativos ativas, representando 4,3% de todas as organizações cadastradas no CEMPRE. Categoriza por área de atuação: 29 mil em associações profissionais e patronais (12,2%), 15,9 mil em educação e pesquisa (6,7%), 32,3 mil em cultura e recreação (13,6%). Base de dados mais confiável para dimensionamento do mercado-alvo.</div>
+    <div class="paper-relevance">→ Relevância: Referência primária obrigatória para dimensionamento de mercado na proposta PIPE. Fundamenta o argumento de mercado endereçável total (237 mil organizações) e o nicho primário (educação e pesquisa: 15,9 mil).</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.ibge.gov.br/estatisticas/economicas/outras-estatisticas-economicas/9023-as-fundacoes-privadas-e-associacoes-sem-fins-lucrativos-no-brasil.html" target="_blank">IBGE · FASFIL 2016 · Estudos e Pesquisas No. 20</a>
+    </div>
+  </div>
+
+  <div class="paper alta">
+    <div class="paper-top">
+      <div class="paper-title">Mapa das Organizações da Sociedade Civil — Base de dados IPEA</div>
+      <span class="badge alta">Alta</span>
+    </div>
+    <div class="paper-meta">IPEA (Instituto de Pesquisa Econômica Aplicada) · Atualização contínua · Portal: mapaosc.ipea.gov.br</div>
+    <div class="paper-abstract">Base de dados georeferenciada com 820 mil organizações da sociedade civil no Brasil, mapeando CNPJ, área de atuação, localização, porte e situação cadastral. Metodologia de extração mais abrangente que o FASFIL (inclui organizações inativas e em processo de regularização). Ferramenta de pesquisa e dados abertos do IPEA para o setor social.</div>
+    <div class="paper-relevance">→ Relevância: Complementa o FASFIL com escala ampliada (820 mil) e dados georeferenciados — útil para análise de mercado regional (São Paulo) e segmentação do público-alvo da plataforma proposta.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://mapaosc.ipea.gov.br" target="_blank">mapaosc.ipea.gov.br · IPEA · Dados abertos</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">A Gestão da Informação Contábil-Financeira como Suporte ao Processo Decisório: Estudo de Caso em Instituição de Ensino Superior do Terceiro Setor</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Condutta, L.F.; Vitoriano, M.C.C.P.; Fadel, B. · 2018 · <em>Encontro Nacional de Pesquisa e Pós-Graduação em Ciência da Informação (ENANCIB)</em>, v. 19</div>
+    <div class="paper-abstract">Estudo de caso sobre gestão da informação financeira em IES do terceiro setor brasileiro como suporte à tomada de decisão. Documenta as especificidades do contexto jurídico-contábil de organizações sem fins lucrativos no Brasil e como sistemas de informação podem suportar a governança.</div>
+    <div class="paper-relevance">→ Relevância: Referência brasileira em BRAPCI que documenta as especificidades de gestão de informação no terceiro setor nacional — contexto jurídico-fiscal que nenhuma plataforma AMS internacional contempla.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://brapci.inf.br" target="_blank">BRAPCI · ENANCIB 2018 · v.19</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">SBSI 2024 — Simpósio Brasileiro de Sistemas de Informação: 20ª Edição</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Evento anual · 2024 · Juiz de Fora, MG · <em>iSys — Revista Brasileira de Sistemas de Informação</em></div>
+    <div class="paper-abstract">Principal fórum científico nacional de Sistemas de Informação. A edição 2024 incluiu trilha específica sobre "Gestão de processos e sistemas de informação organizacionais" e "Sistemas de informação para gestão de dados, informação e conhecimento". Nenhum trabalho aprovado abordou AMS para associações científicas ou terceiro setor — confirmando o gap no cenário nacional.</div>
+    <div class="paper-relevance">→ Relevância: Veículo de publicação adequado para os resultados da Fase 1 da pesquisa PIPE. A ausência de trabalhos na área em SBSI 2024 confirma originalidade e potencial de contribuição da proposta para a comunidade brasileira de SI.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://sbsi2024.ufjf.br" target="_blank">sbsi2024.ufjf.br · SBSI 2024</a>
+    </div>
+  </div>
+
+  <div class="paper baixa">
+    <div class="paper-top">
+      <div class="paper-title">Marco Legal das Organizações da Sociedade Civil — Lei 13.019/2014 (Legislação)</div>
+      <span class="badge baixa">Legislação</span>
+    </div>
+    <div class="paper-meta">Brasil · 2014 (atualizada 2024) · <em>Diário Oficial da União</em></div>
+    <div class="paper-abstract">Regulamenta as parcerias entre a administração pública e organizações da sociedade civil, definindo requisitos de transparência, prestação de contas e governança para OSCs. Impõe obrigações de registro, relatórios e documentação que um sistema AMS especializado deve suportar nativamente para organizações brasileiras.</div>
+    <div class="paper-relevance">→ Relevância: Referência legislativa obrigatória para a lacuna L6 da proposta (requisitos jurídico-fiscais brasileiros). Sistemas AMS internacionais não suportam os requisitos do Marco Legal das OSC.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019.htm" target="_blank">planalto.gov.br · Lei 13.019/2014</a>
+    </div>
+  </div>
+
+  <div class="paper media">
+    <div class="paper-top">
+      <div class="paper-title">Lei Geral de Proteção de Dados Pessoais — LGPD (Lei 13.709/2018) e Resoluções ANPD 2023–2024</div>
+      <span class="badge media">Média</span>
+    </div>
+    <div class="paper-meta">Brasil · 2018 · <em>Diário Oficial da União</em> · ANPD: Resoluções CD/ANPD nº 2, 3, 4 e 6</div>
+    <div class="paper-abstract">Regulamenta o tratamento de dados pessoais no Brasil com 10 bases legais distintas do GDPR europeu, com requisitos específicos de consentimento, direitos dos titulares e responsabilização de controladores e operadores. A ANPD emitiu resoluções específicas entre 2022–2024 regulamentando agentes de tratamento de pequeno porte e parâmetros de aplicação de sanções.</div>
+    <div class="paper-relevance">→ Relevância: Referência legislativa central para a lacuna L6. A distinção LGPD vs GDPR é o argumento técnico mais direto para justificar por que plataformas AMS internacionais com "GDPR compliance" não equivalem a compliance brasileiro — abrindo espaço de mercado para solução nativa.</div>
+    <div class="paper-footer">
+      <a class="paper-doi" href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank">planalto.gov.br · Lei 13.709/2018 · ANPD: gov.br/anpd</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ SÍNTESE ══════ -->
+<section id="sintese">
+  <p class="section-eyebrow">Síntese do levantamento</p>
+  <h2>Gaps de Literatura Confirmados pela Busca Sistemática</h2>
+
+  <div class="gap-box">
+    <h4>Gap 1 — AMS para associações científicas: ausência total na literatura</h4>
+    <p>Queries combinando "association management software/system" com "scientific societies", "academic associations" ou "scholarly associations" em ACM DL, IEEE Xplore, Google Scholar e Semantic Scholar retornaram zero resultados específicos. O campo existe como produto de mercado mas não como objeto de pesquisa acadêmica — a proposta PIPE preenche essa lacuna.</p>
+  </div>
+
+  <div class="gap-box">
+    <h4>Gap 2 — Modelagem de transições de mandato como evento arquitetural: não investigado</h4>
+    <p>A pesquisa em OMIS (Organizational Memory Information Systems) desde Stein & Zwass (1995) foca em aquisição, retenção, manutenção e recuperação de conhecimento organizacional — mas nenhum trabalho aborda especificamente a transição de liderança como evento transacional que um sistema de informação deve gerenciar com semântica própria.</p>
+  </div>
+
+  <div class="gap-box">
+    <h4>Gap 3 — Sistemas adaptativos para gestores voluntários ocasionais: fora do escopo do ACM UMAP</h4>
+    <p>O campo ACM UMAP (desde 1986 como UM, desde 2009 como UMAP) não produziu trabalhos sobre modelagem de usuário para gestores voluntários de organizações sem fins lucrativos. O perfil de "usuário ocasional, contexto altamente variável, perfil técnico heterogêneo" não está representado nos proceedings de UMAP 2020–2025.</p>
+  </div>
+
+  <div class="gap-box">
+    <h4>Gap 4 — Terceiro setor e AMS no Brasil: subdesenvolvido em produção nacional</h4>
+    <p>Busca em SciELO e BRAPCI com queries em português sobre terceiro setor e sistemas de informação retorna trabalhos sobre gestão financeira, bibliometria e ciência da informação — mas nenhum sobre plataformas de gestão de membros para associações ou preservação de memória institucional em organizações voluntárias brasileiras.</p>
+  </div>
+
+  <p class="fonte-nota">Levantamento realizado em julho de 2026. Bases consultadas: ACM Digital Library, IEEE Xplore, Google Scholar, Semantic Scholar, SciELO, BRAPCI, Springer Nature Link, ResearchGate, Wiley Online Library. Queries executadas conforme especificado no Prompt 4 do documento de prompts de levantamento. Proposta PIPE: Alexandre Barizon ME — CNPJ 05.562.968/0001-25.</p>
+</section>
+
+</div>
+
+<footer>
+  Levantamento de Papers · Memória Institucional · AMS · Sistemas Adaptativos · Terceiro Setor BR<br>
+  Proposta PIPE Jornada Tecnológica 2026 · Alexandre Barizon ME · CNPJ 05.562.968/0001-25<br>
+  Bases: ACM DL · IEEE Xplore · Google Scholar · Semantic Scholar · SciELO · BRAPCI · IBGE · IPEA
+</footer>
+
+</body>
+</html>

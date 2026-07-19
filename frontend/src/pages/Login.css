@@ -1,0 +1,423 @@
+/* =============================================================================
+   Login — layout split-screen (Figma Make / WellFlows)
+   ============================================================================= */
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: #ffffff;
+}
+
+/* --- Painel esquerdo (hero) --- */
+
+.login-hero {
+  display: none;
+  position: relative;
+  width: 50%;
+  overflow: hidden;
+}
+
+.login-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+.login-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 3rem;
+}
+
+.login-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.login-hero-brand-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-hero-brand-leaf {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #ffffff;
+}
+
+.login-hero-brand-name {
+  color: #ffffff;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.login-hero-text {
+  max-width: 22rem;
+}
+
+.login-hero-tagline {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  margin: 0 0 0.75rem;
+}
+
+.login-hero-title {
+  color: #ffffff;
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.login-hero-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  margin: 1rem 0 0;
+}
+
+/* --- Painel direito (formulário) --- */
+
+.login-form-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  overflow-y: auto;
+}
+
+.login-form-top {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+}
+
+.login-form-content {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.login-mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 2rem;
+}
+
+.login-mobile-brand-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: #131313;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-mobile-brand-leaf {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #ffffff;
+}
+
+.login-mobile-brand-name {
+  color: #131313;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.login-form-title {
+  color: #131313;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0 0 0.375rem;
+  line-height: 1.4;
+}
+
+.login-form-subtitle {
+  color: #717182;
+  font-size: 0.9375rem;
+  margin: 0 0 2rem;
+  line-height: 1.5;
+}
+
+/* Mensagem de erro */
+.login-error-message {
+  background-color: #fef2f2;
+  color: #c53030;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  border-left: 3px solid #c53030;
+}
+
+/* Formulário */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.login-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.login-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #131313;
+}
+
+.login-forgot-link {
+  font-size: 0.8125rem;
+  color: #717182;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.login-forgot-link:hover {
+  color: #131313;
+}
+
+.login-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 0.75rem;
+  width: 1rem;
+  height: 1rem;
+  color: #717182;
+  pointer-events: none;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  font-size: 0.9375rem;
+  color: #131313;
+  background-color: #f3f3f5;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.login-input-password {
+  padding-right: 2.5rem;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(19, 19, 19, 0.15);
+}
+
+.login-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-input::placeholder {
+  color: #a0aec0;
+}
+
+.login-input[aria-invalid='true'] {
+  border-color: #c53030;
+}
+
+.login-password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #717182;
+  transition: color 0.2s ease;
+}
+
+.login-password-toggle:hover {
+  color: #131313;
+}
+
+.login-toggle-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.login-submit-button {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #ffffff;
+  background: #131313;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.login-submit-button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.login-submit-button:active:not(:disabled) {
+  opacity: 0.8;
+}
+
+.login-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-signup-prompt {
+  text-align: center;
+  color: #717182;
+  font-size: 0.875rem;
+  margin: 2rem 0 0;
+}
+
+.login-signup-link {
+  color: #131313;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.login-signup-link:hover {
+  opacity: 0.7;
+}
+
+/* Seletor de idioma no painel de login */
+.login-form-top .language-select {
+  background-color: #f3f3f5;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #131313;
+}
+
+.login-form-top .language-select:hover {
+  background-color: #ececf0;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* --- Responsividade --- */
+
+@media (min-width: 1024px) {
+  .login-hero {
+    display: block;
+  }
+
+  .login-mobile-brand {
+    display: none;
+  }
+
+  .login-form-panel {
+    position: relative;
+  }
+}
+
+@media (max-width: 1023px) {
+  .login-form-top {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-form-panel {
+    padding: 4.5rem 1.25rem 2rem;
+  }
+
+  .login-form-title {
+    font-size: 1.375rem;
+  }
+}
+
+/* Acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  .login-input,
+  .login-submit-button,
+  .login-forgot-link,
+  .login-signup-link,
+  .login-password-toggle {
+    transition: none;
+  }
+}
+
+/* Proteção contra reset CSS global */
+.login-page {
+  min-height: 100vh !important;
+}
+
+.login-form-panel {
+  padding: 3rem 1.5rem !important;
+}
+
+.login-form {
+  gap: 1.25rem !important;
+}
+
+.login-field {
+  gap: 0.375rem !important;
+}
+
+.login-input {
+  padding: 0.625rem 1rem 0.625rem 2.5rem !important;
+}
+
+.login-input-password {
+  padding-right: 2.5rem !important;
+}
+
+.login-hero-content {
+  padding: 3rem !important;
+}

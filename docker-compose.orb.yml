@@ -1,0 +1,37 @@
+# Docker Compose para OrbStack (Mac M-series / ARM64)
+#
+# Overrides específicos para desenvolvimento no Mac com OrbStack.
+# Deve ser usado APENAS localmente no Mac — nunca em CI/CD ou servidores Linux.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.orb.yml up
+#
+# Ou use o script de conveniência:
+#   ./scripts/up-orb.sh
+#
+# Contexto:
+#   - OrbStack roda containers nativamente como linux/arm64 no Apple Silicon
+#   - As imagens base (postgres:14-alpine, node:18-alpine, python:3.11-slim)
+#     são multi-arch e suportam arm64 sem configuração adicional
+#   - A imagem local assapp-frontend-dev:local deve ser buildada no Mac:
+#     docker build --platform linux/arm64 -f frontend/Dockerfile.dev -t assapp-frontend-dev:local ./frontend
+
+services:
+  db:
+    platform: linux/arm64
+
+  backend:
+    # Backend buildado localmente no Mac — platform padrão do host (arm64)
+    environment:
+      PLATFORM: arm64
+      ORBSTACK: "True"
+
+  frontend:
+    platform: linux/arm64
+    # IMPORTANTE: antes de usar, rebuild a imagem para ARM64:
+    #   docker build --platform linux/arm64 \
+    #     -f frontend/Dockerfile.dev \
+    #     -t assapp-frontend-dev:local \
+    #     ./frontend
+    environment:
+      - PLATFORM=arm64

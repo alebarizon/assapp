@@ -1,0 +1,523 @@
+// =============================================================================
+// AssApp — Schema de Domínio (Documentação PIPE FAPESP)
+// =============================================================================
+//
+// Este arquivo documenta o modelo conceitual da pesquisa PIPE.
+// FONTE DE VERDADE EM RUNTIME: Django ORM (backend/*/models.py)
+//
+// Hipóteses relacionadas:
+//   H1 — Modelagem de conhecimento institucional (Mandato, ContextoHistorico)
+//   H2 — Interface adaptativa (PerfilAdaptativo, OnboardingEtapa)
+//   H3 — Integração fluxos acadêmicos (EventoAcademico, CallForPapers)
+//
+// Multi-tenancy: cada associação = schema PostgreSQL isolado (django-tenants).
+// Modelos abaixo existem no schema do TENANT (não no public).
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  // Nota: client não é gerado em produção — apenas documentação
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// ENUMS
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  superadmin
+  association_admin
+  board_member
+  member
+  reviewer
+}
+
+enum MandatoStatus {
+  planejado
+  ativo
+  transicao
+  encerrado
+  arquivado
+}
+
+enum PerfilTecnico {
+  iniciante    // H2: interface com wizards e tooltips expandidos
+  intermediario
+  avancado     // H2: interface compacta, atalhos
+}
+
+enum TipoCargo {
+  presidente
+  vice_presidente
+  secretario
+  secretario_adjunto
+  tesoureiro
+  tesoureiro_adjunto
+  diretor
+  conselho_fiscal
+  outro
+}
+
+enum TransicaoStatus {
+  pendente
+  em_andamento
+  onboarding_parcial
+  concluida
+  cancelada
+}
+
+enum TipoContextoHistorico {
+  decisao
+  processo
+  evento
+  financeiro
+  comunicacao
+  filiacao
+  evento_academico
+  outro
+}
+
+enum EventoAcademicoStatus {
+  rascunho
+  inscricoes_abertas
+  cfp_aberto
+  em_avaliacao
+  encerrado
+  anais_publicados
+  cancelado
+}
+
+enum SubmissaoStatus {
+  rascunho
+  submetido
+  em_parecer
+  aceito
+  aceito_com_revisoes
+  rejeitado
+  retirado
+}
+
+enum RecomendacaoParecer {
+  aceitar
+  aceitar_com_revisoes
+  rejeitar
+}
+
+enum FiliacaoStatus {
+  ativa
+  inadimplente
+  suspensa
+  cancelada
+  honoraria
+}
+
+enum AnuidadeStatus {
+  pendente
+  paga
+  vencida
+  isenta
+  cancelada
+}
+
+// -----------------------------------------------------------------------------
+// USUÁRIOS E PERFIS ADAPTATIVOS (H2)
+// -----------------------------------------------------------------------------
+
+model User {
+  id              String         @id @default(uuid()) @db.Uuid
+  email           String         @unique
+  nome            String
+  role            UserRole       @default(member)
+  cpf             String?        @db.VarChar(14)
+  telefone        String?
+  locale          String         @default("pt-BR")
+  perfilTecnico   PerfilTecnico  @default(iniciante) @map("perfil_tecnico")
+  consentimentoLgpd Boolean      @default(false) @map("consentimento_lgpd")
+  consentimentoEm DateTime?      @map("consentimento_em")
+  ativo           Boolean        @default(true)
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  cargosMandato   CargoMandato[]
+  contextosAutor  ContextoHistorico[] @relation("AutorContexto")
+  submissoes      SubmissaoTrabalho[]
+  pareceres       Parecer[]
+  filiacoes       Filiacao[]
+  onboardingEtapas OnboardingEtapa[]
+
+  @@map("accounts_user")
+}
+
+// -----------------------------------------------------------------------------
+// MANDATO — Entidade central da pesquisa (H1)
+// -----------------------------------------------------------------------------
+
+/// Representa um ciclo de gestão da diretoria (~2 anos).
+/// Ao encerrar, dispara snapshot automático e inicia transição.
+model Mandato {
+  id              String        @id @default(uuid()) @db.Uuid
+  titulo          String        // ex: "Diretoria 2024-2026"
+  descricao       String?
+  dataInicio      DateTime      @map("data_inicio") @db.Date
+  dataFim         DateTime?     @map("data_fim") @db.Date
+  status          MandatoStatus @default(planejado)
+  numeroSequencial Int          @map("numero_sequencial") // 1, 2, 3...
+  observacoesEncerramento String? @map("observacoes_encerramento")
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  encerradoEm     DateTime?     @map("encerrado_em")
+
+  cargos          CargoMandato[]
+  snapshots       MandatoSnapshot[]
+  transicaoComoAnterior TransicaoMandato[] @relation("MandatoAnterior")
+  transicaoComoNovo     TransicaoMandato[] @relation("MandatoNovo")
+  contextos       ContextoHistorico[]
+  timeline        TimelineInstitucional[]
+  eventos         EventoAcademico[]
+
+  @@index([status])
+  @@index([dataInicio, dataFim])
+  @@map("mandatos_mandato")
+}
+
+/// Membro da diretoria em um mandato específico.
+model CargoMandato {
+  id          String    @id @default(uuid()) @db.Uuid
+  mandatoId   String    @map("mandato_id") @db.Uuid
+  usuarioId   String    @map("usuario_id") @db.Uuid
+  cargo       TipoCargo
+  cargoCustom String?   @map("cargo_custom") // quando cargo = outro
+  dataInicio  DateTime  @map("data_inicio") @db.Date
+  dataFim     DateTime? @map("data_fim") @db.Date
+  ativo       Boolean   @default(true)
+
+  mandato     Mandato   @relation(fields: [mandatoId], references: [id], onDelete: Cascade)
+  usuario     User      @relation(fields: [usuarioId], references: [id])
+
+  @@unique([mandatoId, usuarioId, cargo])
+  @@index([mandatoId, ativo])
+  @@map("mandatos_cargo_mandato")
+}
+
+/// Handoff estruturado entre mandatos — core do onboarding (H1 + H2).
+model TransicaoMandato {
+  id                  String          @id @default(uuid()) @db.Uuid
+  mandatoAnteriorId   String          @map("mandato_anterior_id") @db.Uuid
+  mandatoNovoId       String          @map("mandato_novo_id") @db.Uuid
+  status              TransicaoStatus @default(pendente)
+  dataInicioTransicao DateTime        @default(now()) @map("data_inicio_transicao")
+  dataConclusao       DateTime?       @map("data_conclusao")
+  progressoPercentual Int             @default(0) @map("progresso_percentual")
+  notasTransicao      String?         @map("notas_transicao")
+
+  mandatoAnterior     Mandato         @relation("MandatoAnterior", fields: [mandatoAnteriorId], references: [id])
+  mandatoNovo         Mandato         @relation("MandatoNovo", fields: [mandatoNovoId], references: [id])
+  etapasOnboarding    OnboardingEtapa[]
+
+  @@unique([mandatoAnteriorId, mandatoNovoId])
+  @@map("mandatos_transicao_mandato")
+}
+
+/// Etapas do wizard de onboarding — adaptativo conforme perfil técnico (H2).
+model OnboardingEtapa {
+  id              String    @id @default(uuid()) @db.Uuid
+  transicaoId     String    @map("transicao_id") @db.Uuid
+  responsavelId   String?   @map("responsavel_id") @db.Uuid
+  codigo          String    // ex: "revisar_membros", "configurar_financeiro"
+  titulo          String
+  descricao       String?
+  ordem           Int
+  obrigatoria     Boolean   @default(true)
+  concluida       Boolean   @default(false)
+  concluidaEm     DateTime? @map("concluida_em")
+  dadosContexto   Json?     @map("dados_contexto") // links, contagens, alertas
+  perfilMinimo    PerfilTecnico @default(iniciante) @map("perfil_minimo")
+
+  transicao       TransicaoMandato @relation(fields: [transicaoId], references: [id], onDelete: Cascade)
+  responsavel     User?            @relation(fields: [responsavelId], references: [id])
+
+  @@unique([transicaoId, codigo])
+  @@index([transicaoId, ordem])
+  @@map("mandatos_onboarding_etapa")
+}
+
+/// Snapshot automático ao encerrar mandato — preservação ativa (H1).
+model MandatoSnapshot {
+  id          String   @id @default(uuid()) @db.Uuid
+  mandatoId   String   @map("mandato_id") @db.Uuid
+  tipo        String   // "encerramento", "transicao", "manual"
+  versao      Int      @default(1)
+  dados       Json     // estado consolidado: membros, financeiro, eventos, decisões
+  hash        String?  // integridade auditável
+  criadoPorId String?  @map("criado_por_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  mandato     Mandato  @relation(fields: [mandatoId], references: [id], onDelete: Cascade)
+
+  @@index([mandatoId, tipo])
+  @@map("mandatos_mandato_snapshot")
+}
+
+// -----------------------------------------------------------------------------
+// MEMÓRIA INSTITUCIONAL (H1)
+// -----------------------------------------------------------------------------
+
+/// Registro contextualizado: quem decidiu o quê, por quê, em qual mandato.
+model ContextoHistorico {
+  id              String              @id @default(uuid()) @db.Uuid
+  mandatoId       String?             @map("mandato_id") @db.Uuid
+  autorId         String?             @map("autor_id") @db.Uuid
+  tipo            TipoContextoHistorico
+  titulo          String
+  conteudo        String              @db.Text
+  decisao         String?             // o que foi decidido
+  motivo          String?             @db.Text // por quê
+  entidadeTipo    String?             @map("entidade_tipo") // "membro", "evento", etc.
+  entidadeId      String?             @map("entidade_id") @db.Uuid
+  tags            String[]            @default([])
+  visivelDiretoria Boolean            @default(true) @map("visivel_diretoria")
+  arquivado       Boolean             @default(false)
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  mandato         Mandato?            @relation(fields: [mandatoId], references: [id])
+  autor           User?               @relation("AutorContexto", fields: [autorId], references: [id])
+
+  @@index([mandatoId, tipo])
+  @@index([entidadeTipo, entidadeId])
+  @@index([tags])
+  @@map("memoria_contexto_historico")
+}
+
+/// Eventos na timeline institucional — visão cronológica por mandato.
+model TimelineInstitucional {
+  id          String   @id @default(uuid()) @db.Uuid
+  mandatoId   String   @map("mandato_id") @db.Uuid
+  tipo        String   // "decisao", "evento", "filiacao", "financeiro"
+  titulo      String
+  descricao   String?  @db.Text
+  dataEvento  DateTime @map("data_evento")
+  metadata    Json?
+  contextoId  String?  @map("contexto_id") @db.Uuid
+
+  mandato     Mandato  @relation(fields: [mandatoId], references: [id], onDelete: Cascade)
+
+  @@index([mandatoId, dataEvento])
+  @@map("memoria_timeline_institucional")
+}
+
+// -----------------------------------------------------------------------------
+// MEMBROS E FILIAÇÃO
+// -----------------------------------------------------------------------------
+
+model Membro {
+  id              String    @id @default(uuid()) @db.Uuid
+  nomeCompleto    String    @map("nome_completo")
+  email           String    @unique
+  cpf             String?   @db.VarChar(14)
+  cnpj            String?   @db.VarChar(18) // para instituições filiadas
+  telefone        String?
+  instituicao     String?
+  areaAtuacao     String?   @map("area_atuacao")
+  lattesUrl       String?   @map("lattes_url")
+  orcid           String?
+  consentimentoLgpd Boolean @default(false) @map("consentimento_lgpd")
+  ativo           Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  filiacoes       Filiacao[]
+  submissoes      SubmissaoTrabalho[]
+
+  @@index([cpf])
+  @@map("membros_membro")
+}
+
+model Filiacao {
+  id          String         @id @default(uuid()) @db.Uuid
+  membroId    String         @map("membro_id") @db.Uuid
+  mandatoId   String?        @map("mandato_id") @db.Uuid
+  tipo        String         @default("efetivo") // efetivo, estudante, honorario
+  status      FiliacaoStatus @default(ativa)
+  dataInicio  DateTime       @map("data_inicio") @db.Date
+  dataFim     DateTime?      @map("data_fim") @db.Date
+  observacoes String?
+
+  membro      Membro         @relation(fields: [membroId], references: [id], onDelete: Cascade)
+  anuidades   Anuidade[]
+
+  @@index([membroId, status])
+  @@map("membros_filiacao")
+}
+
+model Anuidade {
+  id          String        @id @default(uuid()) @db.Uuid
+  filiacaoId  String        @map("filiacao_id") @db.Uuid
+  anoReferencia Int         @map("ano_referencia")
+  valor       Decimal       @db.Decimal(10, 2)
+  vencimento  DateTime      @db.Date
+  status      AnuidadeStatus @default(pendente)
+  pagoEm      DateTime?     @map("pago_em")
+  nfNumero    String?       @map("nf_numero")
+  stripePaymentId String?   @map("stripe_payment_id")
+
+  filiacao    Filiacao      @relation(fields: [filiacaoId], references: [id], onDelete: Cascade)
+
+  @@unique([filiacaoId, anoReferencia])
+  @@map("membros_anuidade")
+}
+
+// -----------------------------------------------------------------------------
+// EVENTOS CIENTÍFICOS (H3)
+// -----------------------------------------------------------------------------
+
+model EventoAcademico {
+  id              String              @id @default(uuid()) @db.Uuid
+  mandatoId       String?             @map("mandato_id") @db.Uuid
+  titulo          String
+  slug            String              @unique
+  descricao       String?             @db.Text
+  dataInicio      DateTime            @map("data_inicio")
+  dataFim         DateTime            @map("data_fim")
+  local           String?
+  modalidade      String              @default("presencial") // presencial, online, hibrido
+  status          EventoAcademicoStatus @default(rascunho)
+  capacidadeMax   Int?                @map("capacidade_max")
+  valorInscricao  Decimal?            @map("valor_inscricao") @db.Decimal(10, 2)
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  mandato         Mandato?            @relation(fields: [mandatoId], references: [id])
+  callForPapers   CallForPapers?
+  inscricoes      InscricaoEvento[]
+  anais           AnaisPublicacao?
+
+  @@index([status, dataInicio])
+  @@map("eventos_evento_academico")
+}
+
+model CallForPapers {
+  id              String   @id @default(uuid()) @db.Uuid
+  eventoId        String   @unique @map("evento_id") @db.Uuid
+  titulo          String
+  instrucoes      String   @db.Text
+  dataAbertura    DateTime @map("data_abertura")
+  dataFechamento  DateTime @map("data_fechamento")
+  areasTematicas  String[] @default([]) @map("areas_tematicas")
+  maxSubmissoesPorAutor Int @default(2) @map("max_submissoes_por_autor")
+  anonimo         Boolean  @default(true) // parecer duplo-cego
+
+  evento          EventoAcademico @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  submissoes      SubmissaoTrabalho[]
+
+  @@map("eventos_call_for_papers")
+}
+
+model SubmissaoTrabalho {
+  id              String          @id @default(uuid()) @db.Uuid
+  cfpId           String          @map("cfp_id") @db.Uuid
+  autorId         String          @map("autor_id") @db.Uuid
+  membroId        String?         @map("membro_id") @db.Uuid
+  titulo          String
+  resumo          String          @db.Text
+  palavrasChave   String[]        @default([]) @map("palavras_chave")
+  areaTematica    String?         @map("area_tematica")
+  arquivoUrl      String?         @map("arquivo_url")
+  status          SubmissaoStatus @default(rascunho)
+  submetidoEm     DateTime?       @map("submetido_em")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  cfp             CallForPapers   @relation(fields: [cfpId], references: [id], onDelete: Cascade)
+  autor           User            @relation(fields: [autorId], references: [id])
+  membro          Membro?         @relation(fields: [membroId], references: [id])
+  pareceres       Parecer[]
+
+  @@index([cfpId, status])
+  @@map("eventos_submissao_trabalho")
+}
+
+model Parecer {
+  id              String              @id @default(uuid()) @db.Uuid
+  submissaoId     String              @map("submissao_id") @db.Uuid
+  pareceristaId   String              @map("parecerista_id") @db.Uuid
+  recomendacao    RecomendacaoParecer?
+  nota            Int?                // 1-5
+  comentariosAutor String?            @map("comentarios_autor") @db.Text
+  comentariosInternos String?         @map("comentarios_internos") @db.Text
+  concluido       Boolean             @default(false)
+  concluidoEm     DateTime?           @map("concluido_em")
+
+  submissao       SubmissaoTrabalho   @relation(fields: [submissaoId], references: [id], onDelete: Cascade)
+  parecerista     User                @relation(fields: [pareceristaId], references: [id])
+
+  @@unique([submissaoId, pareceristaId])
+  @@map("eventos_parecer")
+}
+
+model InscricaoEvento {
+  id          String   @id @default(uuid()) @db.Uuid
+  eventoId    String   @map("evento_id") @db.Uuid
+  membroId    String?  @map("membro_id") @db.Uuid
+  nome        String
+  email       String
+  confirmada  Boolean  @default(false)
+  pagoEm      DateTime? @map("pago_em")
+  certificadoUrl String? @map("certificado_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  evento      EventoAcademico @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  @@index([eventoId, confirmada])
+  @@map("eventos_inscricao_evento")
+}
+
+model AnaisPublicacao {
+  id          String   @id @default(uuid()) @db.Uuid
+  eventoId    String   @unique @map("evento_id") @db.Uuid
+  titulo      String
+  issn        String?
+  doiPrefix   String?  @map("doi_prefix")
+  urlPublicacao String? @map("url_publicacao")
+  publicadoEm DateTime? @map("publicado_em")
+  metadata    Json?
+
+  evento      EventoAcademico @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  @@map("eventos_anais_publicacao")
+}
+
+// -----------------------------------------------------------------------------
+// TENANT (schema public — django-tenants)
+// -----------------------------------------------------------------------------
+
+model Tenant {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  schemaName  String   @map("schema_name")
+  cnpj        String?  @db.VarChar(18)
+  ownerId     String?  @map("owner_id") @db.Uuid
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  domains     Domain[]
+
+  @@map("tenants_tenant")
+}
+
+model Domain {
+  id        String  @id @default(uuid()) @db.Uuid
+  domain    String  @unique
+  tenantId  String  @map("tenant_id") @db.Uuid
+  isPrimary Boolean @default(false) @map("is_primary")
+
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenants_domain")
+}
