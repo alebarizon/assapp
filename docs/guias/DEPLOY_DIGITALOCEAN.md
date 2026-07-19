@@ -1,96 +1,127 @@
 # Deploy DigitalOcean — AssApp
 
 **Última atualização:** 2026-07-19  
-**Padrão:** alinhado ao WellSaaS (mesmo droplet pode hospedar staging + produção)
+**Padrão:** alinhado ao WellSaaS (mesmo droplet pode hospedar staging + produção)  
+**Changelog do dia:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md)
 
 ---
 
-## Visão geral
+## Droplet atual
+
+| Campo | Valor |
+|-------|--------|
+| IP | `159.203.183.184` |
+| Hostname | `drop-assapp` |
+| SO | Ubuntu 24.04 LTS |
+| SSH | `ssh root@159.203.183.184` |
+| App | `/opt/assapp` |
+| Bootstrap | **concluído** (`scripts/setup_digitalocean.sh`) |
+
+Portas abertas (UFW): `22`, `80`, `443`, `8080`.
+
+---
+
+## Visão geral do pipeline
 
 ```
 Push origin/develop  →  GitHub Actions  →  build amd64  →  Docker Hub  →  DO staging  (:8080)
 Push origin/main     →  GitHub Actions  →  build amd64  →  Docker Hub  →  DO produção (:80)
 ```
 
-| Ambiente | Branch | Porta | Compose (planejado) | Diretório no servidor |
-|----------|--------|-------|---------------------|------------------------|
+| Ambiente | Branch | Porta | Compose (a criar) | Diretório |
+|----------|--------|-------|-------------------|-----------|
 | Staging | `develop` | 8080 | `docker-compose.staging.yml` | `/opt/assapp` |
 | Produção | `main` | 80 | `docker-compose.prod.yml` | `/opt/assapp` |
 
-Staging e produção compartilham o diretório; usam arquivos compose/env diferentes.
+---
+
+## Bootstrap do servidor
+
+### Já executado (2026-07-19)
+
+```bash
+scp scripts/setup_digitalocean.sh root@159.203.183.184:/tmp/
+ssh root@159.203.183.184 'bash /tmp/setup_digitalocean.sh'
+```
+
+Instala: Docker, Compose plugin, UFW, fail2ban, swap 2G, usuário `deploy`, `/opt/assapp`, Certbot.
+
+### Reexecutar (idempotente na maior parte)
+
+Mesmos comandos acima. O script pula Docker/swap se já existirem.
+
+### User data (cloud-init) — droplets futuros
+
+Na criação do Droplet: **Additional Options → Startup scripts**.  
+Ver: https://docs.digitalocean.com/products/droplets/how-to/provide-user-data/  
+
+Equivale ao `setup_digitalocean.sh` no primeiro boot. Neste droplet o bootstrap foi manual.
 
 ---
 
 ## Secrets do GitHub Actions
 
-Configurar em **Settings → Secrets and variables → Actions**:
+Página: https://github.com/alebarizon/assapp/settings/secrets/actions  
 
-| Secret | Uso |
-|--------|-----|
+| Secret | Valor neste projeto |
+|--------|---------------------|
+| `DO_HOST` | `159.203.183.184` |
+| `DO_STAGING_HOST` | `159.203.183.184` |
+| `DO_USER` | `root` ou `deploy` |
+| `DO_SSH_KEY` | chave privada (`cat ~/.ssh/id_ed25519`) |
 | `DOCKER_USERNAME` | Docker Hub |
-| `DOCKER_PASSWORD` | Docker Hub |
-| `DO_HOST` | IP/host produção |
-| `DO_STAGING_HOST` | IP/host staging (pode ser o mesmo) |
-| `DO_USER` | Usuário SSH (ex.: `root` ou `deploy`) |
-| `DO_SSH_KEY` | Chave privada SSH |
-| `G_TOKEN_DEPLOY` | PAT com scope `repo` (clone privado) |
+| `DOCKER_PASSWORD` | token Docker Hub |
+| `G_TOKEN_DEPLOY` | opcional (repo público) |
 
 Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
+
+**Status:** aguardando cadastro pelo usuário.
 
 ---
 
 ## Imagens Docker Hub
 
-| Serviço | Imagem sugerida |
-|---------|-----------------|
+| Serviço | Imagem |
+|---------|--------|
 | Backend | `${DOCKER_USERNAME}/assapp-backend` |
 | Frontend | `${DOCKER_USERNAME}/assapp-frontend` |
 
-Tags:
-
-- Staging: `develop`, `develop-<sha>`
-- Produção: `latest`, `main-<sha>`
+Tags: staging `develop` · produção `latest` / `main-<sha>`
 
 ---
 
 ## Regras críticas (lições WellSaaS)
 
-1. **Build só no CI** — no servidor, Dockerfiles de produção podem ser desabilitados (`*.disabled`) para evitar build local.
-2. **Concurrency** — `group: deploy-server` nos dois workflows evita race no mesmo droplet.
-3. **Push sequencial** — validar staging antes de `git push origin main`.
-4. **Migrations** — `migrate_schemas --shared` depois `migrate_schemas` após o deploy.
-5. **Never build on droplet** — `COMPOSE_DOCKER_CLI_BUILD=0` no script de deploy.
+1. Build só no CI — servidor só faz `docker pull`.
+2. Concurrency `deploy-server` nos dois workflows.
+3. Push sequencial: staging OK → só então `main`.
+4. Migrations: `migrate_schemas --shared` depois `migrate_schemas`.
+5. `COMPOSE_DOCKER_CLI_BUILD=0` no deploy.
 
 ---
 
-## Estado atual vs próximo passo
+## Checklist de progresso
 
-### Já preparado neste repositório
-
-- Branches `orb` / `develop` / `main`
-- OrbStack local (`docker-compose.orb.yml`, `scripts/up-orb.sh`)
-- Workflows GitHub Actions (scaffold)
-- `frontend/Dockerfile` (produção) + `nginx.conf`
-- Exemplos `env.staging.example` / `env.production.example`
-
-### A completar quando o droplet existir
-
-1. Criar droplet DigitalOcean (Ubuntu 22.04+) e instalar Docker.
-2. Configurar secrets no GitHub.
-3. Adicionar `docker-compose.staging.yml` e `docker-compose.prod.yml` (pull-only, sem `build:`).
-4. Adicionar `scripts/deploy.sh` (padrão WellSaaS).
-5. Primeiro deploy via `workflow_dispatch` ou push em `develop`.
-
-Referência completa no WellSaaS: `/Users/ale/Desktop/Wellsaas/docs/guias/BASE_CONHECIMENTO_DEPLOYS.md`
+| Passo | Status |
+|-------|--------|
+| Repo Git + branches `orb` / `develop` / `main` | ✅ |
+| OrbStack local (`up-orb.sh`) | ✅ |
+| Workflows Actions (scaffold) | ✅ |
+| Droplet criado + SSH | ✅ |
+| Bootstrap Docker / UFW / `/opt/assapp` | ✅ |
+| Secrets no GitHub | ⏳ pendente |
+| `docker-compose.staging.yml` / `prod.yml` | ❌ |
+| `scripts/deploy.sh` | ❌ |
+| `.env.*` no servidor | ❌ |
+| Primeiro deploy staging | ❌ |
+| Domínio + SSL | ❌ |
 
 ---
 
 ## Deploy local (dev)
 
 ```bash
-./scripts/up-orb.sh          # Mac / OrbStack
-# ou
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+./scripts/up-orb.sh
 ```
 
-Não use o compose de produção para desenvolver.
+Não use compose de produção para desenvolver.

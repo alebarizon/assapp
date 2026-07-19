@@ -24,12 +24,13 @@ Base tecnológica: WellSaaS/Wellflows (~80% reutilizável).
 
 1. `cursor-readme.md` — referência técnica rápida
 2. `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md` — branches + OrbStack
-3. `docs/changelog/CHANGELOG_2026_07_14.md` — o que mudou recentemente
-4. `docs/pesquisa/HIPOTESES_PIPE.md` — H1, H2, H3
-5. `docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md` — signup / setup / transição
-6. `docs/guias/UI_PADRAO_WELLSAAS.md` — padrão visual de páginas
-7. `prisma/schema.prisma` — modelo de domínio (documentação)
-8. WellSaaS em `/Users/ale/Desktop/wellsaas` — padrões a reutilizar
+3. `docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md` — infra DO / secrets
+4. `docs/changelog/CHANGELOG_2026_07_14.md` — o que mudou recentemente
+5. `docs/pesquisa/HIPOTESES_PIPE.md` — H1, H2, H3
+6. `docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md` — signup / setup / transição
+7. `docs/guias/UI_PADRAO_WELLSAAS.md` — padrão visual de páginas
+8. `prisma/schema.prisma` — modelo de domínio (documentação)
+9. WellSaaS em `/Users/ale/Desktop/wellsaas` — padrões a reutilizar
 
 ## Regras PIPE
 

@@ -1,31 +1,56 @@
 # Checklist — Secrets GitHub Actions (AssApp)
 
-Configure em: **Settings → Secrets and variables → Actions**
+**URL:** https://github.com/alebarizon/assapp/settings/secrets/actions  
 
-## Obrigatórios para build
+Clique em **New repository secret** para cada item (Repository secrets, não Environment).
+
+**Droplet:** `159.203.183.184` · Bootstrap já feito · Doc: `docs/guias/DEPLOY_DIGITALOCEAN.md`  
+**Changelog:** `docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`
+
+---
+
+## Obrigatórios para build (Docker Hub)
 
 - [ ] `DOCKER_USERNAME` — usuário Docker Hub
-- [ ] `DOCKER_PASSWORD` — token/senha Docker Hub
+- [ ] `DOCKER_PASSWORD` — access token Docker Hub (preferível à senha da conta)
 
 ## Obrigatórios para deploy no droplet
 
-- [ ] `DO_HOST` — host/IP produção
-- [ ] `DO_STAGING_HOST` — host/IP staging (pode ser igual a `DO_HOST`)
-- [ ] `DO_USER` — usuário SSH
-- [ ] `DO_SSH_KEY` — chave privada SSH (conteúdo completo, incluindo `BEGIN`/`END`)
-- [ ] `G_TOKEN_DEPLOY` — GitHub PAT classic com scope `repo` (repositório privado)
+- [ ] `DO_HOST` → `159.203.183.184`
+- [ ] `DO_STAGING_HOST` → `159.203.183.184` (mesmo servidor)
+- [ ] `DO_USER` → `root` (ou `deploy`, se preferir)
+- [ ] `DO_SSH_KEY` → chave **privada** completa
+
+```bash
+# No Mac — copiar e colar no secret (não compartilhar / não commitar)
+cat ~/.ssh/id_ed25519
+```
+
+Deve incluir as linhas `BEGIN` e `END`.
+
+## Opcional
+
+- [ ] `G_TOKEN_DEPLOY` — PAT classic com scope `repo`  
+  Só necessário se o repositório for privado. AssApp está público → pode omitir por enquanto.
+
+---
 
 ## Branches que disparam deploy
 
-| Secret / branch | Workflow |
-|-----------------|----------|
-| Push em `develop` | `deploy-staging.yml` |
-| Push em `main` | `deploy-production.yml` |
+| Branch | Workflow |
+|--------|----------|
+| `develop` | `deploy-staging.yml` → porta 8080 |
+| `main` | `deploy-production.yml` → porta 80 |
 
-## Após configurar
+Push em `orb` **não** dispara deploy.
 
-1. Rodar `workflow_dispatch` em Staging uma vez.
-2. Validar health em `:8080`.
-3. Só então promover para `main`.
+---
+
+## Após cadastrar os secrets
+
+1. Ainda falta no código: `docker-compose.staging.yml`, `docker-compose.prod.yml`, `scripts/deploy.sh`.
+2. Quando existirem: Actions → **Deploy to Staging** → **Run workflow**.
+3. Validar `http://159.203.183.184:8080/health/` (quando o stack estiver no ar).
+4. Só então promover para `main`.
 
 Documentação: `docs/guias/DEPLOY_DIGITALOCEAN.md`

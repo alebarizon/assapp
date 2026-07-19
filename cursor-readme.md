@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-07-19 (branches orb/develop/main + OrbStack + DigitalOcean)
+> **Última revisão:** 2026-07-19 (infra OrbStack + droplet DO `159.203.183.184`)
 
 ---
 
@@ -106,6 +106,7 @@ Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | **Infra 2026-07-19:** Git, OrbStack, droplet DO, secrets |
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
 | [`docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`](docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md) | Promoção orb → develop → main |
