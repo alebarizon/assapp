@@ -1,8 +1,8 @@
-# Tutorial de Migração — orb → develop → assapp
+# Tutorial de Migração — orb → develop → main
 
 **Última revisão:** 2026-07-19  
-**Objetivo:** Promover código da branch local `orb` para `develop` (staging) e depois `assapp` (produção), com segurança.  
-**Padrão:** adaptado do WellSaaS (`TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`); produção = `assapp` (não `main`).
+**Objetivo:** Promover código da branch local `orb` para `develop` (staging) e depois `main` (produção), com segurança.  
+**Padrão:** idêntico ao WellSaaS (`TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`).
 
 ---
 
@@ -10,14 +10,14 @@
 
 1. Consolidar commits em `orb`.
 2. Publicar em `develop` para validar staging.
-3. Publicar em `assapp` só após staging OK.
+3. Publicar em `main` só após staging OK.
 
 ---
 
 ## 2) Regras obrigatórias
 
-- Nunca publicar direto em `assapp` sem passar por `develop`.
-- Push sequencial: primeiro `develop`, depois `assapp`.
+- Nunca publicar direto em `main` sem passar por `develop`.
+- Push sequencial: primeiro `develop`, depois `main`.
 - Validar workflow de staging antes de produção.
 - Não usar `reset --hard` / `push --force` neste fluxo.
 
@@ -30,7 +30,7 @@ git branch --show-current
 git status -sb
 git fetch origin
 git rev-list --left-right --count origin/develop...orb
-git rev-list --left-right --count origin/assapp...orb
+git rev-list --left-right --count origin/main...orb
 ```
 
 ---
@@ -75,13 +75,13 @@ git push origin orb:develop
 
 ---
 
-## 7) Produção (assapp)
+## 7) Produção (main)
 
 ```bash
-git checkout assapp
-git pull origin assapp
+git checkout main
+git pull origin main
 git merge develop
-git push origin assapp
+git push origin main
 ```
 
 ---
@@ -95,8 +95,8 @@ git pull origin develop
 git checkout develop
 git pull origin develop
 
-git checkout assapp
-git pull origin assapp
+git checkout main
+git pull origin main
 ```
 
 ---
@@ -105,7 +105,7 @@ git pull origin assapp
 
 | Erro | Prevenção |
 |------|-----------|
-| Push em `assapp` antes de `develop` | Seguir seções 5 → 6 → 7 |
+| Push em `main` antes de `develop` | Seguir seções 5 → 6 → 7 |
 | Conflito por branch desatualizada | `fetch`/`pull` antes do merge |
 | Deploy quebrado por migration | Revisar migrations e validar staging |
 

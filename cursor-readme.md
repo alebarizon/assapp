@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-07-19 (branches orb/assapp + OrbStack + DigitalOcean)
+> **Última revisão:** 2026-07-19 (branches orb/develop/main + OrbStack + DigitalOcean)
 
 ---
 
@@ -11,10 +11,10 @@
 |--------|----------|-----|
 | `orb` | Dev Mac / OrbStack | nenhum |
 | `develop` | Staging DO `:8080` | `deploy-staging.yml` |
-| `assapp` | **Produção** DO `:80` | `deploy-production.yml` |
+| `main` | **Produção** DO `:80` | `deploy-production.yml` |
 
 ```
-orb → develop (staging) → assapp (produção)
+orb → develop (staging) → main (produção)
 ```
 
 Mac: `./scripts/up-orb.sh` · Docs: [`ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) · [`DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md)
@@ -108,7 +108,7 @@ Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
 |-----------|----------|
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
-| [`docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_ASSAPP.md`](docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_ASSAPP.md) | Promoção orb → develop → assapp |
+| [`docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`](docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md) | Promoção orb → develop → main |
 | [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy DigitalOcean |
 | [`docs/guias/QUICK_REFERENCE_DOCKER.md`](docs/guias/QUICK_REFERENCE_DOCKER.md) | Comandos Docker rápidos |
 | [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) | **Consolidado do dia** (Mandatos H2 + User↔Membro + portal) |

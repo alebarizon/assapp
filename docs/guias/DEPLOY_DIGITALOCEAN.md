@@ -9,13 +9,13 @@
 
 ```
 Push origin/develop  →  GitHub Actions  →  build amd64  →  Docker Hub  →  DO staging  (:8080)
-Push origin/assapp   →  GitHub Actions  →  build amd64  →  Docker Hub  →  DO produção (:80)
+Push origin/main     →  GitHub Actions  →  build amd64  →  Docker Hub  →  DO produção (:80)
 ```
 
 | Ambiente | Branch | Porta | Compose (planejado) | Diretório no servidor |
 |----------|--------|-------|---------------------|------------------------|
 | Staging | `develop` | 8080 | `docker-compose.staging.yml` | `/opt/assapp` |
-| Produção | `assapp` | 80 | `docker-compose.prod.yml` | `/opt/assapp` |
+| Produção | `main` | 80 | `docker-compose.prod.yml` | `/opt/assapp` |
 
 Staging e produção compartilham o diretório; usam arquivos compose/env diferentes.
 
@@ -49,7 +49,7 @@ Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 Tags:
 
 - Staging: `develop`, `develop-<sha>`
-- Produção: `latest`, `assapp-<sha>`
+- Produção: `latest`, `main-<sha>`
 
 ---
 
@@ -57,7 +57,7 @@ Tags:
 
 1. **Build só no CI** — no servidor, Dockerfiles de produção podem ser desabilitados (`*.disabled`) para evitar build local.
 2. **Concurrency** — `group: deploy-server` nos dois workflows evita race no mesmo droplet.
-3. **Push sequencial** — validar staging antes de `git push origin assapp`.
+3. **Push sequencial** — validar staging antes de `git push origin main`.
 4. **Migrations** — `migrate_schemas --shared` depois `migrate_schemas` após o deploy.
 5. **Never build on droplet** — `COMPOSE_DOCKER_CLI_BUILD=0` no script de deploy.
 
@@ -67,7 +67,7 @@ Tags:
 
 ### Já preparado neste repositório
 
-- Branches `orb` / `develop` / `assapp`
+- Branches `orb` / `develop` / `main`
 - OrbStack local (`docker-compose.orb.yml`, `scripts/up-orb.sh`)
 - Workflows GitHub Actions (scaffold)
 - `frontend/Dockerfile` (produção) + `nginx.conf`

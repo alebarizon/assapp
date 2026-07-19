@@ -236,9 +236,9 @@ Fluxo de domínio: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/
 |--------|----------|-----|
 | `orb` | Desenvolvimento Mac / OrbStack | — |
 | `develop` | Staging DigitalOcean `:8080` | `deploy-staging.yml` |
-| `assapp` | **Produção** DigitalOcean `:80` | `deploy-production.yml` |
+| `main` | **Produção** DigitalOcean `:80` | `deploy-production.yml` |
 
-Fluxo: `orb` → `develop` → `assapp`. Guias: [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) · [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md)
+Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) · [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md)
 
 ---
 

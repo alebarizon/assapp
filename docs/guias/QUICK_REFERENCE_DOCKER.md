@@ -87,7 +87,7 @@ docker compose down -v
 ## Branches (lembrete)
 
 ```
-orb → develop (staging) → assapp (produção)
+orb → develop (staging) → main (produção)
 ```
 
 Ver: `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`

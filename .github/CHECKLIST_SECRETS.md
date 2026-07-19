@@ -20,12 +20,12 @@ Configure em: **Settings → Secrets and variables → Actions**
 | Secret / branch | Workflow |
 |-----------------|----------|
 | Push em `develop` | `deploy-staging.yml` |
-| Push em `assapp` | `deploy-production.yml` |
+| Push em `main` | `deploy-production.yml` |
 
 ## Após configurar
 
 1. Rodar `workflow_dispatch` em Staging uma vez.
 2. Validar health em `:8080`.
-3. Só então promover para `assapp`.
+3. Só então promover para `main`.
 
 Documentação: `docs/guias/DEPLOY_DIGITALOCEAN.md`

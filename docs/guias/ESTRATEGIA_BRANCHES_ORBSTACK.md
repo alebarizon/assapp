@@ -2,7 +2,7 @@
 
 **Última atualização:** 2026-07-19  
 **Contexto:** Desenvolvimento no Mac M-series (Apple Silicon) com OrbStack + deploy DigitalOcean  
-**Padrão:** adaptado do WellSaaS (`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`)
+**Padrão:** idêntico ao WellSaaS (`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`)
 
 ---
 
@@ -25,23 +25,21 @@
 ```
 Mac ARM: [orb]  ──── push/pull ──► origin/develop ──► CI staging (DigitalOcean :8080)
                                         │
-[assapp] (produção) ───────────────────► origin/assapp ──► CI produção (DigitalOcean :80)
+[main] (produção) ─────────────────────► origin/main    ──► CI produção (DigitalOcean :80)
 ```
 
 | Branch local | Remoto | CI disparado | Uso |
 |---|---|---|---|
 | `orb` | `origin/orb` (backup) ou push para `origin/develop` | nenhum em `orb`; staging se push em `develop` | Desenvolvimento Mac / OrbStack |
 | `develop` | `origin/develop` | `deploy-staging.yml` | Staging |
-| `assapp` | `origin/assapp` | `deploy-production.yml` | **Produção** |
-
-> **Diferença em relação ao WellSaaS:** lá a produção é `main`; no AssApp a produção é a branch **`assapp`**.
+| `main` | `origin/main` | `deploy-production.yml` | **Produção** |
 
 ### Por que `orb` separada?
 
 1. Identidade da máquina (Mac ARM / OrbStack).
 2. Isolamento de ajustes ARM antes de ir para staging.
 3. Backup remoto (`origin/orb`) sem disparar CI.
-4. Liberdade para experimentar OrbStack sem afetar `develop`/`assapp`.
+4. Liberdade para experimentar OrbStack sem afetar `develop`/`main`.
 
 ---
 
@@ -92,13 +90,13 @@ git push origin orb:develop
 ### Promovendo para produção
 
 ```bash
-git checkout assapp
-git pull origin assapp
+git checkout main
+git pull origin main
 git merge develop
-git push origin assapp   # dispara deploy-production.yml
+git push origin main   # dispara deploy-production.yml
 ```
 
-**Regra:** nunca publicar em `assapp` sem validar staging em `develop`.
+**Regra:** nunca publicar em `main` sem validar staging em `develop`.
 
 ---
 
@@ -106,11 +104,11 @@ git push origin assapp   # dispara deploy-production.yml
 
 ```bash
 # 1. Clonar
-git clone <url-do-repo-assapp>.git
+git clone git@github.com:alebarizon/assapp.git
 cd assapp
 
 # 2. Branches
-git checkout assapp          # produção
+git checkout main            # produção
 git checkout -b develop      # staging (se ainda não existir no remoto)
 git checkout -b orb          # trabalho diário
 
@@ -167,9 +165,9 @@ docker compose exec backend python manage.py migrate_schemas
 | `docker-compose.orb.yml` | Overrides ARM / OrbStack |
 | `scripts/up-orb.sh` | Sobe o ambiente no Mac |
 | `.github/workflows/deploy-staging.yml` | Push em `develop` |
-| `.github/workflows/deploy-production.yml` | Push em `assapp` |
+| `.github/workflows/deploy-production.yml` | Push em `main` |
 | `docs/guias/GIT_WORKFLOW.md` | Fluxo Git |
-| `docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_ASSAPP.md` | Promoção orb → develop → assapp |
+| `docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md` | Promoção orb → develop → main |
 
 ---
 
@@ -178,5 +176,5 @@ docker compose exec backend python manage.py migrate_schemas
 ```
 DESENVOLVER  → branch orb     → push origin/orb       (sem CI)
 STAGING      → branch develop → push origin/develop   (CI staging)
-PRODUÇÃO     → branch assapp  → push origin/assapp    (CI produção, build amd64)
+PRODUÇÃO     → branch main    → push origin/main      (CI produção, build amd64)
 ```

@@ -16,8 +16,8 @@ Base tecnológica: WellSaaS/Wellflows (~80% reutilizável).
 
 - `orb` — desenvolvimento Mac / OrbStack (trabalho diário)
 - `develop` — staging (CI → DigitalOcean :8080)
-- `assapp` — **produção** (CI → DigitalOcean :80)
-- Fluxo: `orb` → `develop` → `assapp` (nunca pular staging)
+- `main` — **produção** (CI → DigitalOcean :80)
+- Fluxo: `orb` → `develop` → `main` (nunca pular staging; igual WellSaaS)
 - Mac: `./scripts/up-orb.sh` — ver `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`
 
 ## Consultar Primeiro

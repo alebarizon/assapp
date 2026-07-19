@@ -2,7 +2,7 @@
 
 **Última atualização:** 2026-07-19  
 **Branch de trabalho:** `orb`  
-**Produção:** branch `assapp`
+**Produção:** branch `main`
 
 ---
 
@@ -17,10 +17,10 @@
 ## Setup rápido
 
 ```bash
-git clone <url-do-repo>.git
+git clone git@github.com:alebarizon/assapp.git
 cd assapp
 
-git checkout assapp
+git checkout main
 git checkout -b develop   # se ainda não existir
 git checkout -b orb
 
@@ -57,7 +57,7 @@ sudo chown -R $USER:$USER ./backend
 |--------|--------|
 | `orb` | Trabalho diário no Mac |
 | `develop` | Staging (CI) |
-| `assapp` | Produção (CI) |
+| `main` | Produção (CI) |
 
 Detalhes: [`ESTRATEGIA_BRANCHES_ORBSTACK.md`](ESTRATEGIA_BRANCHES_ORBSTACK.md)
 

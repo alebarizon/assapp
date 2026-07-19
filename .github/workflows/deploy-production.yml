@@ -3,7 +3,7 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - assapp
+      - main
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -135,8 +135,8 @@ jobs:
               git remote set-url origin "https://${{ secrets.G_TOKEN_DEPLOY }}@github.com/${{ github.repository }}.git" || true
             fi
             git fetch origin
-            git checkout assapp 2>/dev/null || git checkout -b assapp origin/assapp
-            git pull origin assapp
+            git checkout main 2>/dev/null || git checkout -b main origin/main
+            git pull origin main
 
             if [ ! -f .env.production ]; then
               cp env.production.example .env.production
