@@ -1,56 +1,53 @@
 # Checklist — Secrets GitHub Actions (AssApp)
 
 **URL:** https://github.com/alebarizon/assapp/settings/secrets/actions  
-
-Clique em **New repository secret** para cada item (Repository secrets, não Environment).
-
-**Droplet:** `159.203.183.184` · Bootstrap já feito · Doc: `docs/guias/DEPLOY_DIGITALOCEAN.md`  
-**Changelog:** `docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`
+**Changelog / pausa:** `docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`  
+**Droplet:** `159.203.183.184` (bootstrap ✅)
 
 ---
 
-## Obrigatórios para build (Docker Hub)
+## Não confundir tokens
 
-- [ ] `DOCKER_USERNAME` — usuário Docker Hub
-- [ ] `DOCKER_PASSWORD` — access token Docker Hub (preferível à senha da conta)
+| Tipo | Prefixo / origem | Secret AssApp |
+|------|------------------|---------------|
+| Docker Hub Access Token | hub.docker.com → Personal access tokens | `DOCKER_PASSWORD` |
+| GitHub PAT | `ghp_…` (settings/tokens) | `G_TOKEN_DEPLOY` (opcional) |
+| SSH privada | `~/.ssh/id_ed25519` | `DO_SSH_KEY` |
 
-## Obrigatórios para deploy no droplet
+WellSaaS já usa imagens `alebarizon/wellnz-*`. AssApp usa **`alebarizon/assapp-backend`** e **`alebarizon/assapp-frontend`** (criar no Hub se ainda não existirem).
+
+---
+
+## Obrigatórios — build
+
+- [ ] `DOCKER_USERNAME` → `alebarizon`
+- [ ] `DOCKER_PASSWORD` → Access Token Docker Hub (Read & Write)
+
+## Obrigatórios — droplet
 
 - [ ] `DO_HOST` → `159.203.183.184`
-- [ ] `DO_STAGING_HOST` → `159.203.183.184` (mesmo servidor)
-- [ ] `DO_USER` → `root` (ou `deploy`, se preferir)
-- [ ] `DO_SSH_KEY` → chave **privada** completa
-
-```bash
-# No Mac — copiar e colar no secret (não compartilhar / não commitar)
-cat ~/.ssh/id_ed25519
-```
-
-Deve incluir as linhas `BEGIN` e `END`.
+- [ ] `DO_STAGING_HOST` → `159.203.183.184`
+- [ ] `DO_USER` → `root` ou `deploy`
+- [ ] `DO_SSH_KEY` → `cat ~/.ssh/id_ed25519` (BEGIN…END)
 
 ## Opcional
 
-- [ ] `G_TOKEN_DEPLOY` — PAT classic com scope `repo`  
-  Só necessário se o repositório for privado. AssApp está público → pode omitir por enquanto.
+- [ ] `G_TOKEN_DEPLOY` — só se o repo for privado; AssApp público → pode omitir
 
 ---
 
-## Branches que disparam deploy
+## Branches → deploy
 
-| Branch | Workflow |
-|--------|----------|
-| `develop` | `deploy-staging.yml` → porta 8080 |
-| `main` | `deploy-production.yml` → porta 80 |
-
-Push em `orb` **não** dispara deploy.
+| Branch | Workflow | Porta |
+|--------|----------|-------|
+| `develop` | staging | 8080 |
+| `main` | produção | 80 |
+| `orb` | nenhum | — |
 
 ---
 
-## Após cadastrar os secrets
+## Depois dos secrets (ainda falta código)
 
-1. Ainda falta no código: `docker-compose.staging.yml`, `docker-compose.prod.yml`, `scripts/deploy.sh`.
-2. Quando existirem: Actions → **Deploy to Staging** → **Run workflow**.
-3. Validar `http://159.203.183.184:8080/health/` (quando o stack estiver no ar).
-4. Só então promover para `main`.
-
-Documentação: `docs/guias/DEPLOY_DIGITALOCEAN.md`
+1. `docker-compose.staging.yml` / `docker-compose.prod.yml` + `scripts/deploy.sh`
+2. Actions → Run workflow (staging)
+3. Validar health em `:8080` antes de promover `main`

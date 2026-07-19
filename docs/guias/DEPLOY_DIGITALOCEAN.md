@@ -81,12 +81,14 @@ Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 
 ## Imagens Docker Hub
 
-| Serviço | Imagem |
-|---------|--------|
-| Backend | `${DOCKER_USERNAME}/assapp-backend` |
-| Frontend | `${DOCKER_USERNAME}/assapp-frontend` |
+| Projeto | Imagens |
+|---------|---------|
+| WellSaaS (já existem) | `alebarizon/wellnz-backend` · `alebarizon/wellnz-frontend` |
+| AssApp (criar) | `alebarizon/assapp-backend` · `alebarizon/assapp-frontend` |
 
-Tags: staging `develop` · produção `latest` / `main-<sha>`
+Tags AssApp: staging `develop` · produção `latest` / `main-<sha>`
+
+`DOCKER_USERNAME` = `alebarizon`. `DOCKER_PASSWORD` = token do **Docker Hub**, não PAT GitHub (`ghp_`).
 
 ---
 
@@ -109,7 +111,9 @@ Tags: staging `develop` · produção `latest` / `main-<sha>`
 | Workflows Actions (scaffold) | ✅ |
 | Droplet criado + SSH | ✅ |
 | Bootstrap Docker / UFW / `/opt/assapp` | ✅ |
-| Secrets no GitHub | ⏳ pendente |
+| Docs / changelog de pausa | ✅ |
+| Secrets no GitHub | ⏳ em configuração |
+| Repos Hub `assapp-backend` / `assapp-frontend` | ⏳ criar (separados de `wellnz-*`) |
 | `docker-compose.staging.yml` / `prod.yml` | ❌ |
 | `scripts/deploy.sh` | ❌ |
 | `.env.*` no servidor | ❌ |

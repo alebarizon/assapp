@@ -1,7 +1,23 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean (2026-07-19)
 
-> Registro completo da configuração criada neste dia.  
-> Secrets do GitHub Actions: **pendentes** (usuário retorna em seguida).
+> **Pausa documentada:** 2026-07-19 (fim da manhã).  
+> Registro completo do que foi feito. Retomar a partir da seção 9 (pendências).
+
+---
+
+## Resumo executivo
+
+| Área | Status |
+|------|--------|
+| Repo GitHub + branches (`orb` / `develop` / `main`) | ✅ |
+| OrbStack local (Mac) | ✅ |
+| Droplet DO `159.203.183.184` + bootstrap | ✅ |
+| Workflows Actions (scaffold) | ✅ |
+| Documentação operacional | ✅ |
+| Secrets GitHub Actions | ⏳ em configuração pelo usuário |
+| Repos Docker Hub AssApp | ⏳ criar `assapp-backend` / `assapp-frontend` |
+| Compose prod/staging + `deploy.sh` | ❌ próximo bloco de código |
+| Primeiro deploy no ar | ❌ |
 
 ---
 
@@ -11,29 +27,26 @@
 |------|--------|
 | Remote | https://github.com/alebarizon/assapp |
 | SSH | `git@github.com:alebarizon/assapp.git` |
-| Default / produção | `main` (igual WellSaaS) |
+| Produção (default) | `main` — igual WellSaaS |
 | Staging | `develop` |
 | Dev Mac / OrbStack | `orb` |
-
-### Fluxo (padronizado com WellSaaS)
 
 ```
 orb → develop (staging :8080) → main (produção :80)
 ```
 
-### Histórico relevante de commits
+### Commits relevantes
 
 | Commit | Descrição |
 |--------|-----------|
-| `3262e34` | Inicialização do repo + OrbStack + estratégia de branches |
-| `13a47a6` | Padronização: produção `assapp` → `main` |
-| `f96acbf` | Remoção de 43 arquivos de pesquisa PIPE que não deveriam versionar |
+| `3262e34` | Init repo + OrbStack + branches |
+| `13a47a6` | Produção renomeada para `main` (padrão WellSaaS) |
+| `f96acbf` | Remoção de 43 arquivos PIPE que não deveriam versionar |
+| `275431a` | Docs infra + `setup_digitalocean.sh` |
 
-### Removidos do Git (não devem voltar)
+### Removidos do Git (não recolocar)
 
-- Markdowns de proposta PIPE (`0-submissao.md`, `1-objetivo-*.md`, …)
-- HTMLs de levantamento (`comparativo_ams_*.html`, …)
-- Pasta `v2/` e `funcoes.md`, `prompts_*.md`, etc.
+Propostas PIPE (`.md`), HTMLs de levantamento, pasta `v2/`, `funcoes.md`, etc.
 
 ---
 
@@ -41,18 +54,15 @@ orb → develop (staging :8080) → main (produção :80)
 
 | Arquivo | Função |
 |---------|--------|
-| `docker-compose.orb.yml` | Overrides `platform` ARM64 |
-| `scripts/up-orb.sh` | Sobe stack: base + dev + orb |
-| `frontend/Dockerfile.dev` | Imagem `assapp-frontend-dev:local` |
-| `frontend/Dockerfile` | Build produção (Vite → Nginx) |
-| `frontend/nginx.conf` | SPA + assets |
+| `docker-compose.orb.yml` | Overrides ARM64 |
+| `scripts/up-orb.sh` | Sobe base + dev + orb |
+| `frontend/Dockerfile` + `nginx.conf` | Imagem de produção |
+| `frontend/Dockerfile.dev` | Hot reload local |
 
 ```bash
 ./scripts/up-orb.sh --build
-# Frontend http://localhost:5174 · Backend http://localhost:8001
+# http://localhost:5174 · http://localhost:8001
 ```
-
-Docs: `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`, `AMBIENTE_DESENVOLVIMENTO_MAC_OS_ARM.md`, `QUICK_REFERENCE_DOCKER.md`
 
 ---
 
@@ -60,121 +70,127 @@ Docs: `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`, `AMBIENTE_DESENVOLVIMENTO_MA
 
 | Campo | Valor |
 |-------|--------|
-| Nome | `assapp` (hostname `drop-assapp`) |
 | IP | **`159.203.183.184`** |
+| Hostname | `drop-assapp` |
 | SO | Ubuntu 24.04.4 LTS |
-| Acesso SSH | `ssh root@159.203.183.184` |
-| Chave Mac usada | `~/.ssh/id_ed25519` (`mac-ale`) |
+| SSH | `ssh root@159.203.183.184` |
+| Chave Mac | `~/.ssh/id_ed25519` (`mac-ale`) |
 
-### Bootstrap executado em 2026-07-19
-
-Script: `scripts/setup_digitalocean.sh` (adaptado do WellSaaS).
-
-Comando usado:
+### Bootstrap (já executado)
 
 ```bash
 scp scripts/setup_digitalocean.sh root@159.203.183.184:/tmp/
 ssh root@159.203.183.184 'bash /tmp/setup_digitalocean.sh'
 ```
 
-### Estado pós-bootstrap
-
-| Componente | Status |
+| Componente | Estado |
 |------------|--------|
 | Docker | 29.6.2 |
-| Docker Compose plugin | v5.3.1 |
-| UFW | ativo — 22, 80, 443, **8080** |
-| fail2ban | ativo |
-| Swap | 2 GB (`/swapfile`) |
-| Certbot | instalado (SSL quando houver domínio) |
-| Usuário `deploy` | criado (grupo `docker` + sudo; mesma authorized_keys do root) |
-| App dir | `/opt/assapp` (`deploy:deploy`) |
+| Compose plugin | v5.3.1 |
+| UFW | 22, 80, 443, **8080** |
+| fail2ban / swap 2G / certbot | ok |
+| Usuário `deploy` | criado (`docker` + sudo) |
+| `/opt/assapp` | `deploy:deploy` |
 
-### User data (cloud-init)
-
-Documentação DO: https://docs.digitalocean.com/products/droplets/how-to/provide-user-data/
-
-**Relevância:** automatiza o bootstrap no *primeiro* boot. Como o droplet já existia, usamos o script manual (equivalente). Para droplets futuros, o mesmo conteúdo de `setup_digitalocean.sh` pode ir em **Startup scripts**.
+**User data / cloud-init:** útil em droplets *novos* (Startup scripts). Neste servidor o equivalente foi o script manual.  
+Ref: https://docs.digitalocean.com/products/droplets/how-to/provide-user-data/
 
 ---
 
-## 4. GitHub Actions (workflows)
+## 4. GitHub Actions
 
 | Workflow | Branch | Arquivo |
 |----------|--------|---------|
-| Deploy Staging | `develop` | `.github/workflows/deploy-staging.yml` |
-| Deploy Production | `main` | `.github/workflows/deploy-production.yml` |
+| Staging | `develop` | `.github/workflows/deploy-staging.yml` |
+| Produção | `main` | `.github/workflows/deploy-production.yml` |
 
-- Concurrency `group: deploy-server` (evita race no mesmo droplet)
-- Build amd64 → Docker Hub (`assapp-backend` / `assapp-frontend`)
-- SSH deploy para `/opt/assapp` **quando secrets existirem**
-- Sem secrets de DO: build ainda roda; deploy SSH é pulado
+- Concurrency `deploy-server` (mesmo droplet)
+- Build → Docker Hub → SSH em `/opt/assapp` (se secrets DO existirem)
+- Push em `orb` **não** dispara deploy
 
-Checklist: `.github/CHECKLIST_SECRETS.md`
-
----
-
-## 5. Secrets — o que configurar (pendente)
-
-URL: https://github.com/alebarizon/assapp/settings/secrets/actions  
-
-**New repository secret** (não Environment):
-
-| Name | Valor sugerido | Observação |
-|------|----------------|------------|
-| `DO_HOST` | `159.203.183.184` | Produção |
-| `DO_STAGING_HOST` | `159.203.183.184` | Mesmo droplet |
-| `DO_USER` | `root` ou `deploy` | Preferir `deploy` após validar SSH |
-| `DO_SSH_KEY` | Conteúdo de `~/.ssh/id_ed25519` | Privada, com BEGIN/END |
-| `DOCKER_USERNAME` | usuário Docker Hub | Obrigatório para build |
-| `DOCKER_PASSWORD` | token Docker Hub | Obrigatório para build |
-| `G_TOKEN_DEPLOY` | PAT `repo` | Opcional enquanto o repo for público |
-
-```bash
-# Copiar chave privada para colar no secret (não commitar!)
-cat ~/.ssh/id_ed25519
-```
+URL secrets: https://github.com/alebarizon/assapp/settings/secrets/actions
 
 ---
 
-## 6. Documentação criada / atualizada neste dia
+## 5. Docker Hub
+
+### Já existentes (WellSaaS — não misturar)
+
+- `alebarizon/wellnz-backend`
+- `alebarizon/wellnz-frontend`
+
+### Criar para AssApp (combinado na pausa)
+
+- `alebarizon/assapp-backend`
+- `alebarizon/assapp-frontend`
+
+Visibility: Private recomendado. O CI faz o primeiro `push` de tags (`develop` / `latest`).
+
+### Credenciais nos Secrets
+
+| Secret | Valor |
+|--------|--------|
+| `DOCKER_USERNAME` | `alebarizon` |
+| `DOCKER_PASSWORD` | **Access Token do Docker Hub** (hub.docker.com → Personal access tokens), *não* senha GitHub |
+
+**Atenção:** token `ghp_…` (GitHub PAT, ex. nota `wellsaas-deploy-token`) é para `G_TOKEN_DEPLOY`, **não** para `DOCKER_PASSWORD`.  
+Se um `ghp_` foi exposto em chat/notas, **revogar e regenerar** em https://github.com/settings/tokens.
+
+`G_TOKEN_DEPLOY` é **opcional** enquanto o AssApp for público.
+
+---
+
+## 6. Secrets — checklist na pausa
+
+| Secret | Valor / como obter | Status típico |
+|--------|--------------------|---------------|
+| `DO_HOST` | `159.203.183.184` | ⏳ usuário |
+| `DO_STAGING_HOST` | `159.203.183.184` | ⏳ usuário |
+| `DO_USER` | `root` ou `deploy` | ⏳ usuário |
+| `DO_SSH_KEY` | `cat ~/.ssh/id_ed25519` (privada) | ⏳ usuário |
+| `DOCKER_USERNAME` | `alebarizon` | ⏳ usuário |
+| `DOCKER_PASSWORD` | token Docker Hub | ⏳ usuário |
+| `G_TOKEN_DEPLOY` | PAT GitHub `repo` | opcional |
+
+Detalhe: `.github/CHECKLIST_SECRETS.md`
+
+---
+
+## 7. Documentação deste dia
 
 | Documento | Conteúdo |
 |-----------|----------|
+| Este arquivo | Registro mestre / pausa |
+| `docs/guias/DEPLOY_DIGITALOCEAN.md` | Droplet + pipeline |
 | `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md` | Branches + OrbStack |
 | `docs/guias/GIT_WORKFLOW.md` | Push sequencial |
 | `docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md` | orb → develop → main |
-| `docs/guias/DEPLOY_DIGITALOCEAN.md` | Deploy DO + estado do droplet |
 | `docs/guias/AMBIENTE_DESENVOLVIMENTO_MAC_OS_ARM.md` | Setup Mac |
-| `docs/guias/QUICK_REFERENCE_DOCKER.md` | Comandos rápidos |
-| `.github/CHECKLIST_SECRETS.md` | Lista de secrets |
-| `.cursorrules` / `cursor-readme.md` / `README.md` | Branches + OrbStack |
+| `docs/guias/QUICK_REFERENCE_DOCKER.md` | Comandos Docker |
+| `.github/CHECKLIST_SECRETS.md` | Secrets |
+| `scripts/setup_digitalocean.sh` | Bootstrap servidor |
+| `scripts/up-orb.sh` | Dev Mac |
 
 ---
 
-## 7. Ainda não feito (próximos passos)
-
-1. **Usuário:** cadastrar secrets na URL acima.
-2. **Código:** `docker-compose.staging.yml` + `docker-compose.prod.yml` (pull-only, sem `build:`).
-3. **Código:** `scripts/deploy.sh` (padrão WellSaaS).
-4. Clone em `/opt/assapp` (Actions ou manual).
-5. `.env.staging` / `.env.production` **só no servidor**.
-6. Primeiro deploy: push/`workflow_dispatch` em `develop` → validar `:8080` → promover `main`.
-7. Domínio + Certbot quando existir DNS.
-
-Referência WellSaaS: `/Users/ale/Desktop/Wellsaas/docs/guias/BASE_CONHECIMENTO_DEPLOYS.md`
-
----
-
-## 8. Referência rápida SSH
+## 8. SSH rápido
 
 ```bash
 ssh root@159.203.183.184
-# ou
-ssh deploy@159.203.183.184
-
-docker --version
-docker compose version
+docker --version && docker compose version
 ufw status
 ls -ld /opt/assapp
 ```
+
+---
+
+## 9. Ao retomar (próximos passos)
+
+1. Terminar secrets em https://github.com/alebarizon/assapp/settings/secrets/actions  
+2. Criar repos Docker Hub `assapp-backend` e `assapp-frontend` (se ainda não criados)  
+3. No código: `docker-compose.staging.yml` + `docker-compose.prod.yml` (pull-only) + `scripts/deploy.sh`  
+4. `.env.staging` / `.env.production` **só no servidor**  
+5. Primeiro deploy: `develop` → validar `:8080` → depois `main`  
+6. Domínio + Certbot quando houver DNS  
+
+Referência WellSaaS: `/Users/ale/Desktop/Wellsaas/docs/guias/BASE_CONHECIMENTO_DEPLOYS.md`
