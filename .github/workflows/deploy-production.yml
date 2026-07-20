@@ -136,11 +136,22 @@ jobs:
             fi
             git fetch origin
             git checkout main 2>/dev/null || git checkout -b main origin/main
+            git reset --hard origin/main
             git pull origin main
 
             if [ ! -f .env.production ]; then
               cp env.production.example .env.production
-              echo "⚠️  .env.production criado a partir do example — ajuste senhas no servidor"
+            fi
+
+            sed -i "s|^DOCKER_USERNAME=.*|DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}|" .env.production
+            sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=latest|" .env.production
+            if grep -q 'CHANGE_THIS_TO_A_STRONG_SECRET_KEY' .env.production; then
+              PROD_SECRET=$(openssl rand -hex 32)
+              sed -i "s|CHANGE_THIS_TO_A_STRONG_SECRET_KEY|$PROD_SECRET|g" .env.production
+            fi
+            if grep -q 'CHANGE_THIS_TO_A_STRONG_PASSWORD' .env.production; then
+              PROD_DB_PASS=$(openssl rand -hex 24)
+              sed -i "s|CHANGE_THIS_TO_A_STRONG_PASSWORD|$PROD_DB_PASS|g" .env.production
             fi
 
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -149,18 +160,13 @@ jobs:
             export DOCKER_BUILDKIT=0
             export IMAGE_TAG=latest
             export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
+            export DOCKER_PASSWORD="${{ secrets.DOCKER_PASSWORD }}"
 
-            if [ -f scripts/deploy.sh ]; then
-              chmod +x scripts/deploy.sh
-              ./scripts/deploy.sh production
-            elif [ -f docker-compose.prod.yml ]; then
-              docker compose -f docker-compose.prod.yml pull
-              docker compose -f docker-compose.prod.yml up -d
-            else
-              echo "⚠️  scripts/deploy.sh e docker-compose.prod.yml ainda não existem."
-              echo "    Imagens foram publicadas no Docker Hub com tag latest."
-              echo "    Complete o compose de produção conforme docs/guias/DEPLOY_DIGITALOCEAN.md"
-            fi
+            chmod +x scripts/deploy.sh
+            ./scripts/deploy.sh production
+
+            echo "🌐 Produção: http://${{ secrets.DO_HOST }}/"
+            echo "❤️  Health: http://${{ secrets.DO_HOST }}/health/"
 
       - name: Skip deploy (secrets not configured)
         if: steps.check-secrets.outputs.deploy_enabled == 'false'

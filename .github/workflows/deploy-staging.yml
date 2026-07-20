@@ -136,11 +136,26 @@ jobs:
             fi
             git fetch origin
             git checkout develop 2>/dev/null || git checkout -b develop origin/develop
+            git reset --hard origin/develop
             git pull origin develop
 
             if [ ! -f .env.staging ]; then
               cp env.staging.example .env.staging
-              echo "⚠️  .env.staging criado a partir do example — ajuste senhas no servidor"
+            fi
+
+            # Garante valores necessários no .env.staging
+            sed -i "s|^DOCKER_USERNAME=.*|DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}|" .env.staging
+            sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=develop|" .env.staging
+            if grep -q 'CHANGE_THIS_TO_A_STRONG_SECRET_KEY' .env.staging; then
+              STAGING_SECRET=$(openssl rand -hex 32)
+              sed -i "s|CHANGE_THIS_TO_A_STRONG_SECRET_KEY|$STAGING_SECRET|g" .env.staging
+            fi
+            if grep -q 'CHANGE_THIS_TO_A_STRONG_PASSWORD' .env.staging; then
+              STAGING_DB_PASS=$(openssl rand -hex 24)
+              sed -i "s|CHANGE_THIS_TO_A_STRONG_PASSWORD|$STAGING_DB_PASS|g" .env.staging
+            fi
+            if ! grep -q '159.203.183.184' .env.staging; then
+              sed -i "s|^ALLOWED_HOSTS=.*|ALLOWED_HOSTS=159.203.183.184,localhost,127.0.0.1|" .env.staging
             fi
 
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -149,18 +164,13 @@ jobs:
             export DOCKER_BUILDKIT=0
             export IMAGE_TAG=develop
             export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
+            export DOCKER_PASSWORD="${{ secrets.DOCKER_PASSWORD }}"
 
-            if [ -f scripts/deploy.sh ]; then
-              chmod +x scripts/deploy.sh
-              ./scripts/deploy.sh staging
-            elif [ -f docker-compose.staging.yml ]; then
-              docker compose -f docker-compose.staging.yml pull
-              docker compose -f docker-compose.staging.yml up -d
-            else
-              echo "⚠️  scripts/deploy.sh e docker-compose.staging.yml ainda não existem."
-              echo "    Imagens foram publicadas no Docker Hub com tag develop."
-              echo "    Complete o compose de staging conforme docs/guias/DEPLOY_DIGITALOCEAN.md"
-            fi
+            chmod +x scripts/deploy.sh
+            ./scripts/deploy.sh staging
+
+            echo "🌐 Staging: http://${{ secrets.DO_STAGING_HOST }}:8080/"
+            echo "❤️  Health: http://${{ secrets.DO_STAGING_HOST }}:8080/health/"
 
       - name: Skip deploy (secrets not configured)
         if: steps.check-secrets.outputs.deploy_enabled == 'false'

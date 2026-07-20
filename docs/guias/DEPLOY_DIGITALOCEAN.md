@@ -112,12 +112,12 @@ Tags AssApp: staging `develop` · produção `latest` / `main-<sha>`
 | Droplet criado + SSH | ✅ |
 | Bootstrap Docker / UFW / `/opt/assapp` | ✅ |
 | Docs / changelog de pausa | ✅ |
-| Secrets no GitHub | ⏳ em configuração |
-| Repos Hub `assapp-backend` / `assapp-frontend` | ⏳ criar (separados de `wellnz-*`) |
-| `docker-compose.staging.yml` / `prod.yml` | ❌ |
-| `scripts/deploy.sh` | ❌ |
-| `.env.*` no servidor | ❌ |
-| Primeiro deploy staging | ❌ |
+| Secrets no GitHub | ✅ |
+| Repos Hub `assapp-backend` / `assapp-frontend` | ✅ |
+| `docker-compose.staging.yml` / `prod.yml` | ✅ |
+| `scripts/deploy.sh` + nginx reverse proxy | ✅ |
+| `.env.*` no servidor | ⏳ gerado no deploy |
+| Primeiro deploy staging com containers | ⏳ |
 | Domínio + SSL | ❌ |
 
 ---
