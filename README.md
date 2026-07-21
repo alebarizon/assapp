@@ -240,6 +240,8 @@ Fluxo de domínio: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/
 
 Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) · [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md)
 
+**Staging (no ar):** http://159.203.183.184:8080/ · Changelog infra: [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md)
+
 ---
 
 ## Desenvolvimento Local

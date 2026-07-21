@@ -1,124 +1,90 @@
 # Deploy DigitalOcean — AssApp
 
-**Última atualização:** 2026-07-19  
-**Padrão:** alinhado ao WellSaaS (mesmo droplet pode hospedar staging + produção)  
-**Changelog do dia:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md)
+**Última atualização:** 2026-07-21  
+**Changelog completo:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md)
 
 ---
 
-## Droplet atual
+## Staging (no ar)
+
+| Campo | Valor |
+|-------|--------|
+| URL | http://159.203.183.184:8080/ |
+| Health | http://159.203.183.184:8080/health/ |
+| Branch CI | `develop` |
+| Compose | `docker-compose.staging.yml` |
+| Tag imagens | `develop` |
+
+Validado em 2026-07-20 (Actions run `29778780585`).
+
+---
+
+## Droplet
 
 | Campo | Valor |
 |-------|--------|
 | IP | `159.203.183.184` |
-| Hostname | `drop-assapp` |
-| SO | Ubuntu 24.04 LTS |
 | SSH | `ssh root@159.203.183.184` |
 | App | `/opt/assapp` |
-| Bootstrap | **concluído** (`scripts/setup_digitalocean.sh`) |
+| Bootstrap | ✅ `scripts/setup_digitalocean.sh` |
 
-Portas abertas (UFW): `22`, `80`, `443`, `8080`.
-
----
-
-## Visão geral do pipeline
-
-```
-Push origin/develop  →  GitHub Actions  →  build amd64  →  Docker Hub  →  DO staging  (:8080)
-Push origin/main     →  GitHub Actions  →  build amd64  →  Docker Hub  →  DO produção (:80)
-```
-
-| Ambiente | Branch | Porta | Compose (a criar) | Diretório |
-|----------|--------|-------|-------------------|-----------|
-| Staging | `develop` | 8080 | `docker-compose.staging.yml` | `/opt/assapp` |
-| Produção | `main` | 80 | `docker-compose.prod.yml` | `/opt/assapp` |
+UFW: `22`, `80`, `443`, `8080`.
 
 ---
 
-## Bootstrap do servidor
+## Pipeline
 
-### Já executado (2026-07-19)
-
-```bash
-scp scripts/setup_digitalocean.sh root@159.203.183.184:/tmp/
-ssh root@159.203.183.184 'bash /tmp/setup_digitalocean.sh'
+```
+develop → GitHub Actions → Docker Hub → deploy.sh staging → :8080
+main    → GitHub Actions → Docker Hub → deploy.sh production → :80
 ```
 
-Instala: Docker, Compose plugin, UFW, fail2ban, swap 2G, usuário `deploy`, `/opt/assapp`, Certbot.
+| Ambiente | Branch | Porta | Compose |
+|----------|--------|-------|---------|
+| Staging | `develop` | 8080 | `docker-compose.staging.yml` |
+| Produção | `main` | 80 | `docker-compose.prod.yml` |
 
-### Reexecutar (idempotente na maior parte)
-
-Mesmos comandos acima. O script pula Docker/swap se já existirem.
-
-### User data (cloud-init) — droplets futuros
-
-Na criação do Droplet: **Additional Options → Startup scripts**.  
-Ver: https://docs.digitalocean.com/products/droplets/how-to/provide-user-data/  
-
-Equivale ao `setup_digitalocean.sh` no primeiro boot. Neste droplet o bootstrap foi manual.
+**Produção ainda não promovida** — branch `main` no GitHub está atrás de `develop`.
 
 ---
 
-## Secrets do GitHub Actions
+## Secrets
 
-Página: https://github.com/alebarizon/assapp/settings/secrets/actions  
+https://github.com/alebarizon/assapp/settings/secrets/actions → **Repository secrets**
 
-| Secret | Valor neste projeto |
-|--------|---------------------|
-| `DO_HOST` | `159.203.183.184` |
-| `DO_STAGING_HOST` | `159.203.183.184` |
-| `DO_USER` | `root` ou `deploy` |
-| `DO_SSH_KEY` | chave privada (`cat ~/.ssh/id_ed25519`) |
-| `DOCKER_USERNAME` | Docker Hub |
+| Secret | Valor |
+|--------|--------|
+| `DOCKER_USERNAME` | `alebarizon` |
 | `DOCKER_PASSWORD` | token Docker Hub |
-| `G_TOKEN_DEPLOY` | opcional (repo público) |
+| `DO_HOST` / `DO_STAGING_HOST` | `159.203.183.184` |
+| `DO_USER` | `root` |
+| `DO_SSH_KEY` | chave privada SSH |
 
 Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 
-**Status:** aguardando cadastro pelo usuário.
+---
+
+## Docker Hub
+
+- `alebarizon/assapp-backend` (tags: `develop`, `latest`)
+- `alebarizon/assapp-frontend` (tags: `develop`, `latest`)
 
 ---
 
-## Imagens Docker Hub
-
-| Projeto | Imagens |
-|---------|---------|
-| WellSaaS (já existem) | `alebarizon/wellnz-backend` · `alebarizon/wellnz-frontend` |
-| AssApp (criar) | `alebarizon/assapp-backend` · `alebarizon/assapp-frontend` |
-
-Tags AssApp: staging `develop` · produção `latest` / `main-<sha>`
-
-`DOCKER_USERNAME` = `alebarizon`. `DOCKER_PASSWORD` = token do **Docker Hub**, não PAT GitHub (`ghp_`).
-
----
-
-## Regras críticas (lições WellSaaS)
-
-1. Build só no CI — servidor só faz `docker pull`.
-2. Concurrency `deploy-server` nos dois workflows.
-3. Push sequencial: staging OK → só então `main`.
-4. Migrations: `migrate_schemas --shared` depois `migrate_schemas`.
-5. `COMPOSE_DOCKER_CLI_BUILD=0` no deploy.
-
----
-
-## Checklist de progresso
+## Checklist
 
 | Passo | Status |
 |-------|--------|
-| Repo Git + branches `orb` / `develop` / `main` | ✅ |
-| OrbStack local (`up-orb.sh`) | ✅ |
-| Workflows Actions (scaffold) | ✅ |
-| Droplet criado + SSH | ✅ |
-| Bootstrap Docker / UFW / `/opt/assapp` | ✅ |
-| Docs / changelog de pausa | ✅ |
-| Secrets no GitHub | ✅ |
-| Repos Hub `assapp-backend` / `assapp-frontend` | ✅ |
-| `docker-compose.staging.yml` / `prod.yml` | ✅ |
-| `scripts/deploy.sh` + nginx reverse proxy | ✅ |
-| `.env.*` no servidor | ⏳ gerado no deploy |
-| Primeiro deploy staging com containers | ⏳ |
+| Repo + branches | ✅ |
+| OrbStack local | ✅ |
+| Droplet + bootstrap | ✅ |
+| Secrets | ✅ |
+| Hub repos | ✅ |
+| Compose + deploy.sh | ✅ |
+| Staging no ar | ✅ |
+| Produção (`main`) | ❌ |
 | Domínio + SSL | ❌ |
+| Seed tenant sistema (staging) | ❓ |
 
 ---
 
@@ -128,4 +94,11 @@ Tags AssApp: staging `develop` · produção `latest` / `main-<sha>`
 ./scripts/up-orb.sh
 ```
 
-Não use compose de produção para desenvolver.
+---
+
+## Ao retomar
+
+1. `git pull` em `orb`
+2. Desenvolver → `develop` → validar `:8080`
+3. Quando OK: merge `develop` → `main` → validar `:80`
+4. Ver seção 9 do changelog de infra para detalhes

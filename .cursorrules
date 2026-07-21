@@ -24,7 +24,7 @@ Base tecnológica: WellSaaS/Wellflows (~80% reutilizável).
 
 1. `cursor-readme.md` — referência técnica rápida
 2. `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md` — branches + OrbStack
-3. `docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md` — infra DO / secrets
+3. `docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md` — infra DO, staging no ar, retomar
 4. `docs/changelog/CHANGELOG_2026_07_14.md` — o que mudou recentemente
 5. `docs/pesquisa/HIPOTESES_PIPE.md` — H1, H2, H3
 6. `docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md` — signup / setup / transição

@@ -1,7 +1,19 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-07-19 (infra OrbStack + droplet DO `159.203.183.184`)
+> **Última revisão:** 2026-07-21 (staging DO no ar · pausa para retomar)
+
+---
+
+## Infra / Deploy (DigitalOcean)
+
+| Ambiente | URL | Branch |
+|----------|-----|--------|
+| Staging | http://159.203.183.184:8080/ | `develop` |
+| Produção | http://159.203.183.184/ (não promovida) | `main` |
+| Dev Mac | http://localhost:5174 | `orb` |
+
+Droplet: `159.203.183.184` · Changelog infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md)
 
 ---
 
@@ -106,7 +118,7 @@ Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | **Infra 2026-07-19:** Git, OrbStack, droplet DO, secrets |
+| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | **Infra + pausa retomar** (staging OK, prod pendente) |
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
 | [`docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`](docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md) | Promoção orb → develop → main |
@@ -155,4 +167,4 @@ Copiar/adaptar depois (Stripe por último):
 
 ---
 
-**Última revisão:** 2026-07-19
+**Última revisão:** 2026-07-21
