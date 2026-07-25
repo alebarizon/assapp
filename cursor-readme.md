@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-07-21 (staging DO no ar · pausa para retomar)
+> **Última revisão:** 2026-07-24 (landing SaaS Gesttora em `/`)
 
 ---
 
@@ -40,6 +40,24 @@ Django 4.2 + DRF + JWT + django-tenants + PostgreSQL 14 + React 18 + TS + Vite
 **Não usar Prisma em runtime** — `prisma/schema.prisma` é documentação de domínio PIPE.
 
 **UI:** CSS semântico padrão WellSaaS (`Dashboard.css`, `AppLayout.css`, `Login.css`) — ver [`docs/guias/UI_PADRAO_WELLSAAS.md`](docs/guias/UI_PADRAO_WELLSAAS.md).
+
+---
+
+## Rotas públicas (frontend)
+
+| Rota | Página |
+|------|--------|
+| `/` | Landing SaaS **Gesttora** (futuro `gesttora.online`) — conteúdo estático |
+| `/login` | Login |
+| `/signup` | Cadastro da associação (simulado) |
+| `/app/*` | App autenticado (tenant) |
+
+**Demo tenant:** schema `demo` · `demo@demo.com` / `demo` (`association_admin`, todos os módulos)  
+Seed: `./scripts/init_demo_tenant.sh`
+
+CMS / website da associação (tenant): **adiado**. Adminpanel editar landing: **adiado**.
+
+Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md)
 
 ---
 
@@ -118,6 +136,7 @@ Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md) | Landing SaaS Gesttora (`/`) |
 | [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | **Infra + pausa retomar** (staging OK, prod pendente) |
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
@@ -158,13 +177,14 @@ Já adaptado:
 - finance OSC + documents
 - MandatoDetail + deep-links H2
 - Ponte User↔Membro + portal associado (`/app/portal`)
+- Landing SaaS Gesttora em `/` (estática; domínio futuro `gesttora.online`)
 
 Copiar/adaptar depois (Stripe por último):
 - Convite User a partir de Membro; JWT `tenant_schema`
-- Stripe real, `adminpanel`, landing, website CMS
+- Stripe real, `adminpanel` (edição da landing), website CMS do tenant
 
 **Não copiar:** business (meal plans, recipes), prescricao, e-commerce
 
 ---
 
-**Última revisão:** 2026-07-21
+**Última revisão:** 2026-07-24

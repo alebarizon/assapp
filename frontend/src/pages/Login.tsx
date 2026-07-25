@@ -47,10 +47,9 @@ export default function Login() {
             <div className="login-hero-brand-icon">
               <BookMarked className="login-hero-brand-leaf" />
             </div>
-            <span className="login-hero-brand-name">AssApp</span>
+            <span className="login-hero-brand-name">Gesttora</span>
           </div>
           <div className="login-hero-text">
-            <p className="login-hero-tagline">PIPE FAPESP · Fase 1</p>
             <h1 className="login-hero-title">
               Memória institucional{"\n"}que atravessa mandatos
             </h1>
@@ -68,7 +67,7 @@ export default function Login() {
             <div className="login-mobile-brand-icon">
               <BookMarked className="login-mobile-brand-leaf" />
             </div>
-            <span className="login-mobile-brand-name">AssApp</span>
+            <span className="login-mobile-brand-name">Gesttora</span>
           </div>
 
           <h2 className="login-form-title">Entrar na plataforma</h2>
@@ -125,10 +124,6 @@ export default function Login() {
             <Link to="/signup" className="login-signup-link">
               Criar conta
             </Link>
-          </p>
-          <p className="login-hint">
-            Demo ABCiber —{" "}
-            <code>./scripts/init_sistema_tenant.sh</code>
           </p>
         </div>
       </div>

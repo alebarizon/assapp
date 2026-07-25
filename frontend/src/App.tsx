@@ -17,6 +17,7 @@ import PortalHome from "@/pages/PortalHome";
 import MeuPerfil from "@/pages/MeuPerfil";
 import MeusDocumentos from "@/pages/MeusDocumentos";
 import Signup from "@/pages/Signup";
+import GesttoraLanding from "@/pages/GesttoraLanding";
 import { homePathForRole, isMember } from "@/utils/roles";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -72,6 +73,7 @@ function SetupGate({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<GesttoraLanding />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route
@@ -100,7 +102,7 @@ function AppRoutes() {
         <Route path="finance" element={<Finance />} />
         <Route path="documents" element={<Documents />} />
       </Route>
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
