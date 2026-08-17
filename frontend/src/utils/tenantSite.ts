@@ -1,5 +1,7 @@
 import type { CatalogItem } from "@/types/ecommerce";
 
+type CatalogPriceLike = Pick<CatalogItem, "price" | "currency">;
+
 /** Padrão dev: demo.localhost → schema demo */
 export function resolveTenantSchemaFromHost(
   hostname = typeof window !== "undefined" ? window.location.hostname : ""
@@ -38,7 +40,7 @@ export function resolveTenantSchema(searchParams: URLSearchParams): string {
   return "demo";
 }
 
-export function formatCatalogPrice(item: CatalogItem): string {
+export function formatCatalogPrice(item: CatalogPriceLike): string {
   const value = Number(item.price);
   if (Number.isNaN(value)) return item.price;
   return value.toLocaleString("pt-BR", { style: "currency", currency: item.currency || "BRL" });
