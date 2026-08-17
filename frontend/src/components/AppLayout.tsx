@@ -14,13 +14,16 @@ import {
   Users,
   Wallet,
   X,
+  ShoppingBag,
+  Globe,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { isMember } from "@/utils/roles";
+import { buildTenantSiteQuery } from "@/utils/tenantSite";
 import "./AppLayout.css";
 
 export default function AppLayout() {
-  const { user, logout, setupCompleted } = useAuth();
+  const { user, logout, setupCompleted, tenantSchema } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -30,12 +33,17 @@ export default function AppLayout() {
     { to: "/app/eventos", label: "Eventos", icon: Calendar },
     { to: "/app/mandatos", label: "Mandatos", icon: LayoutDashboard },
     { to: "/app/finance", label: "Financeiro", icon: Wallet },
+    { to: "/app/website", label: "Website", icon: Globe },
+    { to: "/app/ecommerce/catalog", label: "Loja — catálogo", icon: ShoppingBag },
+    { to: "/app/ecommerce/orders", label: "Loja — pedidos", icon: ShoppingBag },
     { to: "/app/documents", label: "Documentos", icon: FileText },
     { to: "/app/onboarding", label: "Onboarding", icon: BookOpen },
   ];
 
   const memberNav = [
     { to: "/app/portal", label: "Portal", icon: Home },
+    { to: "/app/portal/loja", label: "Loja", icon: ShoppingBag },
+    { to: "/app/portal/carrinho", label: "Carrinho", icon: ShoppingBag },
     { to: "/app/portal/perfil", label: "Meu perfil", icon: UserRound },
     { to: "/app/portal/documentos", label: "Meus documentos", icon: FileText },
   ];
@@ -119,8 +127,18 @@ export default function AppLayout() {
             <Menu size={18} />
           </button>
           <div className="header-actions">
+            {setupCompleted && !isMember(user?.role) && tenantSchema && (
+              <a
+                href={`/site${buildTenantSiteQuery(tenantSchema)}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{ fontSize: "0.8rem", marginRight: "1rem" }}
+              >
+                Ver site público
+              </a>
+            )}
             <span style={{ fontSize: "0.8rem", color: "#666" }}>
-              PIPE FAPESP · {user?.role === "member" ? "associado" : user?.perfil_tecnico || "—"}
+              Gesttora · {user?.role === "member" ? "associado" : user?.perfil_tecnico || "—"}
             </span>
           </div>
         </header>

@@ -1,3 +1,6 @@
+# Referência local (não versionar)
+OLD/
+
 # Python
 __pycache__/
 *.py[cod]

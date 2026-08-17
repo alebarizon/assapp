@@ -38,6 +38,25 @@ erDiagram
 
 ---
 
+## Website público do tenant (implementado)
+
+App **`website/`** + vitrine **`/site`** — não duplica entidades; lê dados operacionais:
+
+| Seção do site | Entidade / app | Status |
+|---------------|----------------|--------|
+| Diretoria atual | `Mandato`, `CargoMandato` | ✅ API pública |
+| Institucional / notícias | `SitePage`, `WebsiteConfig` | ✅ CMS |
+| Box Associe-se | `CatalogItem` (anuidades) + categorias CMS | ✅ |
+| Contato | `WebsiteConfig` | ✅ |
+| Eventos (vitrine) | `EventoAcademico` | 📋 módulo futuro |
+| Anais / Publicações / Certificados / Parcerias | Apps futuros | 📋 |
+
+Resolução de tenant: `?schema=`, subdomínio (`demo.localhost`) ou `tenants.Domain`.
+
+Especificação: [`WEBSITE_CMS_TENANT.md`](WEBSITE_CMS_TENANT.md)
+
+---
+
 ## Mandato — Ciclo de Vida
 
 ```

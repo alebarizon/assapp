@@ -234,6 +234,33 @@ with schema_context(SCHEMA):
     print(f'📋 Mandato: {mandato.titulo}')
     print(f'📅 Evento: {evento.titulo}')
 
+    from website.services import seed_default_config, seed_default_pages
+    seed_default_config(site_title='Associação Demo', publish=True)
+    seed_default_pages()
+    print('🌐 Website demo publicado — /site?schema=demo ou http://demo.localhost:5174/site')
+
+    from decimal import Decimal
+    from ecommerce.models import CatalogItem, CatalogItemType
+    anuidades = [
+        ('Anuidade — graduação', 'anuidade-graduacao', Decimal('80.00'), 'graduacao'),
+        ('Anuidade — pós-graduação', 'anuidade-pos', Decimal('120.00'), 'pos_graduacao'),
+        ('Anuidade — profissional', 'anuidade-profissional', Decimal('200.00'), 'profissional'),
+    ]
+    for name, slug, price, tipo in anuidades:
+        CatalogItem.objects.get_or_create(
+            slug=slug,
+            defaults={
+                'name': name,
+                'description': f'Filiação anual ({tipo.replace("_", " ")})',
+                'item_type': CatalogItemType.ANUIDADE,
+                'price': price,
+                'is_active': True,
+                'anuidade_ano': date.today().year,
+                'tipo_filiacao': tipo,
+            },
+        )
+    print('🛒 Catálogo demo — anuidades para box Associe-se')
+
 with schema_context('public'):
     tenant.owner_id = admin.id
     tenant.save(update_fields=['owner_id'])

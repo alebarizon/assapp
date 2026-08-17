@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-07-24 (landing SaaS Gesttora em `/`)
+> **Última revisão:** 2026-08-17 (e-commerce · planejamento CMS tenant)
 
 ---
 
@@ -10,10 +10,10 @@
 | Ambiente | URL | Branch |
 |----------|-----|--------|
 | Staging | http://159.203.183.184:8080/ | `develop` |
-| Produção | http://159.203.183.184/ (não promovida) | `main` |
+| Produção | http://gesttora.vertent.com.br/ · http://159.203.183.184/ | `main` |
 | Dev Mac | http://localhost:5174 | `orb` |
 
-Droplet: `159.203.183.184` · Changelog infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md)
+Droplet: `159.203.183.184` · HTTPS: **adiado** · Changelog: [`CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md)
 
 ---
 
@@ -47,7 +47,8 @@ Django 4.2 + DRF + JWT + django-tenants + PostgreSQL 14 + React 18 + TS + Vite
 
 | Rota | Página |
 |------|--------|
-| `/` | Landing SaaS **Gesttora** (futuro `gesttora.online`) — conteúdo estático |
+| `/` | Landing SaaS **Gesttora** (`gesttora.vertent.com.br`) — conteúdo estático |
+| `/site`, `/site/p/:slug` | **Website do tenant** (público, `?schema=`) · CMS em `/app/website` |
 | `/login` | Login |
 | `/signup` | Cadastro da associação (simulado) |
 | `/app/*` | App autenticado (tenant) |
@@ -55,7 +56,7 @@ Django 4.2 + DRF + JWT + django-tenants + PostgreSQL 14 + React 18 + TS + Vite
 **Demo tenant:** schema `demo` · `demo@demo.com` / `demo` (`association_admin`, todos os módulos)  
 Seed: `./scripts/init_demo_tenant.sh`
 
-CMS / website da associação (tenant): **adiado**. Adminpanel editar landing: **adiado**.
+CMS / website da associação (tenant): **implementado** — ver [`docs/modulos/WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md). Site demo: `/site?schema=demo`. Adminpanel editar landing Gesttora: **adiado**.
 
 Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md)
 
@@ -82,8 +83,12 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `eventos` | ★ H3 | CFP, pareceres, anais |
 | `membros` | — | Filiados, anuidades |
 | `finance` | — | Lançamentos OSC, dashboard, e-mail fechamento |
+| `ecommerce` | — | Catálogo, carrinho, pedidos (anuidade, evento, material) |
 | `documents` | — | Upload / audiência / meus |
 | `accounts` | — | User, JWT, register, setup |
+| `website` | — | Site público tenant + CMS (`/site`, `/app/website`) |
+| `publicacoes` | — | **Planejado** — ebooks, dossiês (Fase 4) |
+| `certificados` | — | **Planejado** — emissão/consulta (Fase 4) |
 
 ---
 
@@ -104,7 +109,10 @@ superadmin | association_admin | board_member | member | reviewer
 /api/eventos/    eventos   ★
 /api/membros/    membros
 /api/finance/    finance (OSC)
+/api/ecommerce/  catalog, cart, orders (+ public/catalog)
 /api/documents/  documents (+ meus/)
+/api/website/    website CMS tenant (config, pages, public)
+/api/tenants/    resolve domínio → schema (public/resolve)
 ```
 
 Auth detalhado: [`docs/modulos/AUTH_SIGNUP_SETUP.md`](docs/modulos/AUTH_SIGNUP_SETUP.md)  
@@ -136,12 +144,13 @@ Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md) | **Consolidado 24–27 jul** (landing, deploy, domínio) |
 | [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md) | Landing SaaS Gesttora (`/`) |
-| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | **Infra + pausa retomar** (staging OK, prod pendente) |
+| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra · **HTTPS adiado** (`gesttora.vertent.com.br`) |
+| [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy DO + seção **Domínio + HTTPS (adiado)** |
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
 | [`docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`](docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md) | Promoção orb → develop → main |
-| [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy DigitalOcean |
 | [`docs/guias/QUICK_REFERENCE_DOCKER.md`](docs/guias/QUICK_REFERENCE_DOCKER.md) | Comandos Docker rápidos |
 | [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) | **Consolidado do dia** (Mandatos H2 + User↔Membro + portal) |
 | [`docs/changelog/CHANGELOG_2026_07_14.md`](docs/changelog/CHANGELOG_2026_07_14.md) | Consolidado 2026-07-14 (signup + UI + finance) |
@@ -153,6 +162,9 @@ Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
 | [`docs/guias/UI_PADRAO_WELLSAAS.md`](docs/guias/UI_PADRAO_WELLSAAS.md) | Como estilizar páginas novas |
 | [`docs/referencia/STATUS_SPRINTS_FASE1.md`](docs/referencia/STATUS_SPRINTS_FASE1.md) | Status Sprints 1–5 + pós-Sprint 5 |
 | [`docs/referencia/ANALISE_VINCULOS_MODULOS_E_TENANCY.md`](docs/referencia/ANALISE_VINCULOS_MODULOS_E_TENANCY.md) | Gaps (User↔Membro, Stripe, etc.) |
+| [`docs/modulos/ECOMMERCE.md`](docs/modulos/ECOMMERCE.md) | E-commerce + Associe-se |
+| [`docs/modulos/WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md) | **Website público do tenant** |
+| [`docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md`](docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md) | Planejamento CMS 2026-08 |
 
 ---
 
@@ -164,7 +176,9 @@ docker compose exec backend python manage.py migrate_schemas --shared
 docker compose exec backend python manage.py migrate_schemas
 ```
 
-Seed demo: `./scripts/init_sistema_tenant.sh`
+Seed tenants:
+- `./scripts/init_sistema_tenant.sh` — `sistema` + `abciber` (piloto)
+- `./scripts/init_demo_tenant.sh` — tenant `demo` (`demo@demo.com` / `demo`)
 
 ---
 
@@ -177,14 +191,15 @@ Já adaptado:
 - finance OSC + documents
 - MandatoDetail + deep-links H2
 - Ponte User↔Membro + portal associado (`/app/portal`)
-- Landing SaaS Gesttora em `/` (estática; domínio futuro `gesttora.online`)
+- Landing SaaS Gesttora em `/` (estática; `gesttora.vertent.com.br`)
 
 Copiar/adaptar depois (Stripe por último):
 - Convite User a partir de Membro; JWT `tenant_schema`
-- Stripe real, `adminpanel` (edição da landing), website CMS do tenant
+- Stripe real, `adminpanel` (edição da landing Gesttora)
+- **Website CMS tenant** — ver [`WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md) (base: WellSaaS `website_cms`)
 
-**Não copiar:** business (meal plans, recipes), prescricao, e-commerce
+**Não copiar:** meal plans, prescricao — e-commerce usa motor WellSaaS adaptado em `ecommerce/`
 
 ---
 
-**Última revisão:** 2026-07-24
+**Última revisão:** 2026-08-17

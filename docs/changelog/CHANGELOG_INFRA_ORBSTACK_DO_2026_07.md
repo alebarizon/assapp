@@ -1,7 +1,7 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean
 
-> **Última atualização:** 2026-07-21  
-> **Pausa para retomar:** staging validado e no ar. Produção (`main`) ainda não promovida.
+> **Última atualização:** 2026-07-27  
+> **Pausa HTTPS:** domínio `gesttora.vertent.com.br` OK em HTTP; SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`).
 
 ---
 
@@ -15,10 +15,20 @@
 | Repository secrets GitHub Actions | ✅ |
 | Docker Hub `assapp-backend` / `assapp-frontend` | ✅ |
 | Compose staging/prod + nginx + `deploy.sh` | ✅ |
-| **Staging no ar** (`:8080`) | ✅ validado 2026-07-20 |
-| Produção (`main` → `:80`) | ❌ não promovida ainda |
-| Domínio + SSL (Certbot) | ❌ |
-| Tenant `sistema` / seed no staging | ❓ verificar se necessário |
+| **Staging no ar** (`:8080`) | ✅ |
+| Produção (`main` → `:80`) | ✅ (2026-07-25) |
+| Domínio HTTP `gesttora.vertent.com.br` | ✅ A → droplet |
+| Domínio + SSL (HTTPS / Certbot) | ❌ **adiado** — proxy TLS no host + AssApp em `127.0.0.1:8081` (detalhe em [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https-adiado--retomar-depois)) |
+| Tenant `sistema` / seed no staging | ❓ |
+| Tenant `demo` em staging/prod | ❌ (script local: `scripts/init_demo_tenant.sh`) |
+
+### URLs produção (funcionando)
+
+| Recurso | URL |
+|---------|-----|
+| Frontend (domínio) | http://gesttora.vertent.com.br/ |
+| Frontend (IP) | http://159.203.183.184/ |
+| Health API | http://gesttora.vertent.com.br/health/ |
 
 ### URLs staging (funcionando)
 
@@ -26,7 +36,7 @@
 |---------|-----|
 | Frontend | http://159.203.183.184:8080/ |
 | Health API | http://159.203.183.184:8080/health/ |
-| Actions (último deploy OK) | https://github.com/alebarizon/assapp/actions/runs/29778780585 |
+| Actions (último deploy OK) | https://github.com/alebarizon/assapp/actions/runs/30174090008 |
 
 ---
 
@@ -56,13 +66,23 @@ orb → develop (staging :8080) → main (produção :80)
 | `e937349` | Fix `vite-env.d.ts` (build CI frontend) |
 | `81d99be` | Compose staging/prod + nginx + `deploy.sh` |
 
-### Sincronização de branches (2026-07-21)
+### Sincronização de branches (2026-07-25)
+
+| Branch | Commit | Observação |
+|--------|--------|------------|
+| `orb` | `b2433e5` | landing Gesttora + tenant demo script |
+| `develop` | `b2433e5` | staging deploy OK |
+| `main` | `b2433e5` | produção deploy OK |
+
+Deploys: staging run `30174090008` · produção run `30174258426`.
+
+### Sincronização anterior (2026-07-21)
 
 | Branch | Commit | Observação |
 |--------|--------|------------|
 | `orb` | `81d99be` | alinhada com `develop` |
 | `develop` | `81d99be` | staging deployado |
-| `main` | `275431a` | **atrás** — falta merge de `develop` antes de produção |
+| `main` | `275431a` | atrás de `develop` (corrigido em 2026-07-25) |
 
 ---
 
@@ -201,23 +221,22 @@ Checklist: `.github/CHECKLIST_SECRETS.md`
 
 1. `git checkout orb && git pull origin orb`
 2. Desenvolver em `orb` → merge/push em `develop` para atualizar staging
-3. Validar http://159.203.183.184:8080/ após cada deploy
-4. Rodar `./scripts/init_sistema_tenant.sh` no staging se login superadmin não existir:
-   ```bash
-   ssh root@159.203.183.184
-   cd /opt/assapp
-   docker compose -f docker-compose.staging.yml exec backend python manage.py shell
-   # ou copiar/adaptar init_sistema_tenant.sh para exec no container
-   ```
+3. Validar staging (`:8080`) e produção (`gesttora.vertent.com.br`) após cada deploy
+4. Seeds no droplet (se necessário):
+   - `./scripts/init_sistema_tenant.sh` — superadmin + ABCiber
+   - `./scripts/init_demo_tenant.sh` — tenant `demo` (`demo@demo.com` / `demo`)
 
-### Promover produção (quando staging OK)
+### HTTPS (adiado)
+
+Ver seção em [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https-adiado--retomar-depois): proxy TLS no host + AssApp em porta interna.
+
+### Promover produção (fluxo habitual)
 
 ```bash
-git checkout main
-git pull origin main
-git merge develop
-git push origin main
-# Aguardar Actions → validar http://159.203.183.184/
+git checkout develop && git merge orb && git push origin develop
+# validar staging
+git checkout main && git merge develop && git push origin main
+# validar http://gesttora.vertent.com.br/
 ```
 
 ### Produto / PIPE (Fase 1)
@@ -226,7 +245,7 @@ Retomar sprints conforme `docs/referencia/STATUS_SPRINTS_FASE1.md` — mandatos 
 
 ### Infra futura
 
-- Domínio DNS → `ALLOWED_HOSTS` + Certbot
+- HTTPS (Certbot) — ver acima
 - Stripe real (último, conforme docs)
 - `G_TOKEN_DEPLOY` se repo ficar privado
 

@@ -47,6 +47,8 @@ TENANT_APPS = (
     "membros",
     "finance",
     "documents",
+    "ecommerce",
+    "website",
 )
 
 INSTALLED_APPS = list(dict.fromkeys(SHARED_APPS + TENANT_APPS))

@@ -39,6 +39,8 @@ def api_root(request):
                 "membros": "/api/membros/",
                 "finance": "/api/finance/",
                 "documents": "/api/documents/",
+                "ecommerce": "/api/ecommerce/",
+                "website": "/api/website/",
             },
         },
         status=200,

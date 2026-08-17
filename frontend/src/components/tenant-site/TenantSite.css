@@ -1,0 +1,200 @@
+.tenant-site {
+  --ts-primary: #1a5f4a;
+  --ts-secondary: #0f172a;
+  --ts-bg: #f6f6f3;
+  --ts-surface: #ffffff;
+  --ts-text: #131313;
+  --ts-muted: #666;
+  min-height: 100vh;
+  background: var(--ts-bg);
+  color: var(--ts-text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.tenant-site-header {
+  background: var(--ts-surface);
+  border-bottom: 1px solid #e8e8e4;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.tenant-site-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tenant-site-brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ts-primary);
+  text-decoration: none;
+}
+
+.tenant-site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.tenant-site-nav a {
+  color: var(--ts-secondary);
+  text-decoration: none;
+}
+
+.tenant-site-nav a:hover {
+  color: var(--ts-primary);
+}
+
+.tenant-site-hero {
+  background: linear-gradient(135deg, var(--ts-primary) 0%, #134a3a 100%);
+  color: #fff;
+  padding: 3.5rem 1.25rem;
+}
+
+.tenant-site-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tenant-site-hero h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  margin: 0 0 0.75rem;
+  line-height: 1.15;
+}
+
+.tenant-site-hero p {
+  max-width: 40rem;
+  opacity: 0.92;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+}
+
+.tenant-site-btn {
+  display: inline-block;
+  padding: 0.65rem 1.15rem;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ts-primary);
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.tenant-site-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem;
+}
+
+.tenant-site-section h2 {
+  font-size: 1.35rem;
+  margin: 0 0 1rem;
+}
+
+.tenant-site-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.tenant-site-card {
+  background: var(--ts-surface);
+  border: 1px solid #e8e8e4;
+  border-radius: 8px;
+  padding: 1.1rem;
+}
+
+.tenant-site-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.tenant-site-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ts-muted);
+  line-height: 1.45;
+}
+
+.tenant-site-card a {
+  color: var(--ts-primary);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.tenant-site-associe-se {
+  background: var(--ts-surface);
+  border: 1px solid #e0e7e4;
+  border-radius: 10px;
+  padding: 2rem 1.5rem;
+}
+
+.tenant-site-associe-se h2 {
+  color: var(--ts-primary);
+  margin-top: 0;
+}
+
+.tenant-site-categories {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  margin: 1.25rem 0;
+}
+
+.tenant-site-category {
+  border: 1px solid #e8e8e4;
+  border-radius: 6px;
+  padding: 0.85rem;
+  background: var(--ts-bg);
+}
+
+.tenant-site-category strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.tenant-site-category span {
+  font-size: 0.8rem;
+  color: var(--ts-muted);
+}
+
+.tenant-site-footer {
+  border-top: 1px solid #e8e8e4;
+  padding: 2rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--ts-muted);
+  text-align: center;
+}
+
+.tenant-site-diretoria-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tenant-site-diretoria-list li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.tenant-site-empty {
+  padding: 3rem 1.25rem;
+  text-align: center;
+  color: var(--ts-muted);
+}
+
+.tenant-site-prose {
+  line-height: 1.65;
+  white-space: pre-wrap;
+}

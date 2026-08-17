@@ -36,11 +36,13 @@ if [ "$ENVIRONMENT" = "production" ]; then
   COMPOSE_FILE="docker-compose.prod.yml"
   IMAGE_TAG_DEFAULT="latest"
   HOST_PORT=80
+  BACKEND_CONTAINER="assapp_backend_prod"
   CONTAINER_NAMES="assapp_db_prod assapp_backend_prod assapp_frontend_prod assapp_nginx_prod"
 else
   COMPOSE_FILE="docker-compose.staging.yml"
   IMAGE_TAG_DEFAULT="develop"
   HOST_PORT=8080
+  BACKEND_CONTAINER="assapp_backend_staging"
   CONTAINER_NAMES="assapp_db_staging assapp_backend_staging assapp_frontend_staging assapp_nginx_staging"
 fi
 
@@ -101,6 +103,7 @@ IMAGE_TAG="$IMAGE_TAG_VALUE" DOCKER_USERNAME="$DOCKER_USERNAME_VALUE" \
   docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
 
 log "Aguardando health (:$HOST_PORT/health/)..."
+log "  (migrations rodam no startup do backend — ver $COMPOSE_FILE command)"
 HEALTH_OK=false
 for i in $(seq 1 24); do
   if curl -fsS "http://127.0.0.1:${HOST_PORT}/health/" >/dev/null 2>&1; then
@@ -114,7 +117,7 @@ if [ "$HEALTH_OK" = true ]; then
   log "✅ Health OK — AssApp $ENVIRONMENT no ar (porta $HOST_PORT)"
 else
   warning "Health ainda falhou — logs recentes do backend:"
-  docker logs "assapp_backend_${ENVIRONMENT}" --tail 80 2>&1 || true
+  docker logs "$BACKEND_CONTAINER" --tail 80 2>&1 || true
   docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps || true
   exit 1
 fi

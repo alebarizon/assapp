@@ -13,11 +13,18 @@ import MemoriaInstitucional from "@/pages/MemoriaInstitucional";
 import OnboardingWizard from "@/pages/OnboardingWizard";
 import Finance from "@/pages/Finance";
 import Documents from "@/pages/Documents";
+import EcommerceCatalog from "@/pages/EcommerceCatalog";
+import EcommerceOrders from "@/pages/EcommerceOrders";
+import PortalLoja from "@/pages/PortalLoja";
+import PortalCarrinho from "@/pages/PortalCarrinho";
 import PortalHome from "@/pages/PortalHome";
 import MeuPerfil from "@/pages/MeuPerfil";
 import MeusDocumentos from "@/pages/MeusDocumentos";
 import Signup from "@/pages/Signup";
 import GesttoraLanding from "@/pages/GesttoraLanding";
+import TenantSiteHome from "@/pages/TenantSiteHome";
+import TenantSitePage from "@/pages/TenantSitePage";
+import WebsiteAdmin from "@/pages/WebsiteAdmin";
 import { homePathForRole, isMember } from "@/utils/roles";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -76,6 +83,8 @@ function AppRoutes() {
       <Route path="/" element={<GesttoraLanding />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/site" element={<TenantSiteHome />} />
+      <Route path="/site/p/:slug" element={<TenantSitePage />} />
       <Route
         path="/app"
         element={
@@ -91,6 +100,8 @@ function AppRoutes() {
         <Route path="portal" element={<PortalHome />} />
         <Route path="portal/perfil" element={<MeuPerfil />} />
         <Route path="portal/documentos" element={<MeusDocumentos />} />
+        <Route path="portal/loja" element={<PortalLoja />} />
+        <Route path="portal/carrinho" element={<PortalCarrinho />} />
         <Route path="memoria" element={<MemoriaInstitucional />} />
         <Route path="membros" element={<Membros />} />
         <Route path="membros/:id" element={<MembroDetail />} />
@@ -101,6 +112,9 @@ function AppRoutes() {
         <Route path="mandatos/:id" element={<MandatoDetail />} />
         <Route path="finance" element={<Finance />} />
         <Route path="documents" element={<Documents />} />
+        <Route path="ecommerce/catalog" element={<EcommerceCatalog />} />
+        <Route path="ecommerce/orders" element={<EcommerceOrders />} />
+        <Route path="website" element={<WebsiteAdmin />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

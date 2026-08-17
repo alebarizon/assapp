@@ -116,6 +116,7 @@ assapp/
 │   └── src/
 │       ├── pages/
 │       │   ├── Login.tsx / Signup.tsx   # Auth (split-screen WellSaaS)
+│       │   ├── GesttoraLanding.tsx      # Landing SaaS pública (/)
 │       │   ├── AssociationSetup.tsx     # Setup pós-compra (1º mandato)
 │       │   ├── Mandatos.tsx             # Lista e gestão de mandatos
 │       │   ├── MandatoDetail.tsx        # Cargos, timeline, snapshots
@@ -204,7 +205,9 @@ Diagrama ER completo: [`docs/modulos/SCHEMA_DOMINIO.md`](docs/modulos/SCHEMA_DOM
 | **Signup + Setup (1º mandato)** | ★ Adaptado WellSaaS | **2026-07-14** |
 | **UI shell (Dashboard.css)** | ✅ Padrão WellSaaS | **2026-07-14** |
 | Planos de refeição | ❌ Não replicar | — |
-| E-commerce produtos | ❌ Não replicar | — |
+| E-commerce (catálogo + pedidos) | ✅ Adaptado WellSaaS (`ecommerce/`) | **2026-08** |
+| Website CMS tenant | ✅ MVP (`website/`) — home, notícias, box Associe-se | **2026-08** |
+| Planos de refeição | ❌ Não replicar | — |
 | Prescrições/anamneses | ❌ Não replicar | — |
 
 ---
@@ -219,6 +222,7 @@ Diagrama ER completo: [`docs/modulos/SCHEMA_DOMINIO.md`](docs/modulos/SCHEMA_DOM
 | `/api/eventos/` | eventos | Eventos científicos, CFP, pareceres |
 | `/api/membros/` | membros | Filiados, anuidades |
 | `/api/finance/` | finance | CRUD txs OSC, dashboard, relatório e-mail |
+| `/api/ecommerce/` | ecommerce | Catálogo, carrinho, pedidos |
 | `/api/documents/` | documents | Upload, CRUD, download, `meus/` |
 | `/api/integrations/` | integrations | Google Calendar, NF *(não implementado)* |
 | `/api/admin/` | adminpanel | Superadmin *(stub)* |
@@ -240,7 +244,13 @@ Fluxo de domínio: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/
 
 Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) · [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md)
 
-**Staging (no ar):** http://159.203.183.184:8080/ · Changelog infra: [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md)
+| Ambiente | URL |
+|----------|-----|
+| Staging | http://159.203.183.184:8080/ |
+| Produção | http://gesttora.vertent.com.br/ · http://159.203.183.184/ |
+| HTTPS | adiado — ver guia de deploy |
+
+**Branches alinhadas** em `b2433e5` (2026-07-25). Changelog: [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md)
 
 ---
 
@@ -257,7 +267,8 @@ Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTR
 ```bash
 cp .env.example .env
 ./scripts/up-orb.sh --build    # sobe com docker-compose.orb.yml
-./scripts/init_sistema_tenant.sh
+./scripts/init_sistema_tenant.sh   # sistema + abciber
+./scripts/init_demo_tenant.sh      # opcional: tenant demo (demo@demo.com / demo)
 ```
 
 ### Subir ambiente (sem overrides ARM)
@@ -273,8 +284,10 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 
 | Serviço | URL |
 |---------|-----|
-| Frontend | http://localhost:5174 |
+| Landing Gesttora | http://localhost:5174/ |
+| Frontend (app) | http://localhost:5174/app |
 | Signup (nova associação) | http://localhost:5174/signup |
+| Login | http://localhost:5174/login |
 | Backend API | http://localhost:8001 |
 | Admin Django | http://sistema.localhost:8001/admin/ |
 
@@ -340,10 +353,13 @@ docker compose exec backend python manage.py migrate_schemas
 - [x] MandatoDetail + deep-links H2 + eventos no snapshot (2026-07-15)
 - [x] Ponte User ↔ Membro (`Membro.user`, vincular/desvincular)
 - [x] Portal mínimo do associado (`/app/portal`)
-- [ ] Stripe real / AdminPlan
-- [ ] Integrations (Calendar / NF)
-
-> **Consolidado:** [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) (hoje) · [`CHANGELOG_2026_07_14.md`](docs/changelog/CHANGELOG_2026_07_14.md)  
+- [x] Landing SaaS Gesttora (`/`) + branding login (2026-07-24)
+- [x] Produção promovida (`main` → droplet + domínio HTTP) (2026-07-25)
+- [x] Tenant demo local (`scripts/init_demo_tenant.sh`)
+- [x] E-commerce — catálogo, carrinho, pedidos ([`ECOMMERCE.md`](docs/modulos/ECOMMERCE.md))
+- [x] Website CMS tenant — `/site` + `/app/website` ([`WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md))
+- [ ] HTTPS (Let's Encrypt) — adiado  
+> **Consolidado 2026-07-15:** [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) · [`CHANGELOG_2026_07_14.md`](docs/changelog/CHANGELOG_2026_07_14.md)  
 > **Status detalhado:** [`docs/referencia/STATUS_SPRINTS_FASE1.md`](docs/referencia/STATUS_SPRINTS_FASE1.md)
 
 ---
@@ -368,7 +384,11 @@ Protocolo de entrevistas: [`research/`](research/)
 | Documento | Conteúdo |
 |-----------|----------|
 | [`cursor-readme.md`](cursor-readme.md) | Referência técnica rápida (Cursor AI) |
-| [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) | **Consolidado 2026-07-15** (Mandatos H2 + User↔Membro + portal) |
+| [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md) | **Consolidado 24–27 jul** (landing, deploy, domínio) |
+| [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md) | Landing SaaS Gesttora |
+| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra OrbStack + DigitalOcean |
+| [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy + HTTPS (adiado) |
+| [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) | Consolidado 2026-07-15 (Mandatos H2 + User↔Membro + portal) |
 | [`docs/changelog/CHANGELOG_PORTAL_ASSOCIADO_2026_07.md`](docs/changelog/CHANGELOG_PORTAL_ASSOCIADO_2026_07.md) | Portal do associado |
 | [`docs/changelog/CHANGELOG_USER_MEMBRO_2026_07.md`](docs/changelog/CHANGELOG_USER_MEMBRO_2026_07.md) | Ponte User ↔ Membro |
 | [`docs/changelog/CHANGELOG_MANDATO_DETAIL_H2_2026_07.md`](docs/changelog/CHANGELOG_MANDATO_DETAIL_H2_2026_07.md) | MandatoDetail + H2 deep-links |
@@ -379,6 +399,9 @@ Protocolo de entrevistas: [`research/`](research/)
 | [`docs/modulos/FINANCE.md`](docs/modulos/FINANCE.md) | Lançamentos OSC, dashboard |
 | [`docs/modulos/DOCUMENTS.md`](docs/modulos/DOCUMENTS.md) | Upload e audiência |
 | [`docs/modulos/AUTH_SIGNUP_SETUP.md`](docs/modulos/AUTH_SIGNUP_SETUP.md) | Register, setup, tenant-status |
+| [`docs/modulos/ECOMMERCE.md`](docs/modulos/ECOMMERCE.md) | Catálogo, carrinho, Associe-se |
+| [`docs/modulos/WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md) | Website público do tenant (menu, home, fases) |
+| [`docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md`](docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md) | Planejamento CMS 2026-08 |
 | [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md) | Domínio: assinatura → setup → operação → H2 |
 | [`docs/guias/UI_PADRAO_WELLSAAS.md`](docs/guias/UI_PADRAO_WELLSAAS.md) | Padrão visual de páginas |
 | [`docs/referencia/STATUS_SPRINTS_FASE1.md`](docs/referencia/STATUS_SPRINTS_FASE1.md) | Status Sprints 1–5 e pós-Sprint 5 |
@@ -396,4 +419,4 @@ Resultados de pesquisa serão publicados conforme exigências FAPESP.
 
 ---
 
-**Última atualização:** 2026-07-15
+**Última atualização:** 2026-08-17

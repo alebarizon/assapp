@@ -2,7 +2,7 @@
 
 > **Status:** documento de referência — planejamento + atualizações  
 > **Data da análise original:** 2026-07-13  
-> **Atualização:** 2026-07-15 — MandatoDetail, User↔Membro, portal associado  
+> **Atualização:** 2026-08-17 — e-commerce entregue; CMS tenant especificado  
 > **Contexto:** pós-Sprint 5; PIPE/ABCiber; Stripe adiado
 
 ---
@@ -11,16 +11,20 @@
 
 Os **5 sprints** da Fase 1 PIPE estão **concluídos**.  
 **2026-07-14:** signup/setup, UI WellSaaS, Finance + Documents.  
-**2026-07-15:** MandatoDetail + H2, ponte User↔Membro, portal do associado.
+**2026-07-15:** MandatoDetail + H2, ponte User↔Membro, portal do associado.  
+**2026-07-24–27:** landing SaaS Gesttora (`/`), tenant demo local, deploy produção + domínio `gesttora.vertent.com.br` (HTTP).
 
 | Conclusão | Detalhe |
 |-----------|---------|
 | Sprints 1–5 | ✅ Concluídos |
 | 2026-07-14 | ✅ Signup/Setup + UI + Finance + Documents |
 | 2026-07-15 | ✅ MandatoDetail/H2 + User↔Membro + portal associado |
-| Stripe / adminpanel / landing | ❌ Adiado (não comercializar de imediato) |
+| 2026-07-24–27 | ✅ Landing Gesttora + prod no ar + domínio HTTP |
+| Stripe / adminpanel | ❌ Adiado |
+| Landing editável (adminpanel) / CMS tenant | 📋 **Especificado** · impl. pendente |
+| HTTPS | ❌ Adiado |
 
-**Consolidado do dia:** [`CHANGELOG_2026_07_15.md`](../changelog/CHANGELOG_2026_07_15.md)
+**Consolidado recente:** [`CHANGELOG_2026_07_24_27.md`](../changelog/CHANGELOG_2026_07_24_27.md)
 
 ---
 
@@ -159,7 +163,9 @@ Módulos e funcionalidades mencionados no `README.md` / `cursor-readme.md` que *
 | Portal associado mínimo | ✅ `/app/portal` (2026-07-15) | Ampliar se necessário |
 | Compliance Marco Legal OSCs | Roadmap | Fase 2 |
 | Mensagens, agendamentos diretoria | Mencionados vs WellSaaS | Fase 2 |
-| Landing AssApp + website do tenant | Não trazido | Fase 2 / produção |
+| Landing SaaS Gesttora (`/`) | ✅ Estática (2026-07-24) | Edição via adminpanel depois |
+| Website CMS do tenant | ✅ **Entregue** ([`WEBSITE_CMS_TENANT.md`](../modulos/WEBSITE_CMS_TENANT.md)) | `/site` + `/app/website` |
+| E-commerce (`ecommerce/`) | ✅ Entregue (2026-08) | Associe-se integrado ao catálogo |
 
 ---
 
@@ -183,7 +189,14 @@ Pendências menores: validação E2E ABCiber na UI; seletor histórico na págin
 2. ~~Setup wizard pós-compra com **1º mandato** (fase ②)~~ → **Feito**
 3. Stripe real + `AdminPlan` + webhooks
 4. JWT com claim `tenant_schema` robusto + `adminpanel` / planos editáveis
-5. Landing AssApp + website do tenant
+### Opção D — Website CMS do tenant (2026-08) ✅ entregue
+
+> Especificação: [`WEBSITE_CMS_TENANT.md`](../modulos/WEBSITE_CMS_TENANT.md) · Changelog: [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](../changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md)
+
+1. ~~Site público `/site` + CMS `/app/website`~~ → **Feito**
+2. ~~Box Associe-se + catálogo `ecommerce`~~ → **Feito**
+3. Diretoria ← mandatos (API pública) → **Feito**
+4. **Futuro:** site de evento, `publicacoes`, `certificados`, `parcerias`
 
 ### UI (2026-07-14)
 

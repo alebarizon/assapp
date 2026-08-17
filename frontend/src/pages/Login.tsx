@@ -1,13 +1,22 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BookMarked, Lock, Mail } from "lucide-react";
 import { login } from "@/services/auth";
 import { setAuthToken, setTenantSchema } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { homePathForRole } from "@/utils/roles";
+import { resolveTenantSchema } from "@/utils/tenantSite";
 import "./Login.css";
 
+function safeNextPath(next: string | null): string | null {
+  if (!next || !next.startsWith("/app/")) return null;
+  return next;
+}
+
 export default function Login() {
+  const [searchParams] = useSearchParams();
+  const tenantHint = searchParams.get("schema") || resolveTenantSchema(searchParams);
+  const nextPath = safeNextPath(searchParams.get("next"));
   const [email, setEmail] = useState("diretoria@abciber.org.br");
   const [password, setPassword] = useState("abciber123");
   const [error, setError] = useState("");
@@ -27,7 +36,7 @@ export default function Login() {
       const completed = data.setup_completed ?? true;
       setSetupCompleted(completed);
       await refreshTenantStatus();
-      navigate(homePathForRole(data.user.role, completed));
+      navigate(nextPath || homePathForRole(data.user.role, completed));
     } catch {
       setError(
         "Credenciais inválidas. Demo: diretoria@abciber.org.br / abciber123 ou ana.silva@usp.br / associado123."
@@ -73,7 +82,15 @@ export default function Login() {
           <h2 className="login-form-title">Entrar na plataforma</h2>
           <p className="login-form-subtitle">
             Acesse o painel da sua associação científica.
+            {nextPath === "/app/portal/loja" && (
+              <> Após entrar, você irá à loja para filiação ou renovação.</>
+            )}
           </p>
+          {tenantHint && tenantHint !== "demo" && (
+            <p className="login-form-subtitle" style={{ fontSize: "0.85rem", marginTop: "-0.5rem" }}>
+              Associação: <strong>{tenantHint}</strong>
+            </p>
+          )}
 
           {error && <div className="login-error-message">{error}</div>}
 

@@ -195,7 +195,8 @@ Bloco “diretoria atual” no site público → derivado do `Mandato` ativo / `
 | Documents | ✅ | `/api/documents/`, `/app/documents` |
 | Adminpanel (planos, assinantes) | ❌ Stub | `backend/adminpanel/` |
 | Landing SaaS editável | ❌ | Reutilizar WellSaaS |
-| Website CMS do tenant | ❌ | Reutilizar WellSaaS |
+| Website CMS do tenant | ✅ | [`WEBSITE_CMS_TENANT.md`](../modulos/WEBSITE_CMS_TENANT.md) — `/site` + `/app/website` |
+| E-commerce (Associe-se) | ✅ | `ecommerce/` + CTA `auto:loja` |
 
 > **Implementado em 2026-07-14:** fases ① (signup simulado) e ② (setup com 1º mandato); Finance OSC + Documents. Stripe real e `AdminPlan` permanecem fora de escopo.
 
@@ -209,7 +210,7 @@ Prioridade natural se o objetivo for “produto SaaS vendável”:
 
 1. Stripe real + AdminPlan + webhooks
 2. Aprofundar transição H2 (deep-links membros/eventos; fase ④)
-3. Landing AssApp + website do tenant (adaptar do WellSaaS)
+3. Landing Gesttora (adminpanel) + **website do tenant** — ver [`WEBSITE_CMS_TENANT.md`](../modulos/WEBSITE_CMS_TENANT.md)
 4. `adminpanel` (planos editáveis, assinantes)
 
 Se o objetivo imediato for **validação PIPE com ABCiber**, reforçar operação (③) e transição H2 (④).
@@ -230,4 +231,4 @@ Se o objetivo imediato for **validação PIPE com ABCiber**, reforçar operaçã
 
 ---
 
-**Última atualização:** 2026-07-14
+**Última atualização:** 2026-08-17

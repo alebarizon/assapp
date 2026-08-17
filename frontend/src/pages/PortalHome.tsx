@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileText, UserRound } from "lucide-react";
+import { FileText, ShoppingBag, UserRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function PortalHome() {
@@ -15,7 +15,7 @@ export default function PortalHome() {
 
       <div className="highlight-banner" style={{ marginBottom: "1.25rem" }}>
         <p className="highlight-banner-label">Sua área na associação</p>
-        <p className="highlight-banner-title">Consulte perfil, anuidades e documentos</p>
+        <p className="highlight-banner-title">Consulte perfil, anuidades, loja e documentos</p>
         <p className="highlight-banner-meta">
           Acesso somente leitura — gestão completa fica com a diretoria.
         </p>
@@ -28,6 +28,15 @@ export default function PortalHome() {
             <div>
               <p className="list-card-title">Meu perfil</p>
               <p className="list-card-meta">Dados cadastrais, filiação e anuidades</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/loja" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <ShoppingBag size={20} />
+            <div>
+              <p className="list-card-title">Loja</p>
+              <p className="list-card-meta">Anuidades, inscrições, cursos e materiais</p>
             </div>
           </div>
         </Link>
