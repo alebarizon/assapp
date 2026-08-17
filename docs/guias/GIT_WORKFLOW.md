@@ -26,9 +26,9 @@
 
 ---
 
-## 3. Fluxo adotado: push sequencial (sem PR obrigatório)
+## 3. Fluxo adotado: push sequencial + gate no CI
 
-Staging e produção podem rodar no **mesmo droplet DigitalOcean**. Deploys simultâneos causam race condition.
+Staging e produção rodam no **mesmo droplet DigitalOcean**. Deploys SSH simultâneos causam race condition.
 
 Os workflows usam:
 
@@ -38,7 +38,15 @@ concurrency:
   cancel-in-progress: false
 ```
 
-Ainda assim: **sempre valide staging antes de promover para `main`**.
+**Gate automático (desde 2026-08):** em push para `main`, o job `verify-staging` em `deploy-production.yml`:
+
+1. Confirma que o commit existe em `origin/develop`
+2. Aguarda o workflow **Deploy to Staging** concluir com **success** no mesmo SHA
+3. Só então build + deploy de produção prosseguem
+
+Assim, mesmo que `develop` e `main` sejam pushados juntos, **produção espera staging**.
+
+Ainda assim, siga o fluxo manual: **push `develop` → validar `:8080` → push `main`** (`docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`).
 
 ---
 

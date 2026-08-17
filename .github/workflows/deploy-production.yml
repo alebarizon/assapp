@@ -10,6 +10,8 @@ on:
       - '.github/*.md'
   workflow_dispatch:
 
+# Garante que apenas um deploy SSH rode por vez no mesmo droplet.
+# Se staging estiver deployando, produção aguarda na fila (cancel-in-progress: false).
 concurrency:
   group: deploy-server
   cancel-in-progress: false
@@ -20,7 +22,65 @@ env:
   IMAGE_NAME_FRONTEND: ${{ secrets.DOCKER_USERNAME }}/assapp-frontend
 
 jobs:
+  verify-staging:
+    name: Aguardar staging OK (mesmo commit)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout (histórico para comparar branches)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Confirmar commit em develop
+        run: |
+          git fetch origin develop
+          if ! git merge-base --is-ancestor "${{ github.sha }}" "origin/develop"; then
+            echo "❌ Este commit não está em origin/develop."
+            echo "Fluxo obrigatório: push develop → validar staging → push main"
+            echo "Ver docs/guias/GIT_WORKFLOW.md"
+            exit 1
+          fi
+          echo "✅ Commit presente em origin/develop"
+
+      - name: Aguardar Deploy to Staging concluir com sucesso
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COMMIT="${{ github.sha }}"
+          REPO="${{ github.repository }}"
+          echo "Aguardando workflow Deploy to Staging (commit ${COMMIT})..."
+          for attempt in $(seq 1 90); do
+            RUNS=$(gh run list \
+              --repo "$REPO" \
+              --workflow=deploy-staging.yml \
+              --commit="$COMMIT" \
+              --json status,conclusion \
+              --limit 5)
+            echo "Tentativa ${attempt}/90: ${RUNS}"
+            if echo "$RUNS" | grep -q '"conclusion":"success"'; then
+              echo "✅ Staging validado — produção pode continuar"
+              exit 0
+            fi
+            if echo "$RUNS" | grep -q '"conclusion":"failure"'; then
+              echo "❌ Deploy staging falhou para este commit — produção bloqueada"
+              exit 1
+            fi
+            if echo "$RUNS" | grep -q '"conclusion":"cancelled"'; then
+              echo "❌ Deploy staging cancelado — produção bloqueada"
+              exit 1
+            fi
+            sleep 30
+          done
+          echo "❌ Timeout (45 min) aguardando staging para commit ${COMMIT}"
+          exit 1
+
   build-and-deploy:
+    needs: verify-staging
+    if: always() && (needs.verify-staging.result == 'success' || needs.verify-staging.result == 'skipped')
     runs-on: ubuntu-latest
 
     steps:

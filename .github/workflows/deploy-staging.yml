@@ -10,6 +10,8 @@ on:
       - '.github/*.md'
   workflow_dispatch:
 
+# Garante que apenas um deploy SSH rode por vez no mesmo droplet.
+# Se produção estiver deployando, staging aguarda na fila (cancel-in-progress: false).
 concurrency:
   group: deploy-server
   cancel-in-progress: false
