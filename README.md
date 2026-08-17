@@ -250,7 +250,16 @@ Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTR
 | Produção | http://gesttora.vertent.com.br/ · http://159.203.183.184/ |
 | HTTPS | adiado — ver guia de deploy |
 
-**Branches alinhadas** em `b2433e5` (2026-07-25). Changelog: [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md)
+**Branches alinhadas** em `5486641` (2026-08-17). Changelog: [`docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md)
+
+### Credenciais (remoto, após seed)
+
+| Ambiente | Login ABCiber |
+|----------|----------------|
+| Staging `:8080` | `diretoria@abciber.org.br` / `abciber123` |
+| Produção | idem |
+
+Seed no droplet: `ASSAPP_BACKEND_CONTAINER=assapp_backend_{staging\|prod} ./scripts/init_sistema_tenant.sh`
 
 ---
 
@@ -359,7 +368,8 @@ docker compose exec backend python manage.py migrate_schemas
 - [x] E-commerce — catálogo, carrinho, pedidos ([`ECOMMERCE.md`](docs/modulos/ECOMMERCE.md))
 - [x] Website CMS tenant — `/site` + `/app/website` ([`WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md))
 - [ ] HTTPS (Let's Encrypt) — adiado  
-> **Consolidado 2026-07-15:** [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) · [`CHANGELOG_2026_07_14.md`](docs/changelog/CHANGELOG_2026_07_14.md)  
+
+> **Consolidado 2026-08-17:** [`docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md) · [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](docs/changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md)  
 > **Status detalhado:** [`docs/referencia/STATUS_SPRINTS_FASE1.md`](docs/referencia/STATUS_SPRINTS_FASE1.md)
 
 ---

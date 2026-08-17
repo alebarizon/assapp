@@ -59,22 +59,29 @@ Subdomínio dev: `http://demo.localhost:5174/site` (sem `?schema=`).
 
 ## Deploy remoto (staging + produção)
 
-Após push em `develop` / `main`, o CI builda imagens e roda `deploy.sh`.  
-Migrations são aplicadas **automaticamente no startup** do backend (compose), não no deploy.sh.
+Ver checklist completo: [`CHANGELOG_2026_08_17_DEPLOY_SEED.md`](CHANGELOG_2026_08_17_DEPLOY_SEED.md).
 
-Seed demo (opcional no droplet):
+Após push em `develop` / `main`, o CI builda imagens e roda `deploy.sh`.  
+Migrations são aplicadas **automaticamente no startup** do backend (compose).
+
+**Seed obrigatório** (1ª vez em cada ambiente):
 
 ```bash
-cd /opt/assapp
-docker exec assapp_backend_staging bash -c '...'  # ver init_demo_tenant.sh
-# ou adaptar container: assapp_backend_prod
+ASSAPP_BACKEND_CONTAINER=assapp_backend_staging ./scripts/init_sistema_tenant.sh
+ASSAPP_BACKEND_CONTAINER=assapp_backend_prod ./scripts/init_sistema_tenant.sh
 ```
 
-Validação pós-deploy:
+Login: `diretoria@abciber.org.br` / `abciber123`
+
+Seed demo (opcional): `init_demo_tenant.sh` — tenant `demo` + website/anuidades.
+
+Validação:
 
 ```bash
 curl -s "http://159.203.183.184:8080/health/"
-curl -s "http://159.203.183.184:8080/api/website/public/?schema=demo"
+curl -s -X POST http://159.203.183.184:8080/api/auth/simple/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"email":"diretoria@abciber.org.br","password":"abciber123"}'
 ```
 
 ---

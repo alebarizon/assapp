@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-08-17 (e-commerce · planejamento CMS tenant)
+> **Última revisão:** 2026-08-17 (e-commerce · website CMS · deploy/seed remoto)
 
 ---
 
@@ -13,7 +13,10 @@
 | Produção | http://gesttora.vertent.com.br/ · http://159.203.183.184/ | `main` |
 | Dev Mac | http://localhost:5174 | `orb` |
 
-Droplet: `159.203.183.184` · HTTPS: **adiado** · Changelog: [`CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md)
+Droplet: `159.203.183.184` · HTTPS: **adiado**  
+Changelog do dia: [`CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md)
+
+**Login remoto (ABCiber):** `diretoria@abciber.org.br` / `abciber123` — requer `init_sistema_tenant.sh` no droplet.
 
 ---
 
@@ -68,7 +71,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 |--------|----------|
 | `public` | tenants (com `setup_completed`, `plan_slug`), domains |
 | `sistema` | superadmin |
-| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, accounts |
+| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, website, accounts |
 
 > `adminpanel` / `payments` — stubs; Stripe continua simulado. `finance` e `documents` ativos no tenant.
 
@@ -177,8 +180,10 @@ docker compose exec backend python manage.py migrate_schemas
 ```
 
 Seed tenants:
-- `./scripts/init_sistema_tenant.sh` — `sistema` + `abciber` (piloto)
-- `./scripts/init_demo_tenant.sh` — tenant `demo` (`demo@demo.com` / `demo`)
+- `./scripts/init_sistema_tenant.sh` — `sistema` + `abciber` (`diretoria@abciber.org.br` / `abciber123`)
+- `./scripts/init_demo_tenant.sh` — tenant `demo` (`demo@demo.com` / `demo`) + website/anuidades
+
+**Droplet:** rodar seed em **cada** ambiente após 1º deploy — ver [`DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md).
 
 ---
 
@@ -192,11 +197,12 @@ Já adaptado:
 - MandatoDetail + deep-links H2
 - Ponte User↔Membro + portal associado (`/app/portal`)
 - Landing SaaS Gesttora em `/` (estática; `gesttora.vertent.com.br`)
+- E-commerce (`ecommerce/`) + Website CMS tenant (`website/`, `/site`, `/app/website`)
 
 Copiar/adaptar depois (Stripe por último):
 - Convite User a partir de Membro; JWT `tenant_schema`
 - Stripe real, `adminpanel` (edição da landing Gesttora)
-- **Website CMS tenant** — ver [`WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md) (base: WellSaaS `website_cms`)
+- Site de evento, publicações, certificados (módulos futuros)
 
 **Não copiar:** meal plans, prescricao — e-commerce usa motor WellSaaS adaptado em `ecommerce/`
 

@@ -1,7 +1,7 @@
 # Deploy DigitalOcean — AssApp
 
 **Última atualização:** 2026-08-17  
-**Changelog recente:** [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](../changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md) · [`CHANGELOG_2026_07_24_27.md`](../changelog/CHANGELOG_2026_07_24_27.md)
+**Changelog recente:** [`CHANGELOG_2026_08_17_DEPLOY_SEED.md`](../changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md) · [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](../changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md)
 
 ---
 
@@ -17,6 +17,8 @@
 
 **Mesmo droplet, stacks isolados:** staging (`:8080`) e produção (`:80`) usam `COMPOSE_PROJECT_NAME` distinto (`assapp_staging` / `assapp_prod`) em `deploy.sh` — um deploy **não** derruba o outro.
 
+Validado em 2026-08-17 (commit `5486641`).
+
 ### Produção (no ar)
 
 | Campo | Valor |
@@ -27,8 +29,6 @@
 | Branch CI | `main` |
 | Compose | `docker-compose.prod.yml` |
 | Tag imagens | `latest` |
-
-Validado em 2026-07-25 (Actions run `30174258426`).
 
 ---
 
@@ -98,7 +98,7 @@ Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 | Produção (`main`) | ✅ (promovida 2026-07-25 · landing Gesttora) |
 | Domínio HTTP | ✅ `gesttora.vertent.com.br` → A `159.203.183.184` |
 | Domínio + SSL (HTTPS) | ❌ **adiado** — ver seção abaixo |
-| Seed tenant sistema + abciber | Rodar após 1º deploy — ver abaixo |
+| Seed tenant sistema + abciber | ✅ executado staging + prod (2026-08-17) |
 
 ---
 
