@@ -37,12 +37,14 @@ if [ "$ENVIRONMENT" = "production" ]; then
   IMAGE_TAG_DEFAULT="latest"
   HOST_PORT=80
   BACKEND_CONTAINER="assapp_backend_prod"
+  COMPOSE_PROJECT_NAME="assapp_prod"
   CONTAINER_NAMES="assapp_db_prod assapp_backend_prod assapp_frontend_prod assapp_nginx_prod"
 else
   COMPOSE_FILE="docker-compose.staging.yml"
   IMAGE_TAG_DEFAULT="develop"
   HOST_PORT=8080
   BACKEND_CONTAINER="assapp_backend_staging"
+  COMPOSE_PROJECT_NAME="assapp_staging"
   CONTAINER_NAMES="assapp_db_staging assapp_backend_staging assapp_frontend_staging assapp_nginx_staging"
 fi
 
@@ -73,8 +75,9 @@ for df in frontend/Dockerfile backend/Dockerfile; do
   fi
 done
 
-log "Parando stack anterior..."
-docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" down --remove-orphans --timeout 30 2>/dev/null || true
+log "Parando stack anterior ($COMPOSE_PROJECT_NAME)..."
+COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \
+  docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" down --remove-orphans --timeout 30 2>/dev/null || true
 for c in $CONTAINER_NAMES; do
   docker stop "$c" 2>/dev/null || true
   docker rm -f "$c" 2>/dev/null || true
@@ -98,8 +101,9 @@ docker pull "$BACKEND_IMAGE"
 log "Pull $FRONTEND_IMAGE"
 docker pull "$FRONTEND_IMAGE"
 
-log "Subindo stack..."
-IMAGE_TAG="$IMAGE_TAG_VALUE" DOCKER_USERNAME="$DOCKER_USERNAME_VALUE" \
+log "Subindo stack ($COMPOSE_PROJECT_NAME)..."
+COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \
+  IMAGE_TAG="$IMAGE_TAG_VALUE" DOCKER_USERNAME="$DOCKER_USERNAME_VALUE" \
   docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
 
 log "Aguardando health (:$HOST_PORT/health/)..."
@@ -122,5 +126,6 @@ else
   exit 1
 fi
 
-docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps
+COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \
+  docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps
 log "Deploy $ENVIRONMENT concluído."

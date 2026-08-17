@@ -205,6 +205,7 @@ jobs:
 
             sed -i "s|^DOCKER_USERNAME=.*|DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}|" .env.production
             sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=latest|" .env.production
+            sed -i "s|^ALLOWED_HOSTS=.*|ALLOWED_HOSTS=159.203.183.184,gesttora.vertent.com.br,localhost,127.0.0.1|" .env.production
             if grep -q 'CHANGE_THIS_TO_A_STRONG_SECRET_KEY' .env.production; then
               PROD_SECRET=$(openssl rand -hex 32)
               sed -i "s|CHANGE_THIS_TO_A_STRONG_SECRET_KEY|$PROD_SECRET|g" .env.production

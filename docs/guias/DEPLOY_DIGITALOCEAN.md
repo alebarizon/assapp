@@ -15,8 +15,7 @@
 | Compose | `docker-compose.staging.yml` |
 | Tag imagens | `develop` |
 
-Validado em 2026-07-25 (commit `b2433e5`).  
-**Próximo deploy:** e-commerce + website CMS (2026-08-17) — ver [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](../changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md).
+**Mesmo droplet, stacks isolados:** staging (`:8080`) e produção (`:80`) usam `COMPOSE_PROJECT_NAME` distinto (`assapp_staging` / `assapp_prod`) em `deploy.sh` — um deploy **não** derruba o outro.
 
 ### Produção (no ar)
 
