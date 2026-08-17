@@ -327,7 +327,7 @@ with schema_context('abciber'):
         )
         doc.file.save(
             'estatuto-demo.txt',
-            ContentFile(b'Estatuto social ABCiber — arquivo demo AssApp PIPE.'),
+            ContentFile(b'Estatuto social ABCiber - arquivo demo AssApp PIPE.'),
             save=True,
         )
         print(f\"📄 Documento demo: {doc.title}\")
@@ -344,7 +344,7 @@ with schema_context('abciber'):
         )
         doc_ana.file.save(
             'comprovante-ana.txt',
-            ContentFile(b'Comprovante de filiação — Ana Silva — demo AssApp.'),
+            ContentFile(b'Comprovante de filiacao - Ana Silva - demo AssApp.'),
             save=True,
         )
         print(f\"📄 Documento pessoal: {doc_ana.title}\")

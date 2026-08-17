@@ -98,8 +98,7 @@ Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 | Produção (`main`) | ✅ (promovida 2026-07-25 · landing Gesttora) |
 | Domínio HTTP | ✅ `gesttora.vertent.com.br` → A `159.203.183.184` |
 | Domínio + SSL (HTTPS) | ❌ **adiado** — ver seção abaixo |
-| Seed tenant sistema (staging) | ❓ |
-| Seed tenant `demo` (staging/prod) | Rodar após deploy — ver abaixo |
+| Seed tenant sistema + abciber | Rodar após 1º deploy — ver abaixo |
 
 ---
 
@@ -130,14 +129,23 @@ docker compose -f docker-compose.staging.yml --env-file .env.staging restart bac
 
 **Ordem obrigatória:** `--shared` primeiro (schema `public`), depois tenants.
 
-Seed demo (website + anuidades) — **opcional**, só se quiser tenant `demo` no ambiente remoto:
+Seed demo (website + anuidades) — **opcional**:
+
+```bash
+ASSAPP_BACKEND_CONTAINER=assapp_backend_staging ./scripts/init_demo_tenant.sh
+```
+
+**Obrigatório após 1º deploy** (login ABCiber e dados piloto):
 
 ```bash
 cd /opt/assapp
-chmod +x scripts/init_demo_tenant.sh
-# Edite ASSAPP_BACKEND_CONTAINER se o nome do container for _prod
-ASSAPP_BACKEND_CONTAINER=assapp_backend_staging ./scripts/init_demo_tenant.sh
+# Staging:
+ASSAPP_BACKEND_CONTAINER=assapp_backend_staging ./scripts/init_sistema_tenant.sh
+# Produção:
+ASSAPP_BACKEND_CONTAINER=assapp_backend_prod ./scripts/init_sistema_tenant.sh
 ```
+
+Credenciais criadas: `diretoria@abciber.org.br` / `abciber123` (tenant `abciber`).
 
 Validação:
 
