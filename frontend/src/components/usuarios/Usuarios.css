@@ -1,0 +1,135 @@
+.us-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666666;
+  padding: 0.35rem;
+  border-radius: 4px;
+  display: inline-flex;
+}
+
+.us-icon-btn:hover {
+  background: #f1efe9;
+  color: #131313;
+}
+
+.us-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.us-card-inativo {
+  opacity: 0.65;
+}
+
+.us-acoes {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.us-voce {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #666666;
+  border: 1px solid #ecebe6;
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+}
+
+.us-perfil-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  background: #f1efe9;
+  color: #3d3d3d;
+}
+
+.us-perfil-gestor {
+  background: #1a5f4a;
+  color: #ffffff;
+}
+
+.us-perfil-diretoria {
+  background: #e3efe9;
+  color: #1a5f4a;
+}
+
+.us-perfil-administrativo {
+  background: #e8eefb;
+  color: #2c4a8a;
+}
+
+.us-perfil-financeiro {
+  background: #fbf1df;
+  color: #8a5a12;
+}
+
+.us-perfis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.6rem;
+}
+
+.us-perfil-opcao {
+  cursor: pointer;
+}
+
+.us-perfil-opcao-on {
+  border-color: #1a5f4a;
+  background: #f5faf8;
+}
+
+.us-perfil-desc {
+  display: block;
+  font-size: 0.8rem;
+  color: #666666;
+  margin-top: 0.15rem;
+}
+
+.us-sugerido {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: #1a5f4a;
+  font-weight: 500;
+}
+
+.us-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #1a5f4a;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.us-secao {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem;
+}
+
+.us-matriz td,
+.us-matriz th {
+  text-align: center;
+}
+
+.us-matriz td:first-child,
+.us-matriz th:first-child {
+  text-align: left;
+}
+
+.us-nivel-total {
+  color: #067647;
+  font-weight: 600;
+}
+
+.us-nivel-leitura {
+  color: #8a5a12;
+}
+
+.us-nivel-nenhum {
+  color: #b0b0b0;
+}

@@ -36,6 +36,7 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
 
     serializer_class = CatalogItemSerializer
     lookup_field = "slug"
+    modulo = "loja"
 
     def get_permissions(self):
         if self.action in ("list", "retrieve", "loja"):
@@ -77,6 +78,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     """Pedidos — diretoria vê todos; associado vê os próprios."""
 
     serializer_class = OrderSerializer
+    modulo = "loja"
 
     def get_permissions(self):
         return [IsAuthenticated()]
@@ -271,6 +273,7 @@ class EcommerceResumoView(APIView):
     """KPIs rápidos para dashboard da diretoria."""
 
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "loja"
 
     def get(self, request):
         return Response(

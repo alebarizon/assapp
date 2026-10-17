@@ -4,7 +4,7 @@ import { BookMarked, Lock, Mail } from "lucide-react";
 import { login } from "@/services/auth";
 import { setAuthToken, setTenantSchema } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { homePathForRole } from "@/utils/roles";
+import { homePathForUser } from "@/utils/roles";
 import { resolveTenantSchema } from "@/utils/tenantSite";
 import "./Login.css";
 
@@ -36,7 +36,7 @@ export default function Login() {
       const completed = data.setup_completed ?? true;
       setSetupCompleted(completed);
       await refreshTenantStatus();
-      navigate(nextPath || homePathForRole(data.user.role, completed));
+      navigate(nextPath || homePathForUser(data.user, completed));
     } catch {
       setError(
         "Credenciais inválidas. Demo: diretoria@abciber.org.br / abciber123 ou ana.silva@usp.br / associado123."
@@ -135,6 +135,15 @@ export default function Login() {
               {loading ? "Entrando..." : "Entrar"}
             </button>
           </form>
+
+          <p className="login-signup-prompt" style={{ marginTop: "0.75rem" }}>
+            <Link
+              to={`/esqueci-senha${searchParams.get("schema") ? `?schema=${encodeURIComponent(searchParams.get("schema")!)}` : ""}`}
+              className="login-signup-link"
+            >
+              Esqueci a senha
+            </Link>
+          </p>
 
           <p className="login-signup-prompt">
             Nova associação?{" "}

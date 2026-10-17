@@ -35,6 +35,7 @@ class WebsiteConfigView(APIView):
     """GET/PATCH config singleton — diretoria."""
 
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "website"
 
     def get(self, request):
         config = get_or_create_config()
@@ -51,6 +52,7 @@ class WebsiteConfigView(APIView):
 class SitePageViewSet(viewsets.ModelViewSet):
     serializer_class = SitePageSerializer
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "website"
     lookup_field = "slug"
 
     def get_queryset(self):

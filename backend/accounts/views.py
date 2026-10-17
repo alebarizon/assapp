@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.utils import timezone
-from django.utils.crypto import get_random_string
 from django_tenants.utils import get_tenant_model, schema_context
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -13,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .access import GESTOR, is_gestor, sugerir_perfis
 from .models import User
 from .plans import PLAN_SLUGS, SAAS_PLANS, get_plan
 from .serializers import UserSerializer
@@ -273,6 +273,7 @@ class RegisterAssociationView(APIView):
                 first_name=first_name,
                 last_name=last_name,
                 role=User.ASSOCIATION_ADMIN,
+                perfis=[GESTOR],
                 phone_number=phone,
                 is_staff=True,
                 is_active=True,
@@ -319,6 +320,12 @@ class AssociationSetupView(APIView):
             return Response(
                 {"detail": "Superadmin não realiza setup de associação."},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not is_gestor(request.user):
+            return Response(
+                {"detail": "Apenas o gestor da associação pode concluir o setup."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         schema = _resolve_request_schema(request)
@@ -438,6 +445,7 @@ class AssociationSetupView(APIView):
                 )
 
             admin_user = User.objects.get(pk=request.user.pk)
+            convidados = []
 
             with transaction.atomic():
                 mandato = Mandato.objects.create(
@@ -463,15 +471,19 @@ class AssociationSetupView(APIView):
                                 first_name=item["first_name"] or email.split("@")[0],
                                 last_name=item["last_name"],
                                 role=User.BOARD_MEMBER,
+                                perfis=sugerir_perfis([item["cargo"]]),
                                 is_active=True,
                                 perfil_tecnico=User.PERFIL_INICIANTE,
                                 tenant_id=tenant_id,
                             )
-                            board_user.set_password(get_random_string(12))
+                            board_user.set_unusable_password()
                             board_user.save()
+                            convidados.append(board_user)
                         elif board_user.role == User.MEMBER:
                             board_user.role = User.BOARD_MEMBER
-                            board_user.save(update_fields=["role"])
+                            board_user.perfis = sugerir_perfis([item["cargo"]])
+                            board_user.save(update_fields=["role", "perfis"])
+                            convidados.append(board_user)
 
                     CargoMandato.objects.create(
                         mandato=mandato,
@@ -482,6 +494,12 @@ class AssociationSetupView(APIView):
                         data_fim=data_fim,
                         ativo=True,
                     )
+
+            from .equipe import enviar_convite
+
+            associacao = payload.get("association_name") or tenant.name
+            for convidado in convidados:
+                enviar_convite(convidado, schema, associacao, admin_user)
 
         with schema_context("public"):
             Tenant.objects.filter(id=tenant_id).update(setup_completed=True)

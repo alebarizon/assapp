@@ -108,6 +108,7 @@ def _build_summary(month: int, year: int) -> dict:
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "financeiro"
 
     def get_queryset(self):
         qs = Transaction.objects.select_related("user", "mandato").all()
@@ -132,6 +133,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 class FinancialDashboardView(APIView):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "financeiro"
 
     def get(self, request):
         month, year = _parse_month_year(request)
@@ -150,6 +152,7 @@ class FinancialDashboardView(APIView):
 
 class MonthlyReportView(APIView):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "financeiro"
 
     def get(self, request):
         month, year = _parse_month_year(request)
@@ -158,6 +161,7 @@ class MonthlyReportView(APIView):
 
 class SendReportEmailView(APIView):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "financeiro"
 
     def post(self, request):
         month, year = _parse_month_year(request)
@@ -216,6 +220,7 @@ class CategoriesView(APIView):
     """Lista categorias OSC para o frontend."""
 
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "financeiro"
 
     def get(self, request):
         return Response(

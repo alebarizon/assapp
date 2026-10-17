@@ -2,8 +2,11 @@
 import uuid
 
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.db import models
+
+from .access import PERFIL_CHOICES
 
 
 class User(AbstractUser):
@@ -36,6 +39,12 @@ class User(AbstractUser):
     username = models.CharField(max_length=150, unique=True, db_index=True)
     role = models.CharField(
         max_length=32, choices=ROLE_CHOICES, default=ASSOCIATION_ADMIN, db_index=True
+    )
+    perfis = ArrayField(
+        models.CharField(max_length=20, choices=PERFIL_CHOICES),
+        default=list,
+        blank=True,
+        help_text="Perfis de acesso da equipe (acumuláveis). Vazio para associados.",
     )
     tenant = models.ForeignKey(
         "tenants.Tenant",

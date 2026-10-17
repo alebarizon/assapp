@@ -25,6 +25,7 @@ class ContextoHistoricoViewSet(viewsets.ModelViewSet):
     H1 — CRUD de contextos históricos com vínculo a mandatos.
     """
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "memoria"
 
     def get_queryset(self):
         qs = ContextoHistorico.objects.select_related("mandato", "autor")
@@ -92,6 +93,7 @@ class ContextoHistoricoViewSet(viewsets.ModelViewSet):
 class TimelineInstitucionalViewSet(viewsets.ReadOnlyModelViewSet):
     """Timeline cronológica por mandato (H1)."""
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "memoria"
     serializer_class = TimelineInstitucionalSerializer
 
     def get_queryset(self):

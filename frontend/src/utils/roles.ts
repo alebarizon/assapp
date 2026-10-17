@@ -1,4 +1,5 @@
-/** Helpers de role — portal associado vs painel da diretoria */
+/** Helpers de role e perfis de acesso — portal associado vs painel da equipe */
+import type { ModuloPainel, NivelAcesso, User } from "@/types";
 
 const BOARD_ROLES = new Set([
   "superadmin",
@@ -14,8 +15,37 @@ export function isMember(role?: string | null): boolean {
   return role === "member";
 }
 
-export function homePathForRole(role?: string | null, setupCompleted = true): string {
-  if (!setupCompleted && isBoardOrAdmin(role)) return "/app/setup";
-  if (isMember(role)) return "/app/portal";
-  return "/app/memoria";
+export function nivelModulo(user: User | null | undefined, modulo: ModuloPainel): NivelAcesso | null {
+  return user?.modulos?.[modulo] ?? null;
+}
+
+export function podeVer(user: User | null | undefined, modulo: ModuloPainel): boolean {
+  return nivelModulo(user, modulo) !== null;
+}
+
+export function podeEditar(user: User | null | undefined, modulo: ModuloPainel): boolean {
+  return nivelModulo(user, modulo) === "total";
+}
+
+export function isGestor(user: User | null | undefined): boolean {
+  return podeEditar(user, "usuarios");
+}
+
+/** Ordem de preferência da página inicial da equipe. */
+const HOME_POR_MODULO: [ModuloPainel, string][] = [
+  ["memoria", "/app/memoria"],
+  ["membros", "/app/membros"],
+  ["financeiro", "/app/finance"],
+  ["eventos", "/app/eventos"],
+  ["contatos", "/app/contatos"],
+  ["documentos", "/app/documents"],
+  ["suporte", "/app/suporte"],
+];
+
+export function homePathForUser(user: User | null | undefined, setupCompleted = true): string {
+  if (!setupCompleted && isBoardOrAdmin(user?.role)) return "/app/setup";
+  if (isMember(user?.role)) return "/app/portal";
+  if (!user?.modulos) return "/app/memoria";
+  const destino = HOME_POR_MODULO.find(([m]) => podeVer(user, m));
+  return destino ? destino[1] : "/app/suporte";
 }

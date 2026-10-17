@@ -21,6 +21,7 @@ def _membro_do_user(user):
 class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "documentos"
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):

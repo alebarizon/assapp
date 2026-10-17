@@ -34,6 +34,7 @@ class MandatoViewSet(viewsets.ModelViewSet):
     H2 — Onboarding via ações de transição.
     """
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "mandatos"
 
     def get_queryset(self):
         return Mandato.objects.prefetch_related("cargos", "snapshots").order_by(
@@ -150,6 +151,7 @@ class MandatoViewSet(viewsets.ModelViewSet):
 class TransicaoMandatoViewSet(viewsets.ReadOnlyModelViewSet):
     """Consulta transições de mandato em andamento ou concluídas."""
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "mandatos"
     serializer_class = TransicaoMandatoSerializer
 
     def get_queryset(self):
@@ -178,6 +180,7 @@ class OnboardingEtapaViewSet(viewsets.ReadOnlyModelViewSet):
     Filtra por perfil técnico do usuário autenticado.
     """
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "onboarding"
     serializer_class = OnboardingEtapaSerializer
 
     def get_queryset(self):

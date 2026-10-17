@@ -37,6 +37,7 @@ from .services import (
 
 class MembroViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "membros"
 
     def get_queryset(self):
         qs = Membro.objects.select_related("user").prefetch_related("filiacoes__anuidades")
@@ -123,6 +124,7 @@ class MembroViewSet(viewsets.ModelViewSet):
 
 class FiliacaoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "membros"
     serializer_class = FiliacaoSerializer
 
     def get_queryset(self):
@@ -139,6 +141,7 @@ class FiliacaoViewSet(viewsets.ModelViewSet):
 
 class AnuidadeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = ("membros", "financeiro")
     serializer_class = AnuidadeSerializer
     http_method_names = ["get", "post", "head", "options"]
 
