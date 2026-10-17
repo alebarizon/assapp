@@ -1,4 +1,6 @@
 """API REST — Eventos Acadêmicos (H3)."""
+from django.db import connection
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -6,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import User
+from core.emails import nome_associacao
 from mandatos.permissions import IsBoardOrAdmin
 from membros.models import Membro
 
@@ -33,7 +36,9 @@ from .serializers import (
 from .services import (
     abrir_cfp,
     atribuir_parecerista,
+    build_inscricao_certificate,
     concluir_parecer,
+    emitir_certificados,
     criar_evento_com_mandato,
     gerar_anais,
     resumo_eventos,
@@ -44,6 +49,7 @@ from .services import (
 class EventoAcademicoViewSet(viewsets.ModelViewSet):
     """H3 — Eventos científicos integrados a membros e mandatos."""
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "eventos"
 
     def get_queryset(self):
         return EventoAcademico.objects.select_related(
@@ -92,6 +98,32 @@ class EventoAcademicoViewSet(viewsets.ModelViewSet):
         from .serializers import AnaisPublicacaoSerializer
         return Response(AnaisPublicacaoSerializer(anais).data)
 
+    @action(detail=True, methods=["post"])
+    def presencas(self, request, pk=None):
+        """POST {inscricoes: [ids], presente: bool} — marca/desmarca presença em lote."""
+        evento = self.get_object()
+        ids = request.data.get("inscricoes")
+        if not isinstance(ids, list) or not ids:
+            return Response({"inscricoes": "Selecione ao menos uma inscrição."}, status=status.HTTP_400_BAD_REQUEST)
+        presente = bool(request.data.get("presente", True))
+        alteradas = evento.inscricoes.filter(pk__in=ids).update(presente=presente)
+        return Response({"alteradas": alteradas})
+
+    @action(detail=True, methods=["post"], url_path="emitir-certificados")
+    def emitir_certificados(self, request, pk=None):
+        """POST {notificar?: bool} — emite certificados para os presentes ainda sem código."""
+        evento = self.get_object()
+        try:
+            resultado = emitir_certificados(
+                evento,
+                connection.schema_name,
+                nome_associacao(request),
+                notificar=bool(request.data.get("notificar", True)),
+            )
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(resultado)
+
     @action(detail=True, methods=["get"])
     def submissoes(self, request, pk=None):
         evento = self.get_object()
@@ -105,6 +137,7 @@ class EventoAcademicoViewSet(viewsets.ModelViewSet):
 
 class SubmissaoTrabalhoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "eventos"
     http_method_names = ["get", "post", "head", "options"]
 
     def get_queryset(self):
@@ -156,6 +189,7 @@ class SubmissaoTrabalhoViewSet(viewsets.ModelViewSet):
 
 class ParecerViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "eventos"
     serializer_class = ParecerSerializer
 
     def get_queryset(self):
@@ -172,6 +206,7 @@ class ParecerViewSet(viewsets.ReadOnlyModelViewSet):
 
 class InscricaoEventoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "eventos"
     serializer_class = InscricaoEventoSerializer
 
     def get_queryset(self):
@@ -193,3 +228,13 @@ class InscricaoEventoViewSet(viewsets.ModelViewSet):
                 if not serializer.validated_data.get("email"):
                     save_kwargs["email"] = membro.email
         serializer.save(**save_kwargs)
+
+    @action(detail=True, methods=["get"])
+    def certificado(self, request, pk=None):
+        inscricao = self.get_object()
+        if not inscricao.certificado_codigo:
+            return Response({"detail": "Certificado ainda não emitido."}, status=status.HTTP_404_NOT_FOUND)
+        pdf = build_inscricao_certificate(inscricao, connection.schema_name, nome_associacao(request))
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="certificado-{inscricao.evento.slug}.pdf"'
+        return response

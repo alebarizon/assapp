@@ -87,9 +87,24 @@ class InscricaoEventoSerializer(serializers.ModelSerializer):
         model = InscricaoEvento
         fields = (
             "id", "evento", "membro", "nome", "email",
-            "confirmada", "pago_em", "created_at",
+            "confirmada", "pago_em", "presente",
+            "certificado_codigo", "certificado_emitido_em", "created_at",
         )
-        read_only_fields = ("pago_em", "created_at")
+        read_only_fields = ("pago_em", "certificado_codigo", "certificado_emitido_em", "created_at")
+        extra_kwargs = {"nome": {"required": False}, "email": {"required": False}}
+
+    def validate(self, attrs):
+        membro = attrs.get("membro")
+        if membro:
+            attrs.setdefault("nome", membro.nome_completo)
+            attrs.setdefault("email", membro.email)
+        if not self.instance and (not attrs.get("nome") or not attrs.get("email")):
+            raise serializers.ValidationError("Informe o associado ou nome e e-mail do participante.")
+        evento = attrs.get("evento")
+        if not self.instance and evento and attrs.get("email"):
+            if evento.inscricoes.filter(email__iexact=attrs["email"]).exists():
+                raise serializers.ValidationError("Este e-mail já está inscrito no evento.")
+        return attrs
 
 
 class EventoListSerializer(serializers.ModelSerializer):
@@ -124,6 +139,7 @@ class EventoDetailSerializer(EventoListSerializer):
         fields = EventoListSerializer.Meta.fields + (
             "descricao", "capacidade_max", "mandato", "mandato_titulo",
             "call_for_papers", "anais", "inscricoes_count", "updated_at",
+            "certificado_habilitado", "carga_horaria",
         )
 
     def get_inscricoes_count(self, obj):
@@ -136,6 +152,7 @@ class EventoCreateSerializer(serializers.ModelSerializer):
         fields = (
             "titulo", "slug", "descricao", "data_inicio", "data_fim",
             "local", "modalidade", "capacidade_max", "valor_inscricao", "status",
+            "certificado_habilitado", "carga_horaria",
         )
 
 

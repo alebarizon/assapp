@@ -2,8 +2,12 @@
  * Detalhe do Evento — CFP, submissões, pareceres e geração de anais (H3)
  */
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, FilePlus, Send, UserCheck } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, BookOpen, ClipboardList, FilePlus, Send, UserCheck } from "lucide-react";
+import { createFormulario, listFormularios } from "@/services/formularios";
+import type { FormularioResumo } from "@/types/formularios";
+import InscricoesCertificados from "@/components/eventos/InscricoesCertificados";
+import { FORMULARIO_STATUS_BADGE, novaPergunta } from "@/types/formularios";
 import type { EventoAcademico, SubmissaoTrabalho } from "@/types/eventos";
 import { useAuth } from "@/contexts/AuthContext";
 import { listMembros } from "@/services/membros";
@@ -22,12 +26,15 @@ import {
 export default function EventoDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [evento, setEvento] = useState<EventoAcademico | null>(null);
   const [submissoes, setSubmissoes] = useState<SubmissaoTrabalho[]>([]);
   const [membros, setMembros] = useState<Membro[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
-  const [aba, setAba] = useState<"cfp" | "submissoes" | "anais">("submissoes");
+  const [aba, setAba] = useState<"cfp" | "submissoes" | "anais" | "avaliacao" | "inscricoes">("submissoes");
+  const [totalInscricoes, setTotalInscricoes] = useState<number | null>(null);
+  const [avaliacoes, setAvaliacoes] = useState<FormularioResumo[]>([]);
 
   const [showCfpForm, setShowCfpForm] = useState(false);
   const [showSubForm, setShowSubForm] = useState(false);
@@ -48,20 +55,53 @@ export default function EventoDetail() {
   const carregar = useCallback(async () => {
     if (!id) return;
     setLoading(true);
-    const [ev, subs, mbs] = await Promise.all([
+    const [ev, subs, mbs, forms] = await Promise.all([
       getEvento(id),
       listSubmissoesEvento(id),
       listMembros(),
+      listFormularios({ evento: id }).catch(() => []),
     ]);
     setEvento(ev);
     setSubmissoes(subs);
     setMembros(mbs);
+    setAvaliacoes(forms);
     setLoading(false);
   }, [id]);
 
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  const handleCriarAvaliacao = async () => {
+    if (!id || !evento) return;
+    const escala = (texto: string) => ({ ...novaPergunta(), texto, tipo: "escala" as const, obrigatoria: true });
+    const form = await createFormulario({
+      titulo: `Avaliação — ${evento.titulo}`,
+      evento: id,
+      link_publico_ativo: true,
+      pedir_identificacao: false,
+      mensagem_confirmacao: "Obrigado por avaliar o evento!",
+      secoes: [
+        {
+          titulo: "",
+          descricao: "",
+          perguntas: [
+            escala("Avaliação geral do evento"),
+            escala("Qualidade da programação científica"),
+            escala("Organização e infraestrutura"),
+            {
+              ...novaPergunta(),
+              texto: "Você participaria de uma próxima edição?",
+              tipo: "escolha_unica",
+              opcoes: ["Sim", "Talvez", "Não"],
+            },
+            { ...novaPergunta(), texto: "Sugestões e comentários", tipo: "texto_longo" },
+          ],
+        },
+      ],
+    });
+    navigate(`/app/formularios/${form.id}`);
+  };
 
   const handleAbrirCfp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -335,17 +375,69 @@ export default function EventoDetail() {
       )}
 
       <div className="dashboard-tabs">
-        {(["submissoes", "cfp", "anais"] as const).map((t) => (
+        {(["submissoes", "cfp", "anais", "inscricoes", "avaliacao"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setAba(t)}
             className={`dashboard-tab${aba === t ? " active" : ""}`}
           >
-            {t === "submissoes" ? `Submissões (${submissoes.length})` : t === "cfp" ? "CFP" : "Anais"}
+            {t === "submissoes"
+              ? `Submissões (${submissoes.length})`
+              : t === "cfp"
+                ? "CFP"
+                : t === "anais"
+                  ? "Anais"
+                  : t === "inscricoes"
+                    ? `Inscrições e certificados${totalInscricoes !== null ? ` (${totalInscricoes})` : ""}`
+                    : `Avaliação (${avaliacoes.length})`}
           </button>
         ))}
       </div>
+
+      {aba === "inscricoes" && (
+        <InscricoesCertificados
+          evento={evento}
+          membros={membros}
+          onEventoAtualizado={() => void getEvento(evento.id).then(setEvento)}
+          onTotal={setTotalInscricoes}
+        />
+      )}
+
+      {aba === "avaliacao" && (
+        <div className="dashboard-content-panel">
+          <div className="filters-row" style={{ justifyContent: "space-between" }}>
+            <p className="list-card-meta" style={{ margin: 0 }}>
+              Formulários vinculados a este evento (avaliação dos participantes, pesquisas).
+            </p>
+            <button type="button" className="dashboard-btn-new" onClick={handleCriarAvaliacao}>
+              <ClipboardList size={14} /> Criar formulário de avaliação
+            </button>
+          </div>
+          {avaliacoes.length === 0 ? (
+            <div className="dashboard-empty">Nenhum formulário vinculado.</div>
+          ) : (
+            <div className="list-stack">
+              {avaliacoes.map((f) => (
+                <Link
+                  key={f.id}
+                  to={`/app/formularios/${f.id}`}
+                  className="list-card"
+                  style={{ display: "flex", justifyContent: "space-between", textDecoration: "none", color: "inherit" }}
+                >
+                  <div>
+                    <p className="list-card-title">{f.titulo}</p>
+                    <p className="list-card-meta">{f.respostas_enviadas} resposta(s)</p>
+                  </div>
+                  <span className={`status-badge status-badge-${FORMULARIO_STATUS_BADGE[f.status]}`}>
+                    {f.status_display}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {aba === "cfp" && evento.call_for_papers && (
         <div className="dashboard-content-panel">

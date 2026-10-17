@@ -10,6 +10,7 @@ from .models import (
     CallForPapers,
     EventoAcademico,
     EventoAcademicoStatus,
+    InscricaoEvento,
     Parecer,
     RecomendacaoParecer,
     SubmissaoStatus,
@@ -182,3 +183,82 @@ def criar_evento_com_mandato(dados: dict, mandato: Mandato = None) -> EventoAcad
     if not dados.get("slug"):
         dados["slug"] = slugify(dados["titulo"])
     return EventoAcademico.objects.create(mandato=mandato, **dados)
+
+
+# ---------------------------------------------------------------- Certificados de participação
+
+
+def _periodo(evento: EventoAcademico) -> str:
+    inicio = timezone.localtime(evento.data_inicio).date()
+    fim = timezone.localtime(evento.data_fim).date()
+    if inicio == fim:
+        return f"em {inicio.strftime('%d/%m/%Y')}"
+    return f"de {inicio.strftime('%d/%m/%Y')} a {fim.strftime('%d/%m/%Y')}"
+
+
+def gerar_codigo_certificado() -> str:
+    import secrets
+
+    from courses.models import CourseEnrollment
+
+    while True:
+        code = secrets.token_hex(5).upper()
+        if (
+            not InscricaoEvento.objects.filter(certificado_codigo=code).exists()
+            and not CourseEnrollment.objects.filter(certificate_code=code).exists()
+        ):
+            return code
+
+
+def emitir_certificados(evento: EventoAcademico, schema: str, associacao: str, notificar: bool = True) -> dict:
+    """Gera código para inscritos presentes sem certificado e avisa por e-mail."""
+    from core.certificates import certificate_verify_url
+    from core.emails import enviar_email
+
+    if not evento.certificado_habilitado:
+        raise ValueError("Certificados estão desativados para este evento.")
+    pendentes = evento.inscricoes.filter(presente=True, certificado_codigo__isnull=True)
+    emitidos, emails = 0, 0
+    agora = timezone.now()
+    for inscricao in pendentes:
+        inscricao.certificado_codigo = gerar_codigo_certificado()
+        inscricao.certificado_emitido_em = agora
+        inscricao.save(update_fields=["certificado_codigo", "certificado_emitido_em"])
+        emitidos += 1
+        if notificar and inscricao.email:
+            ok = enviar_email(
+                inscricao.email,
+                f"Seu certificado — {evento.titulo}",
+                (
+                    f"Olá, {inscricao.nome}!\n\n"
+                    f"Seu certificado de participação em {evento.titulo}, emitido por {associacao}, "
+                    f"já está disponível. Use o código {inscricao.certificado_codigo} para baixar "
+                    "ou verificar a autenticidade."
+                ),
+                link=certificate_verify_url(schema, inscricao.certificado_codigo),
+                link_label="Baixar certificado",
+            )
+            emails += int(ok)
+    sem_presenca = evento.inscricoes.filter(presente=False).count()
+    return {"emitidos": emitidos, "emails_enviados": emails, "inscritos_sem_presenca": sem_presenca}
+
+
+def build_inscricao_certificate(inscricao: InscricaoEvento, schema: str, associacao: str) -> bytes:
+    from core.certificates import build_certificate_pdf, certificate_verify_url
+
+    evento = inscricao.evento
+    detalhes = [_periodo(evento).capitalize()]
+    if evento.carga_horaria:
+        detalhes.append(f"Carga horária: {evento.carga_horaria} h")
+    if evento.local:
+        detalhes.append(evento.local)
+    return build_certificate_pdf(
+        participant_name=inscricao.nome,
+        title=evento.titulo,
+        action="participou do evento",
+        details=" · ".join(detalhes),
+        issued_at=timezone.localtime(inscricao.certificado_emitido_em or timezone.now()),
+        code=inscricao.certificado_codigo,
+        issuer=associacao,
+        verify_url=certificate_verify_url(schema, inscricao.certificado_codigo),
+    )

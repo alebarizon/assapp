@@ -72,6 +72,10 @@ class EventoAcademico(models.Model):
     valor_inscricao = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True
     )
+    certificado_habilitado = models.BooleanField(default=True)
+    carga_horaria = models.PositiveSmallIntegerField(
+        blank=True, null=True, help_text="Horas impressas no certificado de participação"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -222,6 +226,9 @@ class InscricaoEvento(models.Model):
         blank=True,
         null=True,
     )
+    presente = models.BooleanField(default=False)
+    certificado_codigo = models.CharField(max_length=16, blank=True, null=True, unique=True)
+    certificado_emitido_em = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

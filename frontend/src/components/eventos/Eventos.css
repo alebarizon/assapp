@@ -1,0 +1,29 @@
+.evento-insc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 8px;
+}
+
+.evento-insc-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #e8e8e4;
+}
+
+.evento-insc-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f1efe9;
+  vertical-align: middle;
+}
+
+.evento-insc-table tr:last-child td {
+  border-bottom: none;
+}

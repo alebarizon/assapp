@@ -1,11 +1,14 @@
 import type {
   AnaisPublicacao,
   CallForPapers,
+  EmissaoCertificados,
   EventoAcademico,
+  InscricaoEvento,
   Parecer,
   ResumoEventos,
   SubmissaoTrabalho,
 } from "@/types/eventos";
+import { downloadBlob } from "@/utils/download";
 import { api } from "./api";
 
 function unwrapList<T>(data: { results?: T[] } | T[]): T[] {
@@ -30,6 +33,45 @@ export async function getEvento(id: string): Promise<EventoAcademico> {
 export async function createEvento(payload: Partial<EventoAcademico>): Promise<EventoAcademico> {
   const { data } = await api.post<EventoAcademico>("/api/eventos/eventos/", payload);
   return data;
+}
+
+export async function updateEvento(id: string, payload: Partial<EventoAcademico>): Promise<void> {
+  await api.patch(`/api/eventos/eventos/${id}/`, payload);
+}
+
+export async function listInscricoes(eventoId: string): Promise<InscricaoEvento[]> {
+  const { data } = await api.get("/api/eventos/inscricoes/", { params: { evento: eventoId } });
+  return unwrapList(data);
+}
+
+export async function createInscricao(payload: {
+  evento: string;
+  membro?: string;
+  nome?: string;
+  email?: string;
+  confirmada?: boolean;
+}): Promise<InscricaoEvento> {
+  const { data } = await api.post<InscricaoEvento>("/api/eventos/inscricoes/", payload);
+  return data;
+}
+
+export async function deleteInscricao(id: string): Promise<void> {
+  await api.delete(`/api/eventos/inscricoes/${id}/`);
+}
+
+export async function marcarPresencas(eventoId: string, inscricoes: string[], presente: boolean): Promise<void> {
+  await api.post(`/api/eventos/eventos/${eventoId}/presencas/`, { inscricoes, presente });
+}
+
+export async function emitirCertificados(eventoId: string, notificar: boolean): Promise<EmissaoCertificados> {
+  const { data } = await api.post<EmissaoCertificados>(`/api/eventos/eventos/${eventoId}/emitir-certificados/`, {
+    notificar,
+  });
+  return data;
+}
+
+export async function downloadCertificadoInscricao(inscricao: InscricaoEvento) {
+  await downloadBlob(`/api/eventos/inscricoes/${inscricao.id}/certificado/`, `certificado-${inscricao.certificado_codigo}.pdf`);
 }
 
 export async function abrirCfp(

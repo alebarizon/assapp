@@ -44,4 +44,17 @@ UI: padrão WellSaaS — [`UI_PADRAO_WELLSAAS.md`](../guias/UI_PADRAO_WELLSAAS.m
 
 ---
 
+## Inscrições, presença e certificados (2026-10)
+
+- `EventoAcademico.certificado_habilitado` e `carga_horaria`; `InscricaoEvento.presente`,
+  `certificado_codigo`, `certificado_emitido_em`.
+- `POST /api/eventos/eventos/{id}/presencas/` `{inscricoes: [ids], presente}` — marca presença em lote.
+- `POST /api/eventos/eventos/{id}/emitir-certificados/` `{notificar}` — gera código para presentes sem
+  certificado e envia e-mail com link de download/verificação.
+- `GET /api/eventos/inscricoes/{id}/certificado/` — PDF (`core/certificates.py`, com QR code).
+- Verificação pública: `/site/certificados?codigo=` → `GET /api/certificados/{codigo}/`.
+- Frontend: aba **Inscrições e certificados** em `/app/eventos/:id`.
+
+---
+
 **Última atualização:** 2026-07-14

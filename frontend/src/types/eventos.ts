@@ -93,7 +93,29 @@ export interface EventoAcademico {
   inscricoes_count?: number;
   call_for_papers?: CallForPapers;
   anais?: AnaisPublicacao;
+  certificado_habilitado?: boolean;
+  carga_horaria?: number | null;
   created_at: string;
+}
+
+export interface InscricaoEvento {
+  id: string;
+  evento: string;
+  membro: string | null;
+  nome: string;
+  email: string;
+  confirmada: boolean;
+  pago_em: string | null;
+  presente: boolean;
+  certificado_codigo: string | null;
+  certificado_emitido_em: string | null;
+  created_at: string;
+}
+
+export interface EmissaoCertificados {
+  emitidos: number;
+  emails_enviados: number;
+  inscritos_sem_presenca: number;
 }
 
 export interface ResumoEventos {
