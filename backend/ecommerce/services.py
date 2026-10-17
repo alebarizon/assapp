@@ -62,6 +62,14 @@ def validate_cart_item_for_membro(catalog_item: CatalogItem, membro: Membro, qua
         if quantity != 1:
             raise ValidationError("Inscrição: quantidade máxima 1.")
 
+    if catalog_item.item_type == CatalogItemType.CURSO:
+        from courses.services import membro_already_has_courses
+
+        if membro_already_has_courses(membro, catalog_item):
+            raise ValidationError("Você já está matriculado neste curso.")
+        if quantity != 1:
+            raise ValidationError("Curso: quantidade máxima 1.")
+
     if catalog_item.inventory_count is not None and catalog_item.inventory_count < quantity:
         raise ValidationError(
             f"Estoque insuficiente. Disponível: {catalog_item.inventory_count}."
@@ -187,7 +195,14 @@ def fulfill_order_item(order: Order, item: OrderItem, user=None) -> dict | None:
     if item.item_type == CatalogItemType.INSCRICAO:
         return _fulfill_inscricao(membro, catalog, user=user)
 
-    # curso, material, digital — registro no pedido; entrega manual/futura
+    if item.item_type == CatalogItemType.CURSO:
+        from courses.services import enroll_from_catalog_item
+
+        enrollments = enroll_from_catalog_item(membro, catalog, order=order)
+        if enrollments:
+            return {"type": "curso", "catalog_item_id": str(catalog.id), "enrollments": enrollments}
+
+    # material, digital e curso sem conteúdo vinculado — registro no pedido; entrega manual
     return {"type": item.item_type, "catalog_item_id": str(catalog.id)}
 
 
