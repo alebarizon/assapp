@@ -1,0 +1,113 @@
+.chamado-unread {
+  border-left: 3px solid #1a5f4a;
+}
+
+.chamado-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1a5f4a;
+  margin-right: 0.4rem;
+}
+
+.chamado-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.chamado-msg {
+  border: 1px solid #e8e8e4;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  max-width: 85%;
+}
+
+.chamado-msg-equipe {
+  align-self: flex-end;
+  background: #f3f8f6;
+  border-color: #cfe3dc;
+}
+
+.chamado-msg-interna {
+  align-self: flex-end;
+  background: #fffaeb;
+  border-color: #fedf89;
+}
+
+.chamado-msg-sistema {
+  align-self: center;
+  background: transparent;
+  border: none;
+  color: #667085;
+  font-size: 0.8rem;
+  font-style: italic;
+  padding: 0.2rem;
+}
+
+.chamado-msg-meta {
+  font-size: 0.75rem;
+  color: #667085;
+  margin-bottom: 0.35rem;
+}
+
+.chamado-msg-texto {
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.chamado-anexos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.chamado-anexo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  border: 1px solid #e8e8e4;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  color: #344054;
+  text-decoration: none;
+  background: #fff;
+}
+
+.chamado-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .chamado-side {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chamado-info {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 0.85rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.chamado-info dt {
+  color: #667085;
+  font-size: 0.75rem;
+}
+
+.chamado-info dd {
+  margin: 0;
+}

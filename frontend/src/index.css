@@ -69,6 +69,12 @@ body {
   border-color: #c7d2fe;
 }
 
+.status-badge-interessado {
+  background: #f4f3ff;
+  color: #5925dc;
+  border-color: #d9d6fe;
+}
+
 .list-stack {
   display: flex;
   flex-direction: column;

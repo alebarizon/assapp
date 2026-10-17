@@ -1,0 +1,71 @@
+.conversa-unread {
+  border-left: 3px solid #1a5f4a;
+}
+
+.conversa-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1a5f4a;
+  margin-right: 0.4rem;
+}
+
+.conversa-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.conversa-bolha {
+  max-width: 80%;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  background: #fff;
+  border: 1px solid #e8e8e4;
+}
+
+.conversa-bolha-minha {
+  align-self: flex-end;
+  background: #f3f8f6;
+  border-color: #cfe3dc;
+}
+
+.conversa-bolha-meta {
+  font-size: 0.72rem;
+  color: #667085;
+  margin-bottom: 0.25rem;
+}
+
+.conversa-bolha-texto {
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.destinatarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.destinatario-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  background: #f1efe9;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.destinatario-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  color: #667085;
+}

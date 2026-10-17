@@ -1,0 +1,279 @@
+.ct-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666666;
+  padding: 0.35rem;
+  border-radius: 4px;
+  display: inline-flex;
+}
+
+.ct-icon-btn:hover {
+  background: #f1efe9;
+  color: #131313;
+}
+
+.funil-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.funil-card {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.funil-card:hover {
+  border-color: #c7c7c0;
+}
+
+.funil-card-active {
+  border-color: #1a5f4a;
+  box-shadow: 0 0 0 1px #1a5f4a inset;
+}
+
+.funil-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.funil-card-label {
+  font-size: 0.8rem;
+  color: #667085;
+}
+
+.etiqueta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  line-height: 1.6;
+}
+
+button.etiqueta-chip {
+  cursor: pointer;
+}
+
+.etiqueta-chip-off {
+  background: #fff !important;
+  color: #667085;
+  border: 1px dashed #c7c7c0;
+}
+
+.etiquetas-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.contato-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .contato-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contato-card {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.contato-card h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.contato-dl {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.4rem 0.75rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.contato-dl dt {
+  color: #667085;
+}
+
+.contato-dl dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.contato-mensagem {
+  white-space: pre-wrap;
+  background: #f9f9f7;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  margin: 0.75rem 0 0;
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline li {
+  border-left: 2px solid #e8e8e4;
+  padding: 0 0 1rem 0.9rem;
+  position: relative;
+}
+
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #c7c7c0;
+}
+
+.timeline li.timeline-manual::before {
+  background: #1a5f4a;
+}
+
+.timeline li.timeline-mensagem::before {
+  background: #5925dc;
+}
+
+.timeline-meta {
+  font-size: 0.75rem;
+  color: #667085;
+  margin-bottom: 0.2rem;
+}
+
+.timeline-texto {
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+}
+
+.timeline li.timeline-sistema .timeline-texto {
+  color: #667085;
+  font-style: italic;
+}
+
+/* Formulário do site público */
+.ts-contato-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .ts-contato-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ts-contato-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ts-contato-form .ts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .ts-contato-form .ts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ts-contato-form label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #344054;
+}
+
+.ts-contato-form input,
+.ts-contato-form select,
+.ts-contato-form textarea {
+  font: inherit;
+  font-weight: 400;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.ts-contato-form .ts-consent {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-weight: 400;
+  color: #475467;
+}
+
+.ts-contato-form .ts-consent input {
+  margin-top: 0.2rem;
+}
+
+.ts-contato-form .ts-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.ts-contato-submit {
+  justify-self: start;
+  background: var(--ts-primary, #1a5f4a);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.65rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ts-contato-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ts-contato-ok {
+  background: #ecfdf3;
+  color: #067647;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+
+.ts-contato-erro {
+  color: #b42318;
+  font-size: 0.85rem;
+}
