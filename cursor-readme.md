@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-08-17 (e-commerce · website CMS · deploy/seed remoto)
+> **Última revisão:** 2026-10-16 (sem hipóteses PIPE · plano de reaproveitamento WellSaaS)
 
 ---
 
@@ -40,7 +40,7 @@ Mac: `./scripts/up-orb.sh` · Docs: [`ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/gui
 
 Django 4.2 + DRF + JWT + django-tenants + PostgreSQL 14 + React 18 + TS + Vite
 
-**Não usar Prisma em runtime** — `prisma/schema.prisma` é documentação de domínio PIPE.
+**Não usar Prisma em runtime** — `prisma/schema.prisma` é documentação de domínio.
 
 **UI:** CSS semântico padrão WellSaaS (`Dashboard.css`, `AppLayout.css`, `Login.css`) — ver [`docs/guias/UI_PADRAO_WELLSAAS.md`](docs/guias/UI_PADRAO_WELLSAAS.md).
 
@@ -69,9 +69,9 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 
 | Schema | Conteúdo |
 |--------|----------|
-| `public` | tenants (com `setup_completed`, `plan_slug`), domains |
+| `public` | tenants (com `setup_completed`, `plan_slug`), domains, **support** (chamados de todas as associações) |
 | `sistema` | superadmin |
-| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, website, accounts |
+| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, website, accounts |
 
 > `adminpanel` / `payments` — stubs; Stripe continua simulado. `finance` e `documents` ativos no tenant.
 
@@ -79,19 +79,25 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 
 ## Apps TENANT (por associação)
 
-| App | PIPE | Descrição |
-|-----|------|-----------|
-| `mandatos` | ★ H1+H2 | Mandatos, transição, onboarding H2 |
-| `memoria` | ★ H1 | ContextoHistorico, timeline |
-| `eventos` | ★ H3 | CFP, pareceres, anais |
-| `membros` | — | Filiados, anuidades |
-| `finance` | — | Lançamentos OSC, dashboard, e-mail fechamento |
-| `ecommerce` | — | Catálogo, carrinho, pedidos (anuidade, evento, material) |
-| `documents` | — | Upload / audiência / meus |
-| `accounts` | — | User, JWT, register, setup |
-| `website` | — | Site público tenant + CMS (`/site`, `/app/website`) |
-| `publicacoes` | — | **Planejado** — ebooks, dossiês (Fase 4) |
-| `certificados` | — | **Planejado** — emissão/consulta (Fase 4) |
+| App | Descrição |
+|-----|-----------|
+| `mandatos` | Mandatos, transição, onboarding da nova diretoria |
+| `memoria` | ContextoHistorico, timeline |
+| `eventos` | CFP, pareceres, anais |
+| `membros` | Filiados, anuidades |
+| `finance` | Lançamentos OSC, dashboard, e-mail fechamento |
+| `ecommerce` | Catálogo, carrinho, pedidos (anuidade, evento, curso, material) |
+| `courses` | Cursos online: aulas, quiz, Q&A, certificado; venda via loja (`/app/courses`, `/app/portal/cursos`, `/site/cursos`) |
+| `formularios` | Pesquisas, avaliação de eventos, consultas: link público, portal e convite por e-mail (`/app/formularios`, `/site/formularios/:token`) |
+| `contatos` | CRM leve: formulário de contato do site, funil, etiquetas, conversão em associado (`/app/contatos`) |
+| `mensagens` | Conversas diretoria ↔ associado (`/app/mensagens`, `/app/portal/mensagens`) |
+| `documents` | Upload / audiência / meus |
+| `accounts` | User, JWT, register, setup |
+| `website` | Site público tenant + CMS (`/site`, `/app/website`) |
+| `publicacoes` | **Planejado** — ebooks, dossiês (Fase 4) |
+
+App compartilhado (schema `public`): `support` — chamados associação → equipe Gesttora (`/app/suporte`).
+Certificados (cursos e eventos) usam `core/certificates.py` + verificação pública em `/site/certificados`.
 
 ---
 
@@ -101,18 +107,29 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 superadmin | association_admin | board_member | member | reviewer
 ```
 
+Equipe (`association_admin`/`board_member`) tem **perfis de acesso** acumuláveis em `User.perfis`:
+`gestor` (máximo) · `diretoria` · `administrativo` · `financeiro`. Cada view do painel declara
+`modulo = "..."` e `IsBoardOrAdmin` checa a matriz em `accounts/access.py`.
+Gestão em `/app/usuarios` — ver [`USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_PERFIS.md).
+
 ---
 
 ## API Prefixos
 
 ```
-/api/auth/       accounts  (login, register, plans, setup, tenant-status, me)
-/api/mandatos/   mandatos  ★
-/api/memoria/    memoria   ★
-/api/eventos/    eventos   ★
+/api/auth/       accounts  (login, register, plans, setup, tenant-status, me, equipe/, senha/esqueci|definir)
+/api/mandatos/   mandatos
+/api/memoria/    memoria
+/api/eventos/    eventos
 /api/membros/    membros
 /api/finance/    finance (OSC)
 /api/ecommerce/  catalog, cart, orders (+ public/catalog)
+/api/courses/    cursos (diretoria, my/ associado, public/ site + certificados)
+/api/formularios/ formulários (diretoria, my/ associado, public/f|r/ sem login)
+/api/contatos/   contatos/CRM (diretoria, etiquetas/, public/ formulário do site)
+/api/mensagens/  conversas (diretoria, my/ associado)
+/api/suporte/    chamados de suporte (diretoria da associação + superadmin)
+/api/certificados/{codigo}/[pdf/]  verificação pública de certificados (cursos e eventos)
 /api/documents/  documents (+ meus/)
 /api/website/    website CMS tenant (config, pages, public)
 /api/tenants/    resolve domínio → schema (public/resolve)
@@ -126,20 +143,12 @@ Finance: [`docs/modulos/FINANCE.md`](docs/modulos/FINANCE.md) · Documents: [`do
 ## Ciclo de vida (domínio)
 
 ```
-Signup (simulado) → Setup (1º mandato) → Operação → Transição H2
+Signup (simulado) → Setup (1º mandato) → Operação → Transição de mandato
 ```
 
 Ver: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md)
 
----
-
-## Hipóteses PIPE (comentar no código)
-
-- **H1:** MandatoSnapshot, ContextoHistorico
-- **H2:** OnboardingEtapa, PerfilTecnico, UI adaptativa (transição — não confundir com Setup)
-- **H3:** EventoAcademico integrado com Membro
-
-Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
+> Hipóteses H1/H2/H3 (PIPE) **não** orientam mais o desenvolvimento — não citar em código, comentários ou docs novos.
 
 ---
 
@@ -166,6 +175,14 @@ Ver: [`docs/pesquisa/HIPOTESES_PIPE.md`](docs/pesquisa/HIPOTESES_PIPE.md)
 | [`docs/referencia/STATUS_SPRINTS_FASE1.md`](docs/referencia/STATUS_SPRINTS_FASE1.md) | Status Sprints 1–5 + pós-Sprint 5 |
 | [`docs/referencia/ANALISE_VINCULOS_MODULOS_E_TENANCY.md`](docs/referencia/ANALISE_VINCULOS_MODULOS_E_TENANCY.md) | Gaps (User↔Membro, Stripe, etc.) |
 | [`docs/modulos/ECOMMERCE.md`](docs/modulos/ECOMMERCE.md) | E-commerce + Associe-se |
+| [`docs/modulos/COURSES.md`](docs/modulos/COURSES.md) | **Cursos** (port WellSaaS + loja) |
+| [`docs/modulos/FORMULARIOS.md`](docs/modulos/FORMULARIOS.md) | **Formulários** (adaptado do QPC) |
+| [`docs/modulos/CONTATOS.md`](docs/modulos/CONTATOS.md) | **Contatos** (CRM do site) |
+| [`docs/modulos/SUPORTE.md`](docs/modulos/SUPORTE.md) | **Suporte** (chamados → equipe Gesttora) |
+| [`docs/modulos/MENSAGENS.md`](docs/modulos/MENSAGENS.md) | **Mensagens** diretoria ↔ associado |
+| [`docs/changelog/CHANGELOG_CONTATOS_SUPORTE_MENSAGENS_2026_10.md`](docs/changelog/CHANGELOG_CONTATOS_SUPORTE_MENSAGENS_2026_10.md) | Contatos, suporte, mensagens, certificados de evento, e-mails |
+| [`docs/modulos/USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_PERFIS.md) | **Usuários e perfis** (gestor, diretoria, administrativo, financeiro) |
+| [`docs/changelog/CHANGELOG_USUARIOS_PERFIS_2026_10.md`](docs/changelog/CHANGELOG_USUARIOS_PERFIS_2026_10.md) | Perfis de acesso, convite por e-mail, definição/redefinição de senha |
 | [`docs/modulos/WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md) | **Website público do tenant** |
 | [`docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md`](docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md) | Planejamento CMS 2026-08 |
 
@@ -194,18 +211,29 @@ Já adaptado:
 - UI shell + Dashboard.css + Login.css
 - Signup simulado + setup 1º mandato
 - finance OSC + documents
-- MandatoDetail + deep-links H2
+- MandatoDetail + deep-links da transição
 - Ponte User↔Membro + portal associado (`/app/portal`)
 - Landing SaaS Gesttora em `/` (estática; `gesttora.vertent.com.br`)
 - E-commerce (`ecommerce/`) + Website CMS tenant (`website/`, `/site`, `/app/website`)
+- Cursos (`courses/`) integrados à loja + certificado PDF (`core/certificates.py`) — ver [`COURSES.md`](docs/modulos/COURSES.md)
+- Formulários (`formularios/`, a partir do QPC) — ver [`FORMULARIOS.md`](docs/modulos/FORMULARIOS.md)
+- Contatos (`contatos/`, a partir de `contacts`), Suporte (`support/`, no schema public) e Mensagens (`mensagens/`)
+- Certificados de evento com QR + verificação unificada; e-mails transacionais (`core/emails.py`)
+- Usuários e perfis de acesso (gestor/diretoria/administrativo/financeiro), convite por e-mail e
+  “esqueci a senha” — modelo da equipe da clínica WellSaaS — ver [`USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_PERFIS.md)
+
+Próximos a portar (funcionalidade; UI segue o CSS semântico do AssApp, sem shadcn):
+1. Ajuda in-app (`frontend/src/help/`)
+2. Esconder ações de edição nas páginas em modo somente leitura (perfis)
 
 Copiar/adaptar depois (Stripe por último):
-- Convite User a partir de Membro; JWT `tenant_schema`
-- Stripe real, `adminpanel` (edição da landing Gesttora)
+- Convite de acesso ao portal a partir do cadastro do Membro (associado); JWT `tenant_schema`
+- Stripe real, `adminpanel` (edição da landing Gesttora, `AdminPlan`/`PlatformModule`), `subscriptions` (anuidade recorrente)
+- Integrações Google Calendar / WhatsApp
 - Site de evento, publicações, certificados (módulos futuros)
 
-**Não copiar:** meal plans, prescricao — e-commerce usa motor WellSaaS adaptado em `ecommerce/`
+**Não copiar:** booking/agenda, programs, meal plans, prescricao, phyto, supplement, workouts, habits, metrics, check-ins, clinic/team — e-commerce usa motor WellSaaS adaptado em `ecommerce/`
 
 ---
 
-**Última revisão:** 2026-08-17
+**Última revisão:** 2026-10-16

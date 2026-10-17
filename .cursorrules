@@ -2,7 +2,7 @@
 
 ## Contexto
 
-SaaS multi-tenant para associações científicas (PIPE FAPESP Fase 1).
+SaaS multi-tenant para associações científicas.
 Base tecnológica: WellSaaS/Wellflows (~80% reutilizável).
 
 ## Stack
@@ -25,20 +25,18 @@ Base tecnológica: WellSaaS/Wellflows (~80% reutilizável).
 1. `cursor-readme.md` — referência técnica rápida
 2. `docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md` — branches + OrbStack
 3. `docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md` — infra DO, staging no ar, retomar
-4. `docs/changelog/CHANGELOG_2026_07_14.md` — o que mudou recentemente
-5. `docs/pesquisa/HIPOTESES_PIPE.md` — H1, H2, H3
-6. `docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md` — signup / setup / transição
-7. `docs/guias/UI_PADRAO_WELLSAAS.md` — padrão visual de páginas
-8. `prisma/schema.prisma` — modelo de domínio (documentação)
-9. WellSaaS em `/Users/ale/Desktop/wellsaas` — padrões a reutilizar
+4. `docs/changelog/CHANGELOG_USUARIOS_PERFIS_2026_10.md` e `CHANGELOG_CONTATOS_SUPORTE_MENSAGENS_2026_10.md` — o que mudou recentemente
+5. `docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md` — signup / setup / transição
+6. `docs/guias/UI_PADRAO_WELLSAAS.md` — padrão visual de páginas
+7. `prisma/schema.prisma` — modelo de domínio (documentação)
+8. WellSaaS em `/Users/ale/Desktop/wellsaas` — padrões a reutilizar
 
-## Regras PIPE
+## Regras do projeto
 
-- Comentar código com referência a H1, H2 ou H3 quando aplicável
-- Prioridade Fase 1: módulo `mandatos` (transição + onboarding H2)
-- Distinguir **Setup pós-compra** (`AssociationSetup`) de **Onboarding H2** (`OnboardingWizard`)
+- Não referenciar hipóteses H1/H2/H3 (PIPE) em código, comentários ou docs novos — o produto evolui independente delas
+- Distinguir **Setup pós-compra** (`AssociationSetup`) de **Onboarding da transição de mandato** (`OnboardingWizard`)
 - `prisma/schema.prisma` é documentação — fonte de verdade é Django ORM
-- Não replicar módulos WellSaaS irrelevantes (meal plans, e-commerce, prescrições)
+- Não replicar módulos WellSaaS irrelevantes (meal plans, booking, prescrições, saúde)
 
 ## UI
 
@@ -70,4 +68,5 @@ docker compose exec backend python manage.py migrate_schemas
 - Schema `sistema`: superadmin
 - Schema por associação: TENANT_APPS (mandatos, memoria, eventos, membros, accounts)
 - Roles: superadmin, association_admin, board_member, member, reviewer
+- Perfis da equipe (`User.perfis`, acumuláveis): gestor, diretoria, administrativo, financeiro — toda view do painel declara `modulo = "..."` (ver `docs/modulos/USUARIOS_PERFIS.md`)
 - Signup cria tenant; `Tenant.setup_completed` controla o wizard de setup

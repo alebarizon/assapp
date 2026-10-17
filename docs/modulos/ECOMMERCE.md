@@ -13,7 +13,8 @@ Catálogo unificado de ofertas da associação. Cada item tem **tipo** e, após 
 |------|-------------|
 | `anuidade` | `membros.Anuidade` paga + espelho `finance` |
 | `inscricao` | `eventos.InscricaoEvento` confirmada + espelho `finance` |
-| `curso` / `material` / `digital` | Pedido concluído; entrega manual/futura |
+| `curso` | Matrícula em `courses.CourseEnrollment` dos cursos vinculados ao item (ver [`COURSES.md`](COURSES.md)) |
+| `material` / `digital` | Pedido concluído; entrega manual/futura |
 
 Comprador: **Membro** (associado com user vinculado).
 
