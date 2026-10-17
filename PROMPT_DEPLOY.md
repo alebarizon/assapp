@@ -16,7 +16,7 @@ Execute o fluxo completo de sincronização e deploy:
 1. Pré-check: git branch --show-current (tem que ser orb), git status -sb, git fetch origin
 2. Verificar migrations pendentes: docker compose exec backend python manage.py makemigrations --check --dry-run
 3. Se houver migrations: gerar e aplicar localmente (makemigrations + migrate_schemas --shared + migrate_schemas) e incluir os arquivos de migration no commit
-4. Validar o build antes de subir (o CI quebra com erro de TypeScript): cd frontend && npm run build. Rodar os testes dos apps alterados: docker compose exec backend pytest <app>
+4. Validar o build antes de subir (o CI quebra com erro de TypeScript): docker compose exec -T frontend npm run build (o Mac não tem node_modules no host). Rodar os testes dos apps alterados: docker compose exec -T backend pytest <app>
 5. Consolidar commits na orb (só arquivos do lote) → git push origin orb
 6. Sincronizar orb → develop → git push origin develop (dispara "Deploy to Staging")
 7. ESPERAR o Actions de staging terminar (gh run watch). Só então:
