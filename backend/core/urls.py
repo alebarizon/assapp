@@ -4,6 +4,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from .certificados_views import CertificadoPdfView, CertificadoVerificacaoView
 from .views import health_check, api_root
 
 urlpatterns = [
@@ -19,6 +20,13 @@ urlpatterns = [
     path("api/documents/", include("documents.urls")),
     path("api/ecommerce/", include("ecommerce.urls")),
     path("api/website/", include("website.urls")),
+    path("api/courses/", include("courses.urls")),
+    path("api/formularios/", include("formularios.urls")),
+    path("api/contatos/", include("contatos.urls")),
+    path("api/suporte/", include("support.urls")),
+    path("api/mensagens/", include("mensagens.urls")),
+    path("api/certificados/<str:code>/", CertificadoVerificacaoView.as_view(), name="certificado-verificar"),
+    path("api/certificados/<str:code>/pdf/", CertificadoPdfView.as_view(), name="certificado-pdf"),
     path("api/tenants/", include("tenants.urls")),
 ]
 

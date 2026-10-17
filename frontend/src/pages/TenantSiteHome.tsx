@@ -4,6 +4,7 @@ import { getPublicSite } from "@/services/website";
 import type { PublicSitePayload } from "@/types/website";
 import { AssocieSeBox, SiteShell, useTenantSchema } from "@/components/tenant-site/TenantSiteLayout";
 import { buildTenantSiteQuery } from "@/utils/tenantSite";
+import ContatoSiteForm from "@/components/contatos/ContatoSiteForm";
 import "@/components/tenant-site/TenantSite.css";
 
 export default function TenantSiteHome() {
@@ -109,10 +110,17 @@ export default function TenantSiteHome() {
 
       <section className="tenant-site-section" id="contato">
         <h2>Contato</h2>
-        <div className="tenant-site-card" style={{ maxWidth: 480 }}>
-          {config.contact_email && <p>E-mail: {config.contact_email}</p>}
-          {config.contact_phone && <p>Telefone: {config.contact_phone}</p>}
-          {config.contact_address && <p>{config.contact_address}</p>}
+        <div className="ts-contato-grid">
+          <div className="tenant-site-card">
+            <ContatoSiteForm schema={schema} associacao={data.tenant_name || config.site_title} />
+          </div>
+          {(config.contact_email || config.contact_phone || config.contact_address) && (
+            <div className="tenant-site-card">
+              {config.contact_email && <p>E-mail: {config.contact_email}</p>}
+              {config.contact_phone && <p>Telefone: {config.contact_phone}</p>}
+              {config.contact_address && <p>{config.contact_address}</p>}
+            </div>
+          )}
         </div>
       </section>
     </SiteShell>

@@ -18,7 +18,29 @@ export interface User {
   is_active: boolean;
   membro_id?: string | null;
   membro_nome?: string | null;
+  perfis?: PerfilAcesso[];
+  modulos?: Partial<Record<ModuloPainel, NivelAcesso>>;
 }
+
+export type PerfilAcesso = "gestor" | "diretoria" | "administrativo" | "financeiro";
+export type NivelAcesso = "total" | "leitura";
+export type ModuloPainel =
+  | "usuarios"
+  | "configuracoes"
+  | "memoria"
+  | "mandatos"
+  | "onboarding"
+  | "membros"
+  | "eventos"
+  | "cursos"
+  | "formularios"
+  | "contatos"
+  | "mensagens"
+  | "website"
+  | "documentos"
+  | "financeiro"
+  | "loja"
+  | "suporte";
 
 export interface Mandato {
   id: string;

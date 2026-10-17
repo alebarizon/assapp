@@ -50,6 +50,15 @@ services:
       GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
       GUNICORN_FORWARDED_ALLOW_IPS: "*"
       SYSTEM_TENANT_SCHEMA: ${SYSTEM_TENANT_SCHEMA:-sistema}
+      FRONTEND_URL: ${FRONTEND_URL:-http://159.203.183.184:8080}
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-localhost}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@vertent.com.br}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media

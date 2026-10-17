@@ -25,7 +25,30 @@ import GesttoraLanding from "@/pages/GesttoraLanding";
 import TenantSiteHome from "@/pages/TenantSiteHome";
 import TenantSitePage from "@/pages/TenantSitePage";
 import WebsiteAdmin from "@/pages/WebsiteAdmin";
-import { homePathForRole, isMember } from "@/utils/roles";
+import Courses from "@/pages/Courses";
+import CourseDetail from "@/pages/CourseDetail";
+import MeusCursos from "@/pages/MeusCursos";
+import CoursePlayer from "@/pages/CoursePlayer";
+import TenantSiteCourses from "@/pages/TenantSiteCourses";
+import TenantSiteCourseDetail from "@/pages/TenantSiteCourseDetail";
+import TenantSiteCertificate from "@/pages/TenantSiteCertificate";
+import Formularios from "@/pages/Formularios";
+import FormularioDetail from "@/pages/FormularioDetail";
+import MeusFormularios from "@/pages/MeusFormularios";
+import PortalFormulario from "@/pages/PortalFormulario";
+import PublicFormulario from "@/pages/PublicFormulario";
+import Contatos from "@/pages/Contatos";
+import ContatoDetail from "@/pages/ContatoDetail";
+import Suporte from "@/pages/Suporte";
+import SuporteDetail from "@/pages/SuporteDetail";
+import Mensagens from "@/pages/Mensagens";
+import MensagemDetail from "@/pages/MensagemDetail";
+import MinhasMensagens from "@/pages/MinhasMensagens";
+import PortalMensagem from "@/pages/PortalMensagem";
+import Usuarios from "@/pages/Usuarios";
+import DefinirSenha from "@/pages/DefinirSenha";
+import EsqueciSenha from "@/pages/EsqueciSenha";
+import { homePathForUser, isMember } from "@/utils/roles";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -72,7 +95,7 @@ function SetupGate({ children }: { children: React.ReactNode }) {
     return <Navigate to="/app/setup" replace />;
   }
   if (setupCompleted && onSetup) {
-    return <Navigate to={homePathForRole(user?.role, true)} replace />;
+    return <Navigate to={homePathForUser(user, true)} replace />;
   }
   return <>{children}</>;
 }
@@ -83,8 +106,15 @@ function AppRoutes() {
       <Route path="/" element={<GesttoraLanding />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+      <Route path="/definir-senha" element={<DefinirSenha />} />
       <Route path="/site" element={<TenantSiteHome />} />
       <Route path="/site/p/:slug" element={<TenantSitePage />} />
+      <Route path="/site/cursos" element={<TenantSiteCourses />} />
+      <Route path="/site/cursos/:slug" element={<TenantSiteCourseDetail />} />
+      <Route path="/site/certificados" element={<TenantSiteCertificate />} />
+      <Route path="/site/formularios/:token" element={<PublicFormulario />} />
+      <Route path="/site/formularios/convite/:token" element={<PublicFormulario convite />} />
       <Route
         path="/app"
         element={
@@ -102,6 +132,12 @@ function AppRoutes() {
         <Route path="portal/documentos" element={<MeusDocumentos />} />
         <Route path="portal/loja" element={<PortalLoja />} />
         <Route path="portal/carrinho" element={<PortalCarrinho />} />
+        <Route path="portal/cursos" element={<MeusCursos />} />
+        <Route path="portal/cursos/:enrollmentId/lessons/:lessonId" element={<CoursePlayer />} />
+        <Route path="portal/formularios" element={<MeusFormularios />} />
+        <Route path="portal/formularios/:id" element={<PortalFormulario />} />
+        <Route path="portal/mensagens" element={<MinhasMensagens />} />
+        <Route path="portal/mensagens/:id" element={<PortalMensagem />} />
         <Route path="memoria" element={<MemoriaInstitucional />} />
         <Route path="membros" element={<Membros />} />
         <Route path="membros/:id" element={<MembroDetail />} />
@@ -115,6 +151,17 @@ function AppRoutes() {
         <Route path="ecommerce/catalog" element={<EcommerceCatalog />} />
         <Route path="ecommerce/orders" element={<EcommerceOrders />} />
         <Route path="website" element={<WebsiteAdmin />} />
+        <Route path="courses" element={<Courses />} />
+        <Route path="courses/:id" element={<CourseDetail />} />
+        <Route path="formularios" element={<Formularios />} />
+        <Route path="formularios/:id" element={<FormularioDetail />} />
+        <Route path="contatos" element={<Contatos />} />
+        <Route path="contatos/:id" element={<ContatoDetail />} />
+        <Route path="suporte" element={<Suporte />} />
+        <Route path="suporte/:id" element={<SuporteDetail />} />
+        <Route path="mensagens" element={<Mensagens />} />
+        <Route path="mensagens/:id" element={<MensagemDetail />} />
+        <Route path="usuarios" element={<Usuarios />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -123,7 +170,7 @@ function AppRoutes() {
 
 function AppIndexRedirect() {
   const { user, setupCompleted } = useAuth();
-  return <Navigate to={homePathForRole(user?.role, setupCompleted !== false).replace("/app/", "")} replace />;
+  return <Navigate to={homePathForUser(user, setupCompleted !== false).replace("/app/", "")} replace />;
 }
 
 export default function App() {

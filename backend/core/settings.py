@@ -34,6 +34,7 @@ SHARED_APPS = (
     "core",
     "tenants",
     "accounts",
+    "support",
 )
 
 TENANT_APPS = (
@@ -49,6 +50,10 @@ TENANT_APPS = (
     "documents",
     "ecommerce",
     "website",
+    "courses",
+    "formularios",
+    "contatos",
+    "mensagens",
 )
 
 INSTALLED_APPS = list(dict.fromkeys(SHARED_APPS + TENANT_APPS))
@@ -117,6 +122,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "pt-br"
+# Produto só em português: o LocaleMiddleware não troca para inglês pelo Accept-Language do navegador
+LANGUAGES = [("pt-br", "Português (Brasil)")]
 TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
@@ -141,6 +148,12 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_RATES": {
+        "formularios_public": "60/min",
+        "contatos_public": "10/hour",
+        "certificados_public": "30/min",
+        "senha_public": "10/hour",
+    },
 }
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -189,4 +202,13 @@ LOGGING = {
 EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@assapp.local")
+# Base dos links enviados por e-mail (convites, certificados, portal)
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5174")
+# Caixa da equipe Gesttora que recebe avisos de chamados de suporte (vazio = sem aviso)
+SUPPORT_EMAIL = os.environ.get("SUPPORT_EMAIL", "")

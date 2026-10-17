@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileText, ShoppingBag, UserRound } from "lucide-react";
+import { ClipboardList, FileText, GraduationCap, MessageSquare, ShoppingBag, UserRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function PortalHome() {
@@ -28,6 +28,33 @@ export default function PortalHome() {
             <div>
               <p className="list-card-title">Meu perfil</p>
               <p className="list-card-meta">Dados cadastrais, filiação e anuidades</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/cursos" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <GraduationCap size={20} />
+            <div>
+              <p className="list-card-title">Meus cursos</p>
+              <p className="list-card-meta">Aulas, progresso e certificados</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/formularios" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <ClipboardList size={20} />
+            <div>
+              <p className="list-card-title">Formulários</p>
+              <p className="list-card-meta">Pesquisas e consultas da associação</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/mensagens" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <MessageSquare size={20} />
+            <div>
+              <p className="list-card-title">Mensagens</p>
+              <p className="list-card-meta">Fale com a secretaria e a diretoria</p>
             </div>
           </div>
         </Link>
