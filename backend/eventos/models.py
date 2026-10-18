@@ -8,6 +8,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -76,6 +77,11 @@ class EventoAcademico(models.Model):
     carga_horaria = models.PositiveSmallIntegerField(
         blank=True, null=True, help_text="Horas impressas no certificado de participação"
     )
+    publicado_site = models.BooleanField(
+        default=False, help_text="Exibe o hotsite do evento em /site/eventos"
+    )
+    resumo = models.CharField(max_length=300, blank=True, default="")
+    capa = models.ImageField(upload_to="eventos/capas/%Y/%m/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -112,6 +118,15 @@ class CallForPapers(models.Model):
         default=True,
         help_text="Parecer duplo-cego",
     )
+    criterios = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Critérios de avaliação: [{"nome": "Relevância", "peso": 2}, ...] — notas de 1 a 5',
+    )
+    nota_corte = models.DecimalField(
+        max_digits=3, decimal_places=2, blank=True, null=True, help_text="Nota média mínima sugerida (1 a 5)"
+    )
+    exige_arquivo = models.BooleanField(default=False, help_text="Submissão precisa de arquivo (PDF)")
 
     class Meta:
         verbose_name = "Call for Papers"
@@ -144,6 +159,9 @@ class SubmissaoTrabalho(models.Model):
     titulo = models.CharField(max_length=500)
     resumo = models.TextField()
     palavras_chave = models.JSONField(default=list, blank=True)
+    coautores = models.JSONField(
+        default=list, blank=True, help_text='[{"nome": "...", "email": "...", "instituicao": "..."}]'
+    )
     area_tematica = models.CharField(max_length=100, blank=True, null=True)
     arquivo = models.FileField(
         upload_to="eventos/submissoes/%Y/%m/",
@@ -156,6 +174,8 @@ class SubmissaoTrabalho(models.Model):
         default=SubmissaoStatus.RASCUNHO,
     )
     submetido_em = models.DateTimeField(blank=True, null=True)
+    decisao_comentario = models.TextField(blank=True, default="")
+    decidido_em = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -188,6 +208,9 @@ class Parecer(models.Model):
         null=True,
     )
     nota = models.PositiveSmallIntegerField(blank=True, null=True)
+    notas = models.JSONField(default=dict, blank=True, help_text="Nota (1 a 5) por critério da chamada")
+    nota_ponderada = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
+    prazo = models.DateField(blank=True, null=True)
     comentarios_autor = models.TextField(blank=True, null=True)
     comentarios_internos = models.TextField(blank=True, null=True)
     concluido = models.BooleanField(default=False)
@@ -248,10 +271,23 @@ class AnaisPublicacao(models.Model):
         on_delete=models.CASCADE,
         related_name="anais",
     )
+    LICENCA_CHOICES = [
+        ("cc-by", "CC BY 4.0"),
+        ("cc-by-sa", "CC BY-SA 4.0"),
+        ("cc-by-nc", "CC BY-NC 4.0"),
+        ("cc-by-nc-nd", "CC BY-NC-ND 4.0"),
+        ("reservados", "Todos os direitos reservados"),
+    ]
+
     titulo = models.CharField(max_length=255)
     issn = models.CharField(max_length=20, blank=True, null=True)
+    isbn = models.CharField(max_length=20, blank=True, default="")
     doi_prefix = models.CharField(max_length=50, blank=True, null=True)
     url_publicacao = models.URLField(blank=True, null=True)
+    licenca = models.CharField(max_length=15, choices=LICENCA_CHOICES, default="cc-by")
+    apresentacao = models.TextField(blank=True, default="")
+    editores = models.CharField(max_length=255, blank=True, default="")
+    cidade = models.CharField(max_length=100, blank=True, default="", help_text="Local de publicação (citação ABNT)")
     publicado_em = models.DateTimeField(blank=True, null=True)
     metadata = models.JSONField(blank=True, null=True)
 
@@ -261,3 +297,103 @@ class AnaisPublicacao(models.Model):
 
     def __str__(self):
         return f"Anais: {self.evento.titulo}"
+
+
+class TrabalhoPublicado(models.Model):
+    """Trabalho nos anais, com endereço público fixo. Sobrevive à exclusão da submissão."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    anais = models.ForeignKey(AnaisPublicacao, on_delete=models.CASCADE, related_name="trabalhos")
+    submissao = models.OneToOneField(
+        SubmissaoTrabalho, on_delete=models.SET_NULL, null=True, blank=True, related_name="publicacao"
+    )
+    slug = models.SlugField(max_length=120)
+    ordem = models.PositiveIntegerField(default=0)
+    titulo = models.CharField(max_length=500)
+    resumo = models.TextField()
+    palavras_chave = models.JSONField(default=list, blank=True)
+    autores = models.JSONField(default=list, help_text='[{"nome": "...", "instituicao": "...", "orcid": "..."}]')
+    area_tematica = models.CharField(max_length=100, blank=True, default="")
+    arquivo = models.FileField(upload_to="eventos/anais/%Y/", blank=True, null=True)
+    doi = models.CharField(max_length=100, blank=True, default="")
+    publicado_em = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["ordem", "titulo"]
+        constraints = [models.UniqueConstraint(fields=["anais", "slug"], name="trabalho_publicado_slug_unico")]
+
+    def __str__(self):
+        return self.titulo
+
+
+class AtividadeProgramacao(models.Model):
+    """Item da grade do evento (palestra, mesa, sessão de trabalhos...)."""
+
+    TIPO_CHOICES = [
+        ("abertura", "Abertura / encerramento"),
+        ("palestra", "Palestra / conferência"),
+        ("mesa", "Mesa-redonda"),
+        ("sessao_trabalhos", "Sessão de trabalhos"),
+        ("minicurso", "Minicurso / oficina"),
+        ("intervalo", "Intervalo"),
+        ("outro", "Outro"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    evento = models.ForeignKey(EventoAcademico, on_delete=models.CASCADE, related_name="programacao")
+    titulo = models.CharField(max_length=255)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default="palestra")
+    inicio = models.DateTimeField()
+    fim = models.DateTimeField()
+    sala = models.CharField(max_length=120, blank=True, default="")
+    responsaveis = models.CharField(
+        max_length=500, blank=True, default="", help_text="Palestrantes, mediadores ou coordenadores"
+    )
+    descricao = models.TextField(blank=True, default="")
+    link_transmissao = models.URLField(max_length=500, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Atividade da programação"
+        verbose_name_plural = "Programação"
+        ordering = ["inicio", "sala", "titulo"]
+        indexes = [models.Index(fields=["evento", "inicio"])]
+
+    def __str__(self):
+        return f"{self.titulo} — {self.evento.titulo}"
+
+
+class CertificadoPapel(models.Model):
+    """Certificado por papel no evento além da participação: autor de trabalho aceito, parecerista."""
+
+    AUTOR = "autor"
+    PARECERISTA = "parecerista"
+    PAPEL_CHOICES = [(AUTOR, "Autor(a)"), (PARECERISTA, "Parecerista")]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    evento = models.ForeignKey(EventoAcademico, on_delete=models.CASCADE, related_name="certificados_papel")
+    papel = models.CharField(max_length=20, choices=PAPEL_CHOICES)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="certificados_papel"
+    )
+    submissao = models.ForeignKey(
+        SubmissaoTrabalho, on_delete=models.CASCADE, null=True, blank=True, related_name="certificados"
+    )
+    nome = models.CharField(max_length=255)
+    email = models.EmailField(blank=True, default="")
+    detalhe = models.CharField(max_length=500, blank=True, default="")
+    codigo = models.CharField(max_length=16, unique=True)
+    emitido_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Certificado por papel"
+        verbose_name_plural = "Certificados por papel"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["evento", "papel", "usuario", "submissao"], name="unique_certificado_papel"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.get_papel_display()} — {self.nome} — {self.evento.titulo}"
