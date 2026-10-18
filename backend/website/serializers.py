@@ -33,6 +33,7 @@ class WebsiteConfigSerializer(serializers.ModelSerializer):
             "contact_address",
             "social_links",
             "is_published",
+            "diretorio_ativo",
             "created_at",
             "updated_at",
         ]

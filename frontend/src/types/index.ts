@@ -39,6 +39,8 @@ export type ModuloPainel =
   | "website"
   | "documentos"
   | "publicacoes"
+  | "governanca"
+  | "newsletter"
   | "financeiro"
   | "loja"
   | "suporte";

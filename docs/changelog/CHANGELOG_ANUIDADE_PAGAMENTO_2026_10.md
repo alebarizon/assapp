@@ -122,4 +122,36 @@ O SMTP precisa estar configurado para os lembretes saírem; envios com falha sã
 - Novo módulo de acesso `publicacoes` (gestor, diretoria, administrativo).
 - Migration `publicacoes/0001`. Testes: `publicacoes/tests.py`.
 
-Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md) · [`CONTATOS.md`](../modulos/CONTATOS.md) · [`PUBLICACOES.md`](../modulos/PUBLICACOES.md)
+## Assembleias e votações (novo app `governanca`)
+
+- Assembleias com convocação por e-mail, pauta, presença (painel e portal), quórum sobre os associados
+  em dia, ata gerada a partir da pauta e dos resultados, publicação com hash SHA-256 e PDF.
+- Eleições de chapa e deliberações com cédula digital (secreta ou nominal), censo congelado na
+  abertura, voto em branco opcional, comprovante, apuração com vencedora/empate e registro na memória.
+- Painel `/app/governanca`, portal `/app/portal/governanca`.
+- Novo módulo de acesso `governanca` (gestor e diretoria; administrativo em leitura).
+- Migration `governanca/0001`. Testes: `governanca/tests.py`.
+
+## Newsletter (novo app `newsletter`)
+
+- Campanhas por e-mail com público combinável: associados por situação e categoria, inscritos em
+  eventos e contatos por etiqueta (só com consentimento LGPD); contagem, amostra, prévia e envio de teste.
+- Envio por fila (`enviar_newsletters`) com limite por minuto (`NEWSLETTER_POR_MINUTO`), até 3
+  tentativas, interrupção e acompanhamento ao vivo.
+- Descadastro com link assinado no rodapé, `List-Unsubscribe` one-click e página `/site/descadastrar`.
+- Novo serviço `newsletter` em `docker-compose.staging.yml` e `docker-compose.prod.yml` (mesma imagem
+  do backend, `enviar_newsletters --loop`); `scripts/deploy.sh` limpa o container novo.
+- Novo módulo de acesso `newsletter` (gestor, diretoria, administrativo).
+- Migration `newsletter/0001`. Testes: `newsletter/tests.py`.
+
+## Diretório público de associados
+
+- O associado passa a editar no portal (`/app/portal/perfil`) instituição, área, Lattes, ORCID,
+  telefone e minibiografia, e autoriza (ou retira) a presença no diretório.
+- A associação liga o diretório em Website; o site ganha `/site/associados` com busca e filtro por
+  instituição. Só aparecem associados com filiação ativa/honorária que autorizaram; nunca e-mail,
+  telefone ou CPF.
+- Painel: detalhe do associado mostra se e quando ele autorizou.
+- Migrations `membros/0005`, `website/0003`. Testes: `membros/test_diretorio.py`.
+
+Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md) · [`CONTATOS.md`](../modulos/CONTATOS.md) · [`PUBLICACOES.md`](../modulos/PUBLICACOES.md) · [`GOVERNANCA.md`](../modulos/GOVERNANCA.md) · [`NEWSLETTER.md`](../modulos/NEWSLETTER.md)

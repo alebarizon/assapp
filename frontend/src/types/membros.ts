@@ -65,6 +65,9 @@ export interface Membro {
   ativo: boolean;
   consentimento_lgpd: boolean;
   consentimento_em?: string;
+  mini_bio?: string;
+  diretorio_publico?: boolean;
+  diretorio_aceito_em?: string | null;
   filiacao_status?: string;
   filiacao_tipo?: string;
   filiacoes?: Filiacao[];

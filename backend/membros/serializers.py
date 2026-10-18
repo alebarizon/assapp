@@ -1,4 +1,5 @@
 """Serializers — Membros, Filiação e Anuidades."""
+from django.utils import timezone
 from rest_framework import serializers
 
 from .models import Anuidade, Filiacao, Membro
@@ -101,9 +102,28 @@ class MembroDetailSerializer(MembroListSerializer):
             "lattes_url",
             "orcid",
             "consentimento_em",
+            "mini_bio",
+            "diretorio_publico",
+            "diretorio_aceito_em",
             "filiacoes",
             "updated_at",
         )
+        read_only_fields = MembroListSerializer.Meta.read_only_fields + ("diretorio_publico", "diretorio_aceito_em")
+
+
+class MeuPerfilSerializer(serializers.ModelSerializer):
+    """O que o próprio associado edita no portal (dados acadêmicos e opt-in do diretório)."""
+
+    class Meta:
+        model = Membro
+        fields = ("telefone", "instituicao", "area_atuacao", "lattes_url", "orcid", "mini_bio", "diretorio_publico")
+
+    def update(self, instance, validated_data):
+        if validated_data.get("diretorio_publico") and not instance.diretorio_publico:
+            instance.diretorio_aceito_em = timezone.now()
+        elif validated_data.get("diretorio_publico") is False:
+            instance.diretorio_aceito_em = None
+        return super().update(instance, validated_data)
 
 
 class MembroCreateSerializer(serializers.ModelSerializer):

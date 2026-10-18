@@ -34,7 +34,7 @@ services:
         python manage.py collectstatic --noinput &&
         gunicorn --config gunicorn_config.py core.wsgi:application
       "
-    environment:
+    environment: &backend_env
       DJANGO_SETTINGS_MODULE: core.settings
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG:-False}
@@ -59,6 +59,7 @@ services:
       EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@vertent.com.br}
       SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
+      NEWSLETTER_POR_MINUTO: ${NEWSLETTER_POR_MINUTO:-30}
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -74,6 +75,19 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  newsletter:
+    image: ${DOCKER_USERNAME:-alebarizon}/assapp-backend:${IMAGE_TAG:-latest}
+    container_name: assapp_newsletter_prod
+    restart: always
+    command: sh -c "python manage.py wait_for_db && python manage.py enviar_newsletters --loop"
+    environment: *backend_env
+    volumes:
+      - media_volume:/app/media
+    depends_on:
+      - backend
+    networks:
+      - assapp_network
 
   frontend:
     image: ${DOCKER_USERNAME:-alebarizon}/assapp-frontend:${IMAGE_TAG:-latest}

@@ -72,6 +72,11 @@ class Membro(models.Model):
     consentimento_lgpd = models.BooleanField(default=False)
     consentimento_em = models.DateTimeField(blank=True, null=True)
     ativo = models.BooleanField(default=True)
+    mini_bio = models.CharField(max_length=600, blank=True, default="")
+    diretorio_publico = models.BooleanField(
+        default=False, help_text="Opt-in do próprio associado para aparecer no diretório do site"
+    )
+    diretorio_aceito_em = models.DateTimeField(blank=True, null=True)
     matricula = models.PositiveIntegerField(unique=True, null=True, blank=True)
     carteirinha_codigo = models.CharField(
         max_length=32, unique=True, null=True, blank=True, help_text="Código do QR da carteirinha; renovar invalida o anterior"

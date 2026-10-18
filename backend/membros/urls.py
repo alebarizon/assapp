@@ -10,6 +10,7 @@ from .views import (
     MinhaCarteirinhaView,
     MinhasAnuidadesView,
     VerificarCarteirinhaView,
+    DiretorioPublicoView,
 )
 
 router = DefaultRouter()
@@ -26,5 +27,6 @@ urlpatterns = [
     path("meu/carteirinha/", MinhaCarteirinhaView.as_view(), name="minha-carteirinha"),
     path("meu/carteirinha/pdf/", MinhaCarteirinhaPdfView.as_view(), name="minha-carteirinha-pdf"),
     path("public/carteirinha/<str:codigo>/", VerificarCarteirinhaView.as_view(), name="verificar-carteirinha"),
+    path("public/diretorio/", DiretorioPublicoView.as_view(), name="diretorio-publico"),
     path("", include(router.urls)),
 ]

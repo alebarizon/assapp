@@ -86,6 +86,24 @@ cursos, conversas, respostas de formulários e contatos do CRM. Exibida em `Memb
 | `POST /api/membros/membros/{id}/carteirinha/renovar/` | Novo QR (invalida o anterior) |
 | `GET /api/membros/public/carteirinha/{codigo}/?schema=` | Verificação pública |
 
+## Diretório público
+
+`membros/diretorio.py` (migrations `membros/0005` e `website/0003`).
+
+- O associado edita no portal (`PATCH /api/membros/meu/`) instituição, área, Lattes, ORCID, telefone,
+  minibiografia e o opt-in `diretorio_publico`; `diretorio_aceito_em` registra quando autorizou. A
+  diretoria só vê a autorização, não a altera.
+- A associação liga o diretório em Website (`WebsiteConfig.diretorio_ativo`, exige site publicado); o
+  menu do site ganha o link **Associados**.
+- Aparece quem autorizou e tem filiação ativa ou honorária. Exibe nome, categoria, ano de entrada,
+  instituição, área, minibiografia, Lattes e ORCID — nunca e-mail, telefone ou CPF.
+- Busca por nome, instituição, área ou tema, filtro por instituição, 24 por página.
+
+| Endpoint | Descrição |
+|----------|-----------|
+| `GET/PATCH /api/membros/meu/` | Perfil do associado (PATCH: campos acadêmicos e opt-in) |
+| `GET /api/membros/public/diretorio/?schema=&q=&instituicao=&pagina=` | Diretório (404 se desligado) |
+
 ## Frontend
 
 | Página | Rota |
@@ -94,6 +112,8 @@ cursos, conversas, respostas de formulários e contatos do CRM. Exibida em `Memb
 | `MembroDetail.tsx` | `/app/membros/:id` (painel Carteirinha) |
 | `MinhaCarteirinha.tsx` | `/app/portal/carteirinha` |
 | `TenantSiteCarteirinha.tsx` | `/site/carteirinha/:codigo` |
+| `MeuPerfil.tsx` (`PerfilPublicoForm`) | `/app/portal/perfil` |
+| `TenantSiteDiretorio.tsx` | `/site/associados` |
 
 UI: padrão WellSaaS (`dashboard-*`, KPIs `stats-grid`) — [`UI_PADRAO_WELLSAAS.md`](../guias/UI_PADRAO_WELLSAAS.md).
 

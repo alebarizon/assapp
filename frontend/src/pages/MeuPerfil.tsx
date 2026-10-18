@@ -4,6 +4,7 @@ import type { DisponibilidadePagamento } from "@/types/pagamentos";
 import { getMeuMembro, listMinhasAnuidades } from "@/services/membros";
 import { getDisponibilidadePagamento } from "@/services/pagamentos";
 import PagarAnuidadeModal from "@/components/pagamentos/PagarAnuidadeModal";
+import PerfilPublicoForm from "@/components/membros/PerfilPublicoForm";
 
 export default function MeuPerfil() {
   const [membro, setMembro] = useState<Membro | null>(null);
@@ -70,18 +71,6 @@ export default function MeuPerfil() {
 
       <div className="dashboard-content-panel" style={{ marginBottom: "1.25rem" }}>
         <div className="form-row-2" style={{ fontSize: "0.9rem" }}>
-          {membro.instituicao && (
-            <div>
-              <span className="form-label">Instituição</span>
-              <p style={{ margin: 0 }}>{membro.instituicao}</p>
-            </div>
-          )}
-          {membro.area_atuacao && (
-            <div>
-              <span className="form-label">Área</span>
-              <p style={{ margin: 0 }}>{membro.area_atuacao}</p>
-            </div>
-          )}
           {membro.filiacao_tipo && (
             <div>
               <span className="form-label">Tipo de filiação</span>
@@ -96,6 +85,8 @@ export default function MeuPerfil() {
           )}
         </div>
       </div>
+
+      <PerfilPublicoForm membro={membro} onSalvo={setMembro} />
 
       <h2 className="dashboard-title" style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>
         Anuidades

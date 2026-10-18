@@ -26,6 +26,7 @@ from .serializers import (
     MembroCreateSerializer,
     MembroDetailSerializer,
     MembroListSerializer,
+    MeuPerfilSerializer,
     RegistrarPagamentoSerializer,
     VincularUserSerializer,
 )
@@ -41,6 +42,7 @@ from .services import (
     vincular_user,
 )
 from .carteirinha import build_carteirinha_pdf, dados_carteirinha, renovar_codigo, situacao
+from .diretorio import buscar as buscar_diretorio
 from .timeline import timeline_membro
 
 
@@ -240,13 +242,25 @@ class MeuMembroView(APIView):
                 {"detail": "Nenhum associado vinculado a este usuário."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+        return Response(self._dados(membro))
+
+    def patch(self, request):
+        membro = resolver_membro_do_user(request.user, auto_link=True)
+        if not membro:
+            raise NotFound("Nenhum associado vinculado a este usuário.")
+        serializer = MeuPerfilSerializer(membro, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(self._dados(membro))
+
+    def _dados(self, membro):
         membro = (
             Membro.objects.filter(pk=membro.pk)
             .select_related("user")
             .prefetch_related("filiacoes__anuidades__lembretes")
             .first()
         )
-        return Response(MembroDetailSerializer(membro).data)
+        return MembroDetailSerializer(membro).data
 
 
 class MinhasAnuidadesView(APIView):
@@ -318,4 +332,33 @@ class VerificarCarteirinhaView(APIView):
                     "verificado_em": timezone.now(),
                     **situacao(membro),
                 }
+            )
+
+
+class DiretorioPublicoView(APIView):
+    """GET /api/membros/public/diretorio/?schema=&q=&instituicao=&pagina= — diretório opt-in do site."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        from website.models import WebsiteConfig
+
+        tenant = resolve_tenant_from_request(request)
+        if not tenant:
+            raise NotFound("Associação não encontrada. Informe ?schema=.")
+        with schema_context(tenant.schema_name):
+            config = WebsiteConfig.objects.filter(is_published=True).first()
+            if not config or not config.diretorio_ativo:
+                raise NotFound("Esta associação não publica diretório de associados.")
+            try:
+                pagina = int(request.query_params.get("pagina") or 1)
+            except ValueError:
+                pagina = 1
+            return Response(
+                buscar_diretorio(
+                    q=(request.query_params.get("q") or "").strip(),
+                    instituicao=(request.query_params.get("instituicao") or "").strip(),
+                    pagina=pagina,
+                )
             )

@@ -37,6 +37,14 @@ import TenantSiteTrabalho from "@/pages/TenantSiteTrabalho";
 import TenantSiteCarteirinha from "@/pages/TenantSiteCarteirinha";
 import MinhaCarteirinha from "@/pages/MinhaCarteirinha";
 import Publicacoes from "@/pages/Publicacoes";
+import Governanca from "@/pages/Governanca";
+import AssembleiaDetail from "@/pages/AssembleiaDetail";
+import VotacaoDetail from "@/pages/VotacaoDetail";
+import MinhaGovernanca from "@/pages/MinhaGovernanca";
+import Newsletter from "@/pages/Newsletter";
+import CampanhaDetail from "@/pages/CampanhaDetail";
+import TenantSiteDescadastrar from "@/pages/TenantSiteDescadastrar";
+import TenantSiteDiretorio from "@/pages/TenantSiteDiretorio";
 import MinhasPublicacoes from "@/pages/MinhasPublicacoes";
 import TenantSitePublicacoes from "@/pages/TenantSitePublicacoes";
 import TenantSitePublicacao from "@/pages/TenantSitePublicacao";
@@ -139,6 +147,8 @@ function AppRoutes() {
       <Route path="/site/carteirinha/:codigo" element={<TenantSiteCarteirinha />} />
       <Route path="/site/publicacoes" element={<TenantSitePublicacoes />} />
       <Route path="/site/publicacoes/:slug" element={<TenantSitePublicacao />} />
+      <Route path="/site/descadastrar" element={<TenantSiteDescadastrar />} />
+      <Route path="/site/associados" element={<TenantSiteDiretorio />} />
       <Route path="/site/formularios/:token" element={<PublicFormulario />} />
       <Route path="/site/formularios/convite/:token" element={<PublicFormulario convite />} />
       <Route
@@ -158,6 +168,7 @@ function AppRoutes() {
         <Route path="portal/carteirinha" element={<MinhaCarteirinha />} />
         <Route path="portal/documentos" element={<MeusDocumentos />} />
         <Route path="portal/publicacoes" element={<MinhasPublicacoes />} />
+        <Route path="portal/governanca" element={<MinhaGovernanca />} />
         <Route path="portal/loja" element={<PortalLoja />} />
         <Route path="portal/carrinho" element={<PortalCarrinho />} />
         <Route path="portal/cursos" element={<MeusCursos />} />
@@ -180,6 +191,11 @@ function AppRoutes() {
         <Route path="finance" element={<Finance />} />
         <Route path="documents" element={<Documents />} />
         <Route path="publicacoes" element={<Publicacoes />} />
+        <Route path="governanca" element={<Governanca />} />
+        <Route path="governanca/assembleias/:id" element={<AssembleiaDetail />} />
+        <Route path="governanca/votacoes/:id" element={<VotacaoDetail />} />
+        <Route path="newsletter" element={<Newsletter />} />
+        <Route path="newsletter/:id" element={<CampanhaDetail />} />
         <Route path="ecommerce/catalog" element={<EcommerceCatalog />} />
         <Route path="ecommerce/orders" element={<EcommerceOrders />} />
         <Route path="website" element={<WebsiteAdmin />} />

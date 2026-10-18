@@ -29,6 +29,7 @@ export interface WebsiteConfig {
   contact_address: string;
   social_links: { label: string; url: string }[];
   is_published: boolean;
+  diretorio_ativo?: boolean;
 }
 
 export interface SitePage {

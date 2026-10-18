@@ -63,6 +63,7 @@ export function SiteShell({
             <Link to={`/site/eventos${q}`}>Eventos</Link>
             <Link to={`/site/cursos${q}`}>Cursos</Link>
             <Link to={`/site/publicacoes${q}`}>Publicações</Link>
+            {config.diretorio_ativo && <Link to={`/site/associados${q}`}>Associados</Link>}
             <Link to={`/site${q}#associe-se`}>Associe-se</Link>
             <Link to={`/site${q}#contato`}>Contato</Link>
             <Link to={buildAssocieSeCtaLink(schema, config.associe_se_cta_link)}>

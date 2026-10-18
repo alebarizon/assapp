@@ -195,6 +195,14 @@ export default function MembroDetail() {
               <p style={{ margin: 0 }}>{membro.area_atuacao}</p>
             </div>
           )}
+          <div>
+            <span className="form-label">Diretório público</span>
+            <p style={{ margin: 0 }}>
+              {membro.diretorio_publico
+                ? `Autorizado pelo associado${membro.diretorio_aceito_em ? ` em ${new Date(membro.diretorio_aceito_em).toLocaleDateString("pt-BR")}` : ""}`
+                : "Não aparece"}
+            </p>
+          </div>
           {membro.lattes_url && (
             <div>
               <span className="form-label">Lattes</span>

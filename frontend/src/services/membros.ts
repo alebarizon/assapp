@@ -104,6 +104,44 @@ export async function getMeuMembro(): Promise<Membro> {
   return data;
 }
 
+export type MeuPerfilPayload = Pick<
+  Membro,
+  "telefone" | "instituicao" | "area_atuacao" | "lattes_url" | "orcid" | "mini_bio" | "diretorio_publico"
+>;
+
+export async function atualizarMeuPerfil(payload: Partial<MeuPerfilPayload>): Promise<Membro> {
+  const { data } = await api.patch<Membro>("/api/membros/meu/", payload);
+  return data;
+}
+
+export interface CartaoDiretorio {
+  id: string;
+  nome: string;
+  instituicao: string;
+  area_atuacao: string;
+  mini_bio: string;
+  lattes_url: string;
+  orcid: string;
+  categoria: string;
+  membro_desde: number | null;
+}
+
+export interface ResultadoDiretorio {
+  total: number;
+  pagina: number;
+  paginas: number;
+  resultados: CartaoDiretorio[];
+  instituicoes: { nome: string; total: number }[];
+}
+
+export async function getDiretorio(
+  schema: string,
+  params: { q?: string; instituicao?: string; pagina?: number },
+): Promise<ResultadoDiretorio> {
+  const { data } = await api.get<ResultadoDiretorio>("/api/membros/public/diretorio/", { params: { schema, ...params } });
+  return data;
+}
+
 export async function listMinhasAnuidades(): Promise<Anuidade[]> {
   const { data } = await api.get<Anuidade[]>("/api/membros/meu/anuidades/");
   return Array.isArray(data) ? data : [];

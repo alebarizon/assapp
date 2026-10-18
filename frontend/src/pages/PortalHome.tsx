@@ -5,6 +5,7 @@ import {
   FileText,
   GraduationCap,
   MessageSquare,
+  Gavel,
   Library,
   ScrollText,
   ShoppingBag,
@@ -74,6 +75,15 @@ export default function PortalHome() {
             <div>
               <p className="list-card-title">Publicações</p>
               <p className="list-card-meta">Dossiês, e-books e boletins da associação</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/governanca" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <Gavel size={20} />
+            <div>
+              <p className="list-card-title">Assembleias e votações</p>
+              <p className="list-card-meta">Convocações, eleições, presença e atas</p>
             </div>
           </div>
         </Link>

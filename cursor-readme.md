@@ -71,7 +71,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 |--------|----------|
 | `public` | tenants (com `setup_completed`, `plan_slug`), domains, **support** (chamados de todas as associações) |
 | `sistema` | superadmin |
-| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, publicacoes, website, accounts |
+| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, publicacoes, governanca, newsletter, website, accounts |
 
 > `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via Asaas da própria associação.
 
@@ -84,7 +84,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `mandatos` | Mandatos, transição, onboarding da nova diretoria |
 | `memoria` | ContextoHistorico, timeline |
 | `eventos` | Chamada de trabalhos (submissão pelo portal, parecer duplo-cego por critérios, decisão, certificados de autor/parecerista), anais com página citável por trabalho (`/site/eventos/:slug/anais`), programação e hotsite (`/site/eventos`) |
-| `membros` | Filiados, anuidades, régua de cobrança (`regua_anuidades`), linha do tempo do associado, carteirinha digital com QR (`/site/carteirinha/:codigo`) |
+| `membros` | Filiados, anuidades, régua de cobrança (`regua_anuidades`), linha do tempo do associado, carteirinha digital com QR (`/site/carteirinha/:codigo`), diretório público opt-in (`/site/associados`) |
 | `payments` | Pagamento online de anuidades (Asaas: Pix, cartão, boleto) + webhook (`/app/finance` → Pagamento online) |
 | `finance` | Lançamentos OSC, dashboard, e-mail fechamento |
 | `ecommerce` | Catálogo, carrinho, pedidos (anuidade, evento, curso, material) |
@@ -96,6 +96,8 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `accounts` | User, JWT, register, setup |
 | `website` | Site público tenant + CMS (`/site`, `/app/website`) |
 | `publicacoes` | Dossiês, e-books, boletins: acesso aberto, para adimplentes ou venda pela loja (`/app/publicacoes`, `/app/portal/publicacoes`, `/site/publicacoes`) |
+| `governanca` | Assembleias (convocação, presença, quórum, ata com hash) e votações com cédula digital (`/app/governanca`, `/app/portal/governanca`) |
+| `newsletter` | Campanhas segmentadas (associados, inscritos, etiquetas) com fila limitada por minuto e descadastro (`/app/newsletter`, `/site/descadastrar`) |
 
 App compartilhado (schema `public`): `support` — chamados associação → equipe Gesttora (`/app/suporte`).
 Certificados (cursos e eventos) usam `core/certificates.py` + verificação pública em `/site/certificados`.
@@ -134,6 +136,8 @@ Gestão em `/app/usuarios` — ver [`USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_
 /api/certificados/{codigo}/[pdf/]  verificação pública de certificados (cursos, eventos, autoria e parecer)
 /api/documents/  documents (+ meus/)
 /api/publicacoes/ publicações (diretoria, minhas/ portal, public/ site)
+/api/governanca/ assembleias/, votacoes/ (diretoria), minhas/ (portal: votar, presença, ata)
+/api/newsletter/ campanhas/, descadastros/ (diretoria), public/descadastrar/ (link do e-mail)
 /api/website/    website CMS tenant (config, pages, public)
 /api/tenants/    resolve domínio → schema (public/resolve)
 ```

@@ -247,6 +247,16 @@ export default function WebsiteAdmin() {
                   Site publicado (visível em /site?schema={schema})
                 </label>
               </div>
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(config.diretorio_ativo)}
+                    onChange={(e) => setConfig({ ...config, diretorio_ativo: e.target.checked })}
+                  />{" "}
+                  Exibir diretório de associados (só quem autorizou no portal aparece)
+                </label>
+              </div>
             </>
           )}
 

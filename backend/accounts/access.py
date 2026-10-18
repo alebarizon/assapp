@@ -27,6 +27,7 @@ MODULOS = [
     ("configuracoes", "Configurações da associação"),
     ("memoria", "Memória institucional"),
     ("mandatos", "Mandatos"),
+    ("governanca", "Assembleias e votações"),
     ("onboarding", "Onboarding"),
     ("membros", "Associados"),
     ("eventos", "Eventos"),
@@ -34,6 +35,7 @@ MODULOS = [
     ("formularios", "Formulários"),
     ("contatos", "Contatos"),
     ("mensagens", "Mensagens"),
+    ("newsletter", "Newsletter"),
     ("website", "Website"),
     ("documentos", "Documentos"),
     ("publicacoes", "Publicações"),
@@ -44,7 +46,8 @@ MODULOS = [
 MODULOS_VALIDOS = frozenset(m for m, _ in MODULOS)
 
 _OPERACIONAIS = (
-    "membros", "eventos", "cursos", "formularios", "contatos", "mensagens", "website", "documentos", "publicacoes",
+    "membros", "eventos", "cursos", "formularios", "contatos", "mensagens", "newsletter", "website", "documentos",
+    "publicacoes",
 )
 
 MATRIZ = {
@@ -57,6 +60,7 @@ MATRIZ = {
     ADMINISTRATIVO: {
         "memoria": LEITURA,
         "mandatos": LEITURA,
+        "governanca": LEITURA,
         "onboarding": LEITURA,
         **{m: TOTAL for m in _OPERACIONAIS},
         "suporte": TOTAL,

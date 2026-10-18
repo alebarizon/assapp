@@ -62,6 +62,7 @@ class WebsiteConfig(models.Model):
     social_links = models.JSONField(default=list, blank=True)
 
     is_published = models.BooleanField(default=False)
+    diretorio_ativo = models.BooleanField(default=False, help_text="Exibe o diretório de associados no site")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
