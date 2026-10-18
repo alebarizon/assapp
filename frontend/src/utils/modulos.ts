@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Inbox,
   LayoutDashboard,
+  Library,
   LifeBuoy,
   MessageSquare,
   ShoppingBag,
@@ -28,7 +29,7 @@ export const PERFIL_LABEL: Record<PerfilAcesso, string> = {
 export const PERFIL_DESCRICAO: Record<PerfilAcesso, string> = {
   gestor: "Acesso total, inclusive usuários e configurações da associação.",
   diretoria: "Todos os módulos; financeiro e loja só para consulta.",
-  administrativo: "Secretaria: associados, eventos, cursos, contatos, site e documentos.",
+  administrativo: "Secretaria: associados, eventos, cursos, contatos, site, documentos e publicações.",
   financeiro: "Tesouraria: financeiro, loja, anuidades e documentos.",
 };
 
@@ -53,6 +54,7 @@ export const BOARD_NAV: NavItem[] = [
   { to: "/app/ecommerce/catalog", label: "Loja — catálogo", icon: ShoppingBag, modulo: "loja" },
   { to: "/app/ecommerce/orders", label: "Loja — pedidos", icon: ShoppingBag, modulo: "loja" },
   { to: "/app/documents", label: "Documentos", icon: FileText, modulo: "documentos" },
+  { to: "/app/publicacoes", label: "Publicações", icon: Library, modulo: "publicacoes" },
   { to: "/app/onboarding", label: "Onboarding", icon: BookOpen, modulo: "onboarding" },
   { to: "/app/usuarios", label: "Usuários e perfis", icon: UserCog, modulo: "usuarios" },
   { to: "/app/suporte", label: "Suporte", icon: LifeBuoy, modulo: "suporte" },
@@ -71,6 +73,7 @@ const PREFIXO_MODULO: [string, ModuloPainel][] = [
   ["/app/website", "website"],
   ["/app/ecommerce", "loja"],
   ["/app/documents", "documentos"],
+  ["/app/publicacoes", "publicacoes"],
   ["/app/onboarding", "onboarding"],
   ["/app/usuarios", "usuarios"],
   ["/app/suporte", "suporte"],

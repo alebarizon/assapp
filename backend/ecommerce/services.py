@@ -75,6 +75,14 @@ def validate_cart_item_for_membro(catalog_item: CatalogItem, membro: Membro, qua
         if quantity != 1:
             raise ValidationError("Curso: quantidade máxima 1.")
 
+    if catalog_item.item_type == CatalogItemType.DIGITAL and catalog_item.publicacoes.exists():
+        if OrderItem.objects.filter(
+            catalog_item=catalog_item, order__membro=membro, order__paid_at__isnull=False
+        ).exists():
+            raise ValidationError("Você já tem acesso a esta publicação.")
+        if quantity != 1:
+            raise ValidationError("Publicação: quantidade máxima 1.")
+
     if catalog_item.inventory_count is not None and catalog_item.inventory_count < quantity:
         raise ValidationError(
             f"Estoque insuficiente. Disponível: {catalog_item.inventory_count}."

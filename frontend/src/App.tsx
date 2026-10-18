@@ -36,6 +36,10 @@ import TenantSiteAnais from "@/pages/TenantSiteAnais";
 import TenantSiteTrabalho from "@/pages/TenantSiteTrabalho";
 import TenantSiteCarteirinha from "@/pages/TenantSiteCarteirinha";
 import MinhaCarteirinha from "@/pages/MinhaCarteirinha";
+import Publicacoes from "@/pages/Publicacoes";
+import MinhasPublicacoes from "@/pages/MinhasPublicacoes";
+import TenantSitePublicacoes from "@/pages/TenantSitePublicacoes";
+import TenantSitePublicacao from "@/pages/TenantSitePublicacao";
 import TenantSiteCourseDetail from "@/pages/TenantSiteCourseDetail";
 import TenantSiteCertificate from "@/pages/TenantSiteCertificate";
 import Formularios from "@/pages/Formularios";
@@ -133,6 +137,8 @@ function AppRoutes() {
       <Route path="/site/eventos/:slug/anais/:trabalho" element={<TenantSiteTrabalho />} />
       <Route path="/site/certificados" element={<TenantSiteCertificate />} />
       <Route path="/site/carteirinha/:codigo" element={<TenantSiteCarteirinha />} />
+      <Route path="/site/publicacoes" element={<TenantSitePublicacoes />} />
+      <Route path="/site/publicacoes/:slug" element={<TenantSitePublicacao />} />
       <Route path="/site/formularios/:token" element={<PublicFormulario />} />
       <Route path="/site/formularios/convite/:token" element={<PublicFormulario convite />} />
       <Route
@@ -151,6 +157,7 @@ function AppRoutes() {
         <Route path="portal/perfil" element={<MeuPerfil />} />
         <Route path="portal/carteirinha" element={<MinhaCarteirinha />} />
         <Route path="portal/documentos" element={<MeusDocumentos />} />
+        <Route path="portal/publicacoes" element={<MinhasPublicacoes />} />
         <Route path="portal/loja" element={<PortalLoja />} />
         <Route path="portal/carrinho" element={<PortalCarrinho />} />
         <Route path="portal/cursos" element={<MeusCursos />} />
@@ -172,6 +179,7 @@ function AppRoutes() {
         <Route path="mandatos/:id" element={<MandatoDetail />} />
         <Route path="finance" element={<Finance />} />
         <Route path="documents" element={<Documents />} />
+        <Route path="publicacoes" element={<Publicacoes />} />
         <Route path="ecommerce/catalog" element={<EcommerceCatalog />} />
         <Route path="ecommerce/orders" element={<EcommerceOrders />} />
         <Route path="website" element={<WebsiteAdmin />} />

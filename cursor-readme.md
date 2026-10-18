@@ -71,7 +71,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 |--------|----------|
 | `public` | tenants (com `setup_completed`, `plan_slug`), domains, **support** (chamados de todas as associações) |
 | `sistema` | superadmin |
-| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, website, accounts |
+| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, publicacoes, website, accounts |
 
 > `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via Asaas da própria associação.
 
@@ -90,12 +90,12 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `ecommerce` | Catálogo, carrinho, pedidos (anuidade, evento, curso, material) |
 | `courses` | Cursos online: aulas, quiz, Q&A, certificado; venda via loja (`/app/courses`, `/app/portal/cursos`, `/site/cursos`) |
 | `formularios` | Pesquisas, avaliação de eventos, consultas: link público, portal e convite por e-mail (`/app/formularios`, `/site/formularios/:token`) |
-| `contatos` | CRM leve: formulário de contato do site, funil, etiquetas, conversão em associado (`/app/contatos`) |
+| `contatos` | CRM leve: formulário de contato do site, funil, etiquetas, conversão em associado, ficha 360 por e-mail (`/app/contatos`) |
 | `mensagens` | Conversas diretoria ↔ associado (`/app/mensagens`, `/app/portal/mensagens`) |
 | `documents` | Upload / audiência / meus |
 | `accounts` | User, JWT, register, setup |
 | `website` | Site público tenant + CMS (`/site`, `/app/website`) |
-| `publicacoes` | **Planejado** — ebooks, dossiês (Fase 4) |
+| `publicacoes` | Dossiês, e-books, boletins: acesso aberto, para adimplentes ou venda pela loja (`/app/publicacoes`, `/app/portal/publicacoes`, `/site/publicacoes`) |
 
 App compartilhado (schema `public`): `support` — chamados associação → equipe Gesttora (`/app/suporte`).
 Certificados (cursos e eventos) usam `core/certificates.py` + verificação pública em `/site/certificados`.
@@ -133,6 +133,7 @@ Gestão em `/app/usuarios` — ver [`USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_
 /api/suporte/    chamados de suporte (diretoria da associação + superadmin)
 /api/certificados/{codigo}/[pdf/]  verificação pública de certificados (cursos, eventos, autoria e parecer)
 /api/documents/  documents (+ meus/)
+/api/publicacoes/ publicações (diretoria, minhas/ portal, public/ site)
 /api/website/    website CMS tenant (config, pages, public)
 /api/tenants/    resolve domínio → schema (public/resolve)
 ```

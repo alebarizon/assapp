@@ -5,6 +5,7 @@ import {
   FileText,
   GraduationCap,
   MessageSquare,
+  Library,
   ScrollText,
   ShoppingBag,
   UserRound,
@@ -64,6 +65,15 @@ export default function PortalHome() {
             <div>
               <p className="list-card-title">Meus cursos</p>
               <p className="list-card-meta">Aulas, progresso e certificados</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/publicacoes" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <Library size={20} />
+            <div>
+              <p className="list-card-title">Publicações</p>
+              <p className="list-card-meta">Dossiês, e-books e boletins da associação</p>
             </div>
           </div>
         </Link>

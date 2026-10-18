@@ -16,6 +16,7 @@ import {
   FileSearch,
   ScrollText,
   CreditCard,
+  Library,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { BOARD_NAV, PERFIL_LABEL, moduloDaRota } from "@/utils/modulos";
@@ -47,6 +48,7 @@ export default function AppLayout() {
   const memberNav = [
     { to: "/app/portal", label: "Portal", icon: Home },
     { to: "/app/portal/cursos", label: "Meus cursos", icon: GraduationCap },
+    { to: "/app/portal/publicacoes", label: "Publicações", icon: Library },
     { to: "/app/portal/formularios", label: "Formulários", icon: ClipboardList },
     { to: "/app/portal/mensagens", label: "Mensagens", icon: MessageSquare },
     { to: "/app/portal/trabalhos", label: "Trabalhos científicos", icon: ScrollText },

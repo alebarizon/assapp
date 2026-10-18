@@ -38,6 +38,7 @@ export type ModuloPainel =
   | "mensagens"
   | "website"
   | "documentos"
+  | "publicacoes"
   | "financeiro"
   | "loja"
   | "suporte";

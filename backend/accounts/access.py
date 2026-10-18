@@ -36,13 +36,16 @@ MODULOS = [
     ("mensagens", "Mensagens"),
     ("website", "Website"),
     ("documentos", "Documentos"),
+    ("publicacoes", "Publicações"),
     ("financeiro", "Financeiro"),
     ("loja", "Loja"),
     ("suporte", "Suporte"),
 ]
 MODULOS_VALIDOS = frozenset(m for m, _ in MODULOS)
 
-_OPERACIONAIS = ("membros", "eventos", "cursos", "formularios", "contatos", "mensagens", "website", "documentos")
+_OPERACIONAIS = (
+    "membros", "eventos", "cursos", "formularios", "contatos", "mensagens", "website", "documentos", "publicacoes",
+)
 
 MATRIZ = {
     GESTOR: {m: TOTAL for m in MODULOS_VALIDOS},

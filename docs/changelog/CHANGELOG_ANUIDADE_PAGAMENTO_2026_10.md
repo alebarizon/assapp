@@ -104,4 +104,22 @@ O SMTP precisa estar configurado para os lembretes saírem; envios com falha sã
 - Painel: carteirinha no detalhe do membro, com PDF e "Gerar novo QR" (invalida o anterior).
 - Testes: `membros/test_carteirinha.py`.
 
-Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md)
+## Ficha 360 do contato
+
+- `GET /api/contatos/{id}/ficha/` (`contatos/ficha.py`): resumo (associado e situação, contatos, eventos,
+  trabalhos, compras pagas, última atividade) e linha do tempo unificada.
+- Contato vinculado usa a linha do tempo do associado; não vinculado é cruzado por e-mail com inscrições,
+  submissões e respostas de formulário, e sugere o associado com o mesmo e-mail.
+- Painel: card **Ficha 360** no detalhe do contato.
+- Testes: `contatos/test_ficha.py`.
+
+## Publicações (novo app `publicacoes`)
+
+- Dossiês, e-books, boletins, livros e relatórios com capa, arquivo, autores e ISBN/ISSN.
+- Acesso aberto, para associados em dia ou por venda; o preço cria o item digital na loja e o pedido pago
+  libera o download no portal.
+- Painel `/app/publicacoes`, portal `/app/portal/publicacoes`, site `/site/publicacoes`.
+- Novo módulo de acesso `publicacoes` (gestor, diretoria, administrativo).
+- Migration `publicacoes/0001`. Testes: `publicacoes/tests.py`.
+
+Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md) · [`CONTATOS.md`](../modulos/CONTATOS.md) · [`PUBLICACOES.md`](../modulos/PUBLICACOES.md)
