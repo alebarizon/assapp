@@ -75,6 +75,18 @@ for df in frontend/Dockerfile backend/Dockerfile; do
   fi
 done
 
+if [ -n "${DOCKER_PASSWORD:-}" ]; then
+  log "Login Docker Hub..."
+  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME_VALUE" --password-stdin
+fi
+
+# Pull antes de parar a stack: se faltar disco ou rede, a versão anterior continua no ar
+log "Espaço livre em /: $(df -h / | awk 'NR==2 {print $4}')"
+log "Pull $BACKEND_IMAGE"
+docker pull "$BACKEND_IMAGE"
+log "Pull $FRONTEND_IMAGE"
+docker pull "$FRONTEND_IMAGE"
+
 log "Parando stack anterior ($COMPOSE_PROJECT_NAME)..."
 COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \
   docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" down --remove-orphans --timeout 30 2>/dev/null || true
@@ -90,16 +102,6 @@ if command -v lsof &>/dev/null; then
     docker ps -a --format '{{.ID}} {{.Ports}}' | grep -E ":${HOST_PORT}->|: ${HOST_PORT}/" | awk '{print $1}' | xargs -r docker rm -f 2>/dev/null || true
   fi
 fi
-
-if [ -n "${DOCKER_PASSWORD:-}" ]; then
-  log "Login Docker Hub..."
-  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME_VALUE" --password-stdin
-fi
-
-log "Pull $BACKEND_IMAGE"
-docker pull "$BACKEND_IMAGE"
-log "Pull $FRONTEND_IMAGE"
-docker pull "$FRONTEND_IMAGE"
 
 log "Subindo stack ($COMPOSE_PROJECT_NAME)..."
 COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \
@@ -128,4 +130,10 @@ fi
 
 COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \
   docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps
+
+# Só imagens sem tag e sem container (versões anteriores substituídas pelo pull).
+# Nunca volumes, containers nem `system prune`: staging e produção dividem o host.
+log "Removendo imagens antigas sem tag..."
+docker image prune -f 2>&1 | tail -1 || true
+log "Espaço livre em /: $(df -h / | awk 'NR==2 {print $4}')"
 log "Deploy $ENVIRONMENT concluído."

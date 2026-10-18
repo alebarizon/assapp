@@ -38,7 +38,8 @@ Regras obrigatórias (produção):
 - Abortar se faltar .env.production ou o volume assapp_postgres_data_prod. O workflow recria .env a partir do env.production.example com senha nova de banco — isso não bate com o volume existente e o backend não sobe.
 - NÃO apagar dados: nunca docker volume rm, compose down -v, system prune --volumes, rm -rf /opt/assapp.
 - Migrations rodam no startup do backend (migrate_schemas --shared → migrate_schemas → gunicorn). Migration quebrada = backend em loop de restart = 502. Não rodar migrations manualmente após deploy, só na recuperação.
-- Staging e produção compartilham o droplet e a fila concurrency "deploy-server". Projetos Compose isolados: assapp_staging (:8080) e assapp_prod (:80). NUNCA rodar docker compose down sem COMPOSE_PROJECT_NAME, docker container prune / system prune no host, nem matar quem escuta na porta 80 a partir do staging.
+- Staging e produção compartilham o droplet e a fila concurrency "deploy-server". Projetos Compose isolados: assapp_staging (:8080) e assapp_prod (:80). NUNCA rodar docker compose down sem COMPOSE_PROJECT_NAME, docker container prune / system prune no host, nem matar quem escuta na porta 80 a partir do staging. `docker image prune -f` (sem `-a`) é permitido: o deploy.sh já roda ao final.
+- Ao acompanhar o deploy de produção, checar `curl http://gesttora.vertent.com.br/health/` a cada poucos minutos, não só o container novo: o deploy para a stack antes de subir a nova.
 - Não empilhar push develop e main ao mesmo tempo: esperar staging terminar e validar antes do push main.
 - Só commitar o que é do lote. Não incluir .env, .env.staging, .env.production, relatórios .md soltos nem arquivos de outro trabalho em andamento. Se o git status tiver coisa ambígua, perguntar antes.
 - Se o login mostrar erro, checar /health/ PRIMEIRO. Conexão recusada = nginx_prod fora. HTML 502 = backend fora (ver docker logs). Nenhum dos dois é senha.
@@ -93,7 +94,7 @@ Alterar só `*.md` / `docs/` / `.github/*.md` **não** dispara os workflows (`pa
 1. GitHub Actions **builda as imagens** (`ubuntu-latest`, amd64) e faz push em `alebarizon/assapp-backend` e `alebarizon/assapp-frontend` (tag `develop` no staging, `latest` na produção).
 2. SSH no droplet (`/opt/assapp`): `git fetch` → `git checkout <branch>` → `git reset --hard origin/<branch>`. Arquivos untracked (`.env.staging`, `.env.production`) e volumes Docker ficam.
 3. Se o `.env.<ambiente>` não existir, o workflow copia do `env.<ambiente>.example` e gera `SECRET_KEY` e senha de banco novas. Em ambiente com volume existente isso **quebra** a conexão com o Postgres.
-4. `scripts/deploy.sh <ambiente>`: carrega o `.env`, para só o projeto daquele ambiente (`assapp_prod` ou `assapp_staging`), libera só a porta do ambiente (80 ou 8080), faz `docker pull` e `up -d`, depois espera `/health/` por até 2 minutos.
+4. `scripts/deploy.sh <ambiente>`: carrega o `.env`, faz `docker pull` **antes** de parar qualquer coisa (se o pull falhar, a versão anterior continua no ar), para só o projeto daquele ambiente (`assapp_prod` ou `assapp_staging`), libera só a porta do ambiente (80 ou 8080), `up -d`, espera `/health/` por até 2 minutos e, com health OK, roda `docker image prune -f` (só imagens sem tag e sem container — cada deploy deixa ~1 GB de imagem antiga; em out/2026 o disco encheu e o pull falhou).
 5. O backend, ao subir, roda `wait_for_db` → `migrate_schemas --shared` → `migrate_schemas` → `collectstatic` → `gunicorn`. Health OK = migrations aplicadas.
 6. Em push para `main`, o job `verify-staging` exige que o SHA esteja em `origin/develop` e que o "Deploy to Staging" daquele SHA tenha concluído com sucesso (timeout 45 min).
 
@@ -110,6 +111,7 @@ Logs ruins (parar e investigar, não insistir no login):
 - `build: encontrado em docker-compose.*.yml` (staging/prod são pull-only)
 - `❌ Este commit não está em origin/develop` (pulou o staging)
 - `/health/` = HTML 502 · `curl` porta 80 = conexão recusada
+- `no space left on device` no pull (checar `df -h /` e `docker system df`; liberar com `docker image prune -f`, nunca com `system prune`/`volume rm`)
 
 ---
 
