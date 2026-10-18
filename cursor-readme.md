@@ -84,7 +84,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `mandatos` | Mandatos, transição, onboarding da nova diretoria |
 | `memoria` | ContextoHistorico, timeline |
 | `eventos` | Chamada de trabalhos (submissão pelo portal, parecer duplo-cego por critérios, decisão, certificados de autor/parecerista), anais com página citável por trabalho (`/site/eventos/:slug/anais`), programação e hotsite (`/site/eventos`) |
-| `membros` | Filiados, anuidades, régua de cobrança (`regua_anuidades`), linha do tempo do associado, carteirinha digital com QR (`/site/carteirinha/:codigo`), diretório público opt-in (`/site/associados`) |
+| `membros` | Filiados, anuidades, régua de cobrança (`regua_anuidades`, diária pelo serviço `agendador`), linha do tempo do associado, carteirinha digital com QR (`/site/carteirinha/:codigo`), diretório público opt-in (`/site/associados`) |
 | `payments` | Pagamento online de anuidades (Asaas: Pix, cartão, boleto) + webhook (`/app/finance` → Pagamento online) |
 | `finance` | Lançamentos OSC, dashboard, e-mail fechamento |
 | `ecommerce` | Catálogo, carrinho, pedidos (anuidade, evento, curso, material) |

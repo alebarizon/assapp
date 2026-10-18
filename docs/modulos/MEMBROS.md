@@ -48,7 +48,12 @@
 5. **Pagamento online** — o associado paga pelo portal (Pix, cartão, boleto via Asaas); a confirmação do
    gateway quita a anuidade e lança no financeiro. Ver [`PAGAMENTOS.md`](PAGAMENTOS.md).
 
-### Comando diário (cron)
+### Execução diária (serviço `agendador`)
+
+Em staging e produção o serviço `agendador` do compose roda `regua_anuidades` uma vez por dia, a partir
+de `REGUA_HORA` (padrão 8h, Brasília). Se a primeira tentativa do dia falhar, repete no minuto seguinte.
+Enquanto o `EMAIL_BACKEND` não entrega de fato (console, locmem, arquivo), roda com `--sem-email`: só marca
+vencidas/inadimplentes, sem registrar lembretes que não saíram. À mão:
 
 ```bash
 docker compose exec -T backend python manage.py regua_anuidades            # todos os tenants

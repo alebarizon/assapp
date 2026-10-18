@@ -2,7 +2,7 @@
 Régua diária de anuidades em todas as associações (ou em uma, com --schema).
 
 Marca vencidas/inadimplentes e envia o lembrete devido de cada anuidade em aberto.
-Rodar uma vez por dia via cron:
+Em staging e produção o serviço `agendador` do compose roda uma vez por dia. À mão:
 
     docker compose exec -T backend python manage.py regua_anuidades
 """

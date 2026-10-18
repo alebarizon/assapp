@@ -60,6 +60,7 @@ services:
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@vertent.com.br}
       SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
       NEWSLETTER_POR_MINUTO: ${NEWSLETTER_POR_MINUTO:-30}
+      REGUA_HORA: ${REGUA_HORA:-8}
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -76,11 +77,11 @@ services:
       retries: 3
       start_period: 60s
 
-  newsletter:
+  agendador:
     image: ${DOCKER_USERNAME:-alebarizon}/assapp-backend:${IMAGE_TAG:-latest}
-    container_name: assapp_newsletter_prod
+    container_name: assapp_agendador_prod
     restart: always
-    command: sh -c "python manage.py wait_for_db && python manage.py enviar_newsletters --loop"
+    command: sh -c "python manage.py wait_for_db && python manage.py agendador"
     environment: *backend_env
     healthcheck:
       disable: true

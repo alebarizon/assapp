@@ -2,8 +2,8 @@
 Despacha a fila da newsletter de todas as associações (ou de uma, com --schema).
 
 O limite por minuto vale para o servidor inteiro e é dividido entre as associações
-com campanha em andamento. Com --loop o comando fica rodando (serviço `newsletter`
-do compose); sem ele, processa um lote e sai (cron a cada minuto).
+com campanha em andamento. Sem --loop processa um lote e sai (é assim que o serviço
+`agendador` do compose o chama a cada minuto); com --loop fica rodando sozinho.
 
     docker compose exec -T backend python manage.py enviar_newsletters
 """

@@ -34,8 +34,8 @@ envio em ritmo controlado e descadastro (LGPD). App TENANT `newsletter`; módulo
    (`NEWSLETTER_POR_MINUTO`, padrão 30) dividido entre as associações com campanha em andamento. Ele
    reabre a lista de descadastros a cada lote, tenta cada e-mail até 3 vezes e conclui a campanha
    quando a fila acaba.
-4. Em staging e produção o serviço `newsletter` do compose roda `enviar_newsletters --loop`. Em dev,
-   rode o comando à mão:
+4. Em staging e produção o serviço `agendador` do compose (comando `agendador`) roda um lote por
+   minuto. Em dev, rode o comando à mão:
 
 ```bash
 docker compose exec -T backend python manage.py enviar_newsletters [--schema abciber] [--por-minuto 10]

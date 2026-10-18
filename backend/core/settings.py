@@ -214,6 +214,8 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@assapp.local")
 NEWSLETTER_POR_MINUTO = int(os.environ.get("NEWSLETTER_POR_MINUTO", "30"))
+# Hora (Brasília) a partir da qual o agendador roda a régua de anuidades do dia
+REGUA_HORA = int(os.environ.get("REGUA_HORA", "8"))
 # Base dos links enviados por e-mail (convites, certificados, portal)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5174")
 

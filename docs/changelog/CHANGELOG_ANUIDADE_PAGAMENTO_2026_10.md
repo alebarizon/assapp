@@ -29,13 +29,9 @@ docker compose exec backend python manage.py migrate_schemas
 
 Variável no `.env` do droplet: `PAGAMENTO_SIMULADO=True` em staging/demo, `False` em produção.
 
-Cron diário no droplet (ex.: 8h, horário de Brasília):
-
-```cron
-0 11 * * * cd /caminho/assapp && docker compose exec -T backend python manage.py regua_anuidades >> /var/log/regua_anuidades.log 2>&1
-```
-
-O SMTP precisa estar configurado para os lembretes saírem; envios com falha são retentados na execução seguinte.
+A régua roda sozinha uma vez por dia pelo serviço `agendador` do compose (ver "Agendador" abaixo); não há
+cron no droplet. O provedor de e-mail precisa estar configurado para os lembretes saírem; envios com falha são
+retentados na execução seguinte.
 
 ## Desconto de sócio adimplente na loja
 
@@ -139,8 +135,7 @@ O SMTP precisa estar configurado para os lembretes saírem; envios com falha sã
 - Envio por fila (`enviar_newsletters`) com limite por minuto (`NEWSLETTER_POR_MINUTO`), até 3
   tentativas, interrupção e acompanhamento ao vivo.
 - Descadastro com link assinado no rodapé, `List-Unsubscribe` one-click e página `/site/descadastrar`.
-- Novo serviço `newsletter` em `docker-compose.staging.yml` e `docker-compose.prod.yml` (mesma imagem
-  do backend, `enviar_newsletters --loop`); `scripts/deploy.sh` limpa o container novo.
+- A fila é despachada pelo serviço `agendador` (ver abaixo).
 - Novo módulo de acesso `newsletter` (gestor, diretoria, administrativo).
 - Migration `newsletter/0001`. Testes: `newsletter/tests.py`.
 
@@ -153,5 +148,15 @@ O SMTP precisa estar configurado para os lembretes saírem; envios com falha sã
   telefone ou CPF.
 - Painel: detalhe do associado mostra se e quando ele autorizou.
 - Migrations `membros/0005`, `website/0003`. Testes: `membros/test_diretorio.py`.
+
+## Agendador (cobrança automática)
+
+- Comando `agendador` (`core`): a cada minuto um lote da newsletter; uma vez por dia, a partir de
+  `REGUA_HORA` (padrão 8h, Brasília), a régua de anuidades. Falha numa tarefa não derruba a outra.
+- Sem provedor de e-mail que entregue de fato, a régua roda com `--sem-email` (só marca
+  vencidas/inadimplentes), para não registrar lembretes que não saíram.
+- O serviço `newsletter` do compose virou `agendador` (`assapp_agendador_prod` / `_staging`);
+  `scripts/deploy.sh` remove o container antigo. Variável nova: `REGUA_HORA`.
+- Testes: `core/test_agendador.py`.
 
 Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md) · [`CONTATOS.md`](../modulos/CONTATOS.md) · [`PUBLICACOES.md`](../modulos/PUBLICACOES.md) · [`GOVERNANCA.md`](../modulos/GOVERNANCA.md) · [`NEWSLETTER.md`](../modulos/NEWSLETTER.md)
