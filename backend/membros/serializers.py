@@ -7,6 +7,7 @@ from .models import Anuidade, Filiacao, Membro
 class AnuidadeSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display", read_only=True)
     membro_nome = serializers.CharField(source="filiacao.membro.nome_completo", read_only=True)
+    ultimo_lembrete = serializers.SerializerMethodField()
 
     class Meta:
         model = Anuidade
@@ -22,8 +23,15 @@ class AnuidadeSerializer(serializers.ModelSerializer):
             "pago_em",
             "nf_numero",
             "stripe_payment_id",
+            "ultimo_lembrete",
         )
         read_only_fields = ("pago_em", "stripe_payment_id")
+
+    def get_ultimo_lembrete(self, obj):
+        lembretes = sorted(obj.lembretes.all(), key=lambda lembrete: lembrete.created_at, reverse=True)
+        if not lembretes:
+            return None
+        return {"etapa": lembretes[0].get_etapa_display(), "enviado_em": lembretes[0].created_at}
 
 
 class FiliacaoSerializer(serializers.ModelSerializer):

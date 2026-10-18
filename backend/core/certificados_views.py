@@ -18,7 +18,7 @@ from tenants.resolvers import resolve_tenant_from_request
 
 def _localizar(code: str):
     from courses.models import CourseEnrollment
-    from eventos.models import InscricaoEvento
+    from eventos.models import CertificadoPapel, InscricaoEvento
 
     code = code.strip().upper()
     enrollment = (
@@ -31,6 +31,9 @@ def _localizar(code: str):
     inscricao = InscricaoEvento.objects.filter(certificado_codigo=code).select_related("evento").first()
     if inscricao:
         return "evento", inscricao
+    papel = CertificadoPapel.objects.filter(codigo=code).select_related("evento").first()
+    if papel:
+        return "papel", papel
     raise NotFound("Certificado não encontrado.")
 
 
@@ -60,6 +63,18 @@ class CertificadoVerificacaoView(CertificadoPublicBase):
                     "action": "concluiu o curso",
                     "workload_hours": obj.course.workload_hours,
                     "code": obj.certificate_code,
+                }
+            elif tipo == "papel":
+                from eventos.cientifico import ACAO_CERTIFICADO
+
+                data = obj.emitido_em
+                payload = {
+                    "participant_name": obj.nome,
+                    "title": obj.evento.titulo,
+                    "action": ACAO_CERTIFICADO[obj.papel],
+                    "details": obj.detalhe,
+                    "workload_hours": None,
+                    "code": obj.codigo,
                 }
             else:
                 data = obj.certificado_emitido_em
@@ -91,6 +106,11 @@ class CertificadoPdfView(CertificadoPublicBase):
 
                 pdf = build_enrollment_certificate(obj, tenant.name)
                 slug = obj.course.slug
+            elif tipo == "papel":
+                from eventos.cientifico import build_certificado_papel_pdf
+
+                pdf = build_certificado_papel_pdf(obj, tenant.schema_name, tenant.name)
+                slug = f"{obj.evento.slug}-{obj.papel}"
             else:
                 from eventos.services import build_inscricao_certificate
 

@@ -72,6 +72,10 @@ class Membro(models.Model):
     consentimento_lgpd = models.BooleanField(default=False)
     consentimento_em = models.DateTimeField(blank=True, null=True)
     ativo = models.BooleanField(default=True)
+    matricula = models.PositiveIntegerField(unique=True, null=True, blank=True)
+    carteirinha_codigo = models.CharField(
+        max_length=32, unique=True, null=True, blank=True, help_text="Código do QR da carteirinha; renovar invalida o anterior"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -156,3 +160,37 @@ class Anuidade(models.Model):
 
     def __str__(self):
         return f"Anuidade {self.ano_referencia} — {self.filiacao.membro.nome_completo}"
+
+
+class LembreteAnuidade(models.Model):
+    """Lembrete de cobrança enviado ao associado (uma vez por etapa da régua)."""
+
+    ANTES_30 = "antes_30"
+    ANTES_15 = "antes_15"
+    NO_DIA = "no_dia"
+    DEPOIS_15 = "depois_15"
+    ETAPA_CHOICES = [
+        (ANTES_30, "30 dias antes"),
+        (ANTES_15, "15 dias antes"),
+        (NO_DIA, "No vencimento"),
+        (DEPOIS_15, "15 dias após"),
+    ]
+    # Dias relativos ao vencimento; a ordem da lista é a ordem da régua.
+    OFFSETS = [(ANTES_30, -30), (ANTES_15, -15), (NO_DIA, 0), (DEPOIS_15, 15)]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    anuidade = models.ForeignKey(Anuidade, on_delete=models.CASCADE, related_name="lembretes")
+    etapa = models.CharField(max_length=20, choices=ETAPA_CHOICES)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Lembrete de anuidade"
+        verbose_name_plural = "Lembretes de anuidade"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["anuidade", "etapa"], name="unique_lembrete_anuidade_etapa")
+        ]
+
+    def __str__(self):
+        return f"{self.get_etapa_display()} — {self.anuidade}"

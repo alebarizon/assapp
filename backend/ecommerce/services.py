@@ -9,7 +9,12 @@ from django.utils import timezone
 
 from eventos.models import EventoAcademico, InscricaoEvento
 from membros.models import Anuidade, AnuidadeStatus, Membro
-from membros.services import get_valor_anuidade, registrar_pagamento, resolver_membro_do_user
+from membros.services import (
+    get_valor_anuidade,
+    membro_adimplente,
+    registrar_pagamento,
+    resolver_membro_do_user,
+)
 
 from .models import (
     Cart,
@@ -100,6 +105,7 @@ def create_order_from_cart(
     for ci in cart_items:
         validate_cart_item_for_membro(ci.catalog_item, membro, ci.quantity)
 
+    adimplente = membro_adimplente(membro)
     total = Decimal("0")
     order = Order.objects.create(
         membro=membro,
@@ -111,7 +117,8 @@ def create_order_from_cart(
 
     line_items: list[OrderItem] = []
     for ci in cart_items:
-        subtotal = ci.catalog_item.price * ci.quantity
+        preco = ci.catalog_item.preco_para(adimplente)
+        subtotal = preco * ci.quantity
         total += subtotal
         line_items.append(
             OrderItem(
@@ -119,7 +126,8 @@ def create_order_from_cart(
                 catalog_item=ci.catalog_item,
                 item_type=ci.catalog_item.item_type,
                 quantity=ci.quantity,
-                price_at_purchase=ci.catalog_item.price,
+                price_at_purchase=preco,
+                list_price=ci.catalog_item.price,
                 subtotal=subtotal,
             )
         )

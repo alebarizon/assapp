@@ -1,4 +1,5 @@
 """API REST — e-commerce Gesttora."""
+from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
 from rest_framework import status, viewsets
@@ -12,7 +13,9 @@ from rest_framework.views import APIView
 from accounts.models import User
 from mandatos.permissions import IsBoardOrAdmin
 
-from .models import Cart, CartItem, CatalogItem, Order, OrderStatus, PaymentMethod
+from membros.services import membro_adimplente
+
+from .models import Cart, CartItem, CatalogItem, CatalogItemType, Order, OrderStatus, PaymentMethod
 from .permissions import IsMember
 from .serializers import (
     CartSerializer,
@@ -62,6 +65,12 @@ class CatalogItemViewSet(viewsets.ModelViewSet):
                     Q(name__icontains=search) | Q(description__icontains=search)
                 )
         return qs.order_by("name")
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        if self.request.user.is_authenticated and self.request.user.role == User.MEMBER:
+            ctx["adimplente"] = membro_adimplente(resolve_membro_for_ecommerce(self.request.user))
+        return ctx
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -136,9 +145,12 @@ class CartViewSet(viewsets.ViewSet):
             )
         return membro
 
+    def _cart_response(self, cart, membro):
+        return Response(CartSerializer(cart, context={"adimplente": membro_adimplente(membro)}).data)
+
     def list(self, request):
-        cart = get_or_create_cart(self._membro(request))
-        return Response(CartSerializer(cart).data)
+        membro = self._membro(request)
+        return self._cart_response(get_or_create_cart(membro), membro)
 
     @action(detail=False, methods=["post"], url_path="add")
     def add_item(self, request):
@@ -177,7 +189,7 @@ class CartViewSet(viewsets.ViewSet):
             CartItem.objects.create(cart=cart, catalog_item=catalog_item, quantity=quantity)
 
         cart.refresh_from_db()
-        return Response(CartSerializer(cart).data)
+        return self._cart_response(cart, membro)
 
     @action(detail=False, methods=["patch"], url_path=r"update/(?P<item_id>[^/.]+)")
     def update_item(self, request, item_id=None):
@@ -201,7 +213,7 @@ class CartViewSet(viewsets.ViewSet):
             cart_item.save(update_fields=["quantity", "updated_at"])
 
         cart.refresh_from_db()
-        return Response(CartSerializer(cart).data)
+        return self._cart_response(cart, membro)
 
     @action(detail=False, methods=["delete"], url_path=r"remove/(?P<item_id>[^/.]+)")
     def remove_item(self, request, item_id=None):
@@ -209,33 +221,44 @@ class CartViewSet(viewsets.ViewSet):
         cart = get_or_create_cart(membro)
         CartItem.objects.filter(id=item_id, cart=cart).delete()
         cart.refresh_from_db()
-        return Response(CartSerializer(cart).data)
+        return self._cart_response(cart, membro)
 
     @action(detail=False, methods=["post"], url_path="clear")
     def clear_cart(self, request):
         membro = self._membro(request)
         cart = get_or_create_cart(membro)
         cart.items.all().delete()
-        return Response(CartSerializer(cart).data)
+        return self._cart_response(cart, membro)
 
     @action(detail=False, methods=["post"], url_path="checkout")
     def checkout(self, request):
         membro = self._membro(request)
         ser = CheckoutSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        method = ser.validated_data.get("payment_method", "simulated")
-        payment_method = (
-            PaymentMethod.SIMULATED if method == "simulated" else PaymentMethod.MANUAL
-        )
-        auto_pay = method == "simulated"
+        method = ser.validated_data.get("payment_method", "manual")
+        if method == "simulated" and not getattr(settings, "PAGAMENTO_SIMULADO", False):
+            raise ValidationError({"detail": "Pagamento imediato só existe no ambiente de demonstração."})
+        payment_method = {
+            "simulated": PaymentMethod.SIMULATED,
+            "manual": PaymentMethod.MANUAL,
+            "online": PaymentMethod.ONLINE,
+        }[method]
+        if method == "online":
+            from payments.services import disponibilidade
+
+            if not disponibilidade()["habilitado"]:
+                raise ValidationError({"detail": "Pagamento online não está habilitado. Fale com a secretaria."})
         try:
             order = create_order_from_cart(
                 membro,
                 payment_method=payment_method,
                 notes=ser.validated_data.get("notes", ""),
-                auto_pay=auto_pay,
+                auto_pay=method == "simulated",
                 user=request.user,
             )
+            if method == "online" and order.total_amount <= 0:
+                process_order_payment(order, payment_method=PaymentMethod.ONLINE, user=request.user)
+                order.refresh_from_db()
         except DjangoValidationError as exc:
             msg = exc.messages[0] if hasattr(exc, "messages") else str(exc)
             raise ValidationError({"detail": msg})

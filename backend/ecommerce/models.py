@@ -29,6 +29,7 @@ class OrderStatus(models.TextChoices):
 class PaymentMethod(models.TextChoices):
     SIMULATED = "simulated", "Simulado (dev)"
     MANUAL = "manual", "Manual / transferência"
+    ONLINE = "online", "Online (Pix / cartão / boleto)"
     STRIPE = "stripe", "Stripe"
 
 
@@ -46,6 +47,13 @@ class CatalogItem(models.Model):
         db_index=True,
     )
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    member_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Preço para sócio adimplente; vazio = mesmo preço para todos",
+    )
     currency = models.CharField(max_length=3, default="BRL")
     inventory_count = models.PositiveIntegerField(
         null=True,
@@ -111,9 +119,21 @@ class CatalogItem(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
 
+    def preco_para(self, adimplente: bool):
+        if adimplente and self.member_price is not None and self.item_type != CatalogItemType.ANUIDADE:
+            return min(self.member_price, self.price)
+        return self.price
+
     def clean(self):
         if self.price is not None and self.price < 0:
             raise ValidationError({"price": "Preço não pode ser negativo."})
+        if self.member_price is not None:
+            if self.item_type == CatalogItemType.ANUIDADE:
+                raise ValidationError({"member_price": "Anuidade não tem preço de sócio."})
+            if self.member_price < 0:
+                raise ValidationError({"member_price": "Preço não pode ser negativo."})
+            if self.price is not None and self.member_price > self.price:
+                raise ValidationError({"member_price": "Preço de sócio não pode ser maior que o preço cheio."})
         if self.item_type == CatalogItemType.ANUIDADE and not self.anuidade_ano:
             raise ValidationError({"anuidade_ano": "Informe o ano da anuidade."})
         if self.item_type == CatalogItemType.INSCRICAO and not self.evento_id:
@@ -143,10 +163,10 @@ class Cart(models.Model):
     def __str__(self):
         return f"Carrinho — {self.membro.nome_completo}"
 
-    def get_total(self):
+    def get_total(self, adimplente: bool = False):
         total = 0
         for item in self.items.select_related("catalog_item"):
-            total += item.get_subtotal()
+            total += item.get_subtotal(adimplente)
         return total
 
     def get_item_count(self):
@@ -178,8 +198,8 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.catalog_item.name} x{self.quantity}"
 
-    def get_subtotal(self):
-        return self.quantity * self.catalog_item.price
+    def get_subtotal(self, adimplente: bool = False):
+        return self.quantity * self.catalog_item.preco_para(adimplente)
 
     def clean(self):
         if self.catalog_item_id and not self.catalog_item.is_active:
@@ -250,6 +270,13 @@ class OrderItem(models.Model):
     item_type = models.CharField(max_length=20, choices=CatalogItemType.choices)
     quantity = models.PositiveIntegerField(default=1)
     price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
+    list_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Preço cheio no momento da compra (difere de price_at_purchase com desconto de sócio)",
+    )
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     fulfillment_ref = models.JSONField(
         blank=True,

@@ -54,6 +54,7 @@ TENANT_APPS = (
     "formularios",
     "contatos",
     "mensagens",
+    "payments",
 )
 
 INSTALLED_APPS = list(dict.fromkeys(SHARED_APPS + TENANT_APPS))
@@ -187,6 +188,7 @@ CORS_ALLOWED_ORIGINS = (
     else []
 )
 CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ["Content-Disposition"]
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS",
     "http://localhost:3000,http://localhost:5173",
@@ -210,5 +212,8 @@ EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@assapp.local")
 # Base dos links enviados por e-mail (convites, certificados, portal)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5174")
+
+# Sem gateway configurado na associação, permite cobranças fictícias (dev/demo).
+PAGAMENTO_SIMULADO = os.environ.get("PAGAMENTO_SIMULADO", str(DEBUG)) == "True"
 # Caixa da equipe Gesttora que recebe avisos de chamados de suporte (vazio = sem aviso)
 SUPPORT_EMAIL = os.environ.get("SUPPORT_EMAIL", "")

@@ -6,7 +6,10 @@ from .views import (
     FiliacaoViewSet,
     MembroViewSet,
     MeuMembroView,
+    MinhaCarteirinhaPdfView,
+    MinhaCarteirinhaView,
     MinhasAnuidadesView,
+    VerificarCarteirinhaView,
 )
 
 router = DefaultRouter()
@@ -20,5 +23,8 @@ urlpatterns = [
     # Self-service associado — antes do router (evita colisão com UUID)
     path("meu/", MeuMembroView.as_view(), name="meu"),
     path("meu/anuidades/", MinhasAnuidadesView.as_view(), name="meu-anuidades"),
+    path("meu/carteirinha/", MinhaCarteirinhaView.as_view(), name="minha-carteirinha"),
+    path("meu/carteirinha/pdf/", MinhaCarteirinhaPdfView.as_view(), name="minha-carteirinha-pdf"),
+    path("public/carteirinha/<str:codigo>/", VerificarCarteirinhaView.as_view(), name="verificar-carteirinha"),
     path("", include(router.urls)),
 ]

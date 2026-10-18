@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/contatos/", include("contatos.urls")),
     path("api/suporte/", include("support.urls")),
     path("api/mensagens/", include("mensagens.urls")),
+    path("api/pagamentos/", include("payments.urls")),
     path("api/certificados/<str:code>/", CertificadoVerificacaoView.as_view(), name="certificado-verificar"),
     path("api/certificados/<str:code>/pdf/", CertificadoPdfView.as_view(), name="certificado-pdf"),
     path("api/tenants/", include("tenants.urls")),

@@ -199,11 +199,20 @@ class CourseViewSet(BoardMixin, viewsets.ModelViewSet):
             price = None
         if price is None or price < 0:
             raise ValidationError({"price": "Informe um valor igual ou maior que zero."})
+        member_price = None
+        if request.data.get("member_price") not in (None, ""):
+            try:
+                member_price = Decimal(str(request.data.get("member_price"))).quantize(Decimal("0.01"))
+            except (InvalidOperation, TypeError, ValueError):
+                raise ValidationError({"member_price": "Valor inválido."})
+            if member_price < 0 or member_price > price:
+                raise ValidationError({"member_price": "Preço de sócio deve ficar entre zero e o preço cheio."})
         item = CatalogItem.objects.create(
             name=course.title,
             description=course.short_description or "",
             item_type=CatalogItemType.CURSO,
             price=price,
+            member_price=member_price,
             currency="BRL",
             image_url=request.build_absolute_uri(course.cover_image.url) if course.cover_image else None,
             is_active=True,

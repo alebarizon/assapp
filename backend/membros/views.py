@@ -1,14 +1,20 @@
 """API REST — Membros, Filiação e Anuidades (Sprint 4)."""
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import connection
 from django.db.models import Q
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import User
+from core.emails import nome_associacao
+from django_tenants.utils import schema_context
+from tenants.resolvers import resolve_tenant_from_request
 from mandatos.models import Mandato
 from mandatos.permissions import IsBoardOrAdmin
 
@@ -27,12 +33,22 @@ from .services import (
     atualizar_anuidades_vencidas,
     criar_membro_com_filiacao,
     desvincular_user,
+    enviar_lembretes_anuidade,
     gerar_anuidades_ano,
     registrar_pagamento,
     resolver_membro_do_user,
     resumo_quadro,
     vincular_user,
 )
+from .carteirinha import build_carteirinha_pdf, dados_carteirinha, renovar_codigo, situacao
+from .timeline import timeline_membro
+
+
+def _carteirinha_pdf_response(membro, request):
+    pdf = build_carteirinha_pdf(membro, connection.schema_name, nome_associacao(request))
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="carteirinha-{membro.matricula:06d}.pdf"'
+    return response
 
 
 class MembroViewSet(viewsets.ModelViewSet):
@@ -40,7 +56,7 @@ class MembroViewSet(viewsets.ModelViewSet):
     modulo = "membros"
 
     def get_queryset(self):
-        qs = Membro.objects.select_related("user").prefetch_related("filiacoes__anuidades")
+        qs = Membro.objects.select_related("user").prefetch_related("filiacoes__anuidades__lembretes")
 
         status_filiacao = self.request.query_params.get("status_filiacao")
         if status_filiacao:
@@ -121,6 +137,25 @@ class MembroViewSet(viewsets.ModelViewSet):
         membro = desvincular_user(self.get_object())
         return Response(MembroDetailSerializer(membro).data)
 
+    @action(detail=True, methods=["get"])
+    def carteirinha(self, request, pk=None):
+        return Response(dados_carteirinha(self.get_object(), connection.schema_name, nome_associacao(request)))
+
+    @action(detail=True, methods=["get"], url_path="carteirinha/pdf")
+    def carteirinha_pdf(self, request, pk=None):
+        return _carteirinha_pdf_response(self.get_object(), request)
+
+    @action(detail=True, methods=["post"], url_path="carteirinha/renovar")
+    def carteirinha_renovar(self, request, pk=None):
+        """Gera novo QR; carteirinhas impressas ou salvas com o código anterior deixam de validar."""
+        membro = renovar_codigo(self.get_object())
+        return Response(dados_carteirinha(membro, connection.schema_name, nome_associacao(request)))
+
+    @action(detail=True, methods=["get"])
+    def timeline(self, request, pk=None):
+        """Histórico do associado em todos os módulos (mais recente primeiro)."""
+        return Response(timeline_membro(self.get_object()))
+
 
 class FiliacaoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsBoardOrAdmin]
@@ -146,7 +181,7 @@ class AnuidadeViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "head", "options"]
 
     def get_queryset(self):
-        qs = Anuidade.objects.select_related("filiacao__membro")
+        qs = Anuidade.objects.select_related("filiacao__membro").prefetch_related("lembretes")
         status_param = self.request.query_params.get("status")
         if status_param:
             qs = qs.filter(status=status_param)
@@ -173,6 +208,12 @@ class AnuidadeViewSet(viewsets.ModelViewSet):
         """Atualiza status de anuidades vencidas e filiações inadimplentes."""
         result = atualizar_anuidades_vencidas()
         return Response(result)
+
+    @action(detail=False, methods=["post"])
+    def enviar_lembretes(self, request):
+        """Roda a régua agora (a mesma do cron diário); não repete lembretes já enviados."""
+        atualizar_anuidades_vencidas()
+        return Response(enviar_lembretes_anuidade(request=request))
 
     @action(detail=True, methods=["post"])
     def registrar_pagamento(self, request, pk=None):
@@ -202,7 +243,7 @@ class MeuMembroView(APIView):
         membro = (
             Membro.objects.filter(pk=membro.pk)
             .select_related("user")
-            .prefetch_related("filiacoes__anuidades")
+            .prefetch_related("filiacoes__anuidades__lembretes")
             .first()
         )
         return Response(MembroDetailSerializer(membro).data)
@@ -223,6 +264,58 @@ class MinhasAnuidadesView(APIView):
         qs = (
             Anuidade.objects.filter(filiacao__membro=membro)
             .select_related("filiacao__membro")
+            .prefetch_related("lembretes")
             .order_by("-ano_referencia", "-vencimento")
         )
         return Response(AnuidadeSerializer(qs, many=True).data)
+
+
+def _meu_membro(request):
+    membro = resolver_membro_do_user(request.user, auto_link=True)
+    if not membro:
+        raise NotFound("Nenhum associado vinculado a este usuário.")
+    return membro
+
+
+class MinhaCarteirinhaView(APIView):
+    """GET /api/membros/meu/carteirinha/ — dados e QR da carteirinha do associado logado."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(dados_carteirinha(_meu_membro(request), connection.schema_name, nome_associacao(request)))
+
+
+class MinhaCarteirinhaPdfView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return _carteirinha_pdf_response(_meu_membro(request), request)
+
+
+class VerificarCarteirinhaView(APIView):
+    """GET /api/membros/public/carteirinha/<codigo>/?schema= — verificação pública pelo QR.
+
+    Expõe só o necessário para conferir a filiação (sem e-mail, CPF ou contato).
+    """
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request, codigo):
+        tenant = resolve_tenant_from_request(request)
+        if not tenant:
+            raise NotFound("Associação não encontrada. Informe ?schema=.")
+        with schema_context(tenant.schema_name):
+            membro = Membro.objects.filter(carteirinha_codigo=codigo).first()
+            if not membro:
+                raise NotFound("Carteirinha não encontrada ou substituída por uma mais recente.")
+            return Response(
+                {
+                    "nome": membro.nome_completo,
+                    "matricula": f"{membro.matricula:06d}" if membro.matricula else "",
+                    "associacao": tenant.name,
+                    "verificado_em": timezone.now(),
+                    **situacao(membro),
+                }
+            )

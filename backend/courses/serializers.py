@@ -44,6 +44,7 @@ def _catalog_payload(item):
         "slug": item.slug,
         "name": item.name,
         "price": str(item.price),
+        "member_price": str(item.member_price) if item.member_price is not None else None,
         "currency": item.currency,
         "is_active": item.is_active,
     }

@@ -1,5 +1,5 @@
-"""Serviços — geração e renovação de anuidades + ponte User↔Membro."""
-from datetime import date
+"""Serviços — geração e renovação de anuidades, régua de cobrança + ponte User↔Membro."""
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -7,7 +7,14 @@ from django.utils import timezone
 
 from mandatos.models import Mandato
 
-from .models import Anuidade, AnuidadeStatus, Filiacao, FiliacaoStatus, Membro
+from .models import (
+    Anuidade,
+    AnuidadeStatus,
+    Filiacao,
+    FiliacaoStatus,
+    LembreteAnuidade,
+    Membro,
+)
 
 
 # Valores padrão por tipo de filiação (configurável futuramente via settings do tenant)
@@ -92,8 +99,105 @@ def atualizar_anuidades_vencidas() -> dict:
     }
 
 
+_ETAPAS_ORDEM = [etapa for etapa, _ in LembreteAnuidade.OFFSETS]
+
+# Fora desta janela a anuidade não entra na régua (evita disparar lembretes de
+# cobranças antigas na primeira execução).
+_JANELA_ANTES = 30
+_JANELA_DEPOIS = 45
+
+
+def etapa_devida(anuidade: Anuidade, hoje: date) -> str | None:
+    """Etapa mais recente da régua já alcançada pela anuidade em `hoje`."""
+    dias = (hoje - anuidade.vencimento).days
+    devida = None
+    for etapa, offset in LembreteAnuidade.OFFSETS:
+        if dias >= offset:
+            devida = etapa
+    return devida
+
+
+def _texto_lembrete(anuidade: Anuidade, etapa: str, associacao: str) -> tuple[str, str]:
+    membro = anuidade.filiacao.membro
+    venc = anuidade.vencimento.strftime("%d/%m/%Y")
+    valor = f"R$ {anuidade.valor:.2f}".replace(".", ",")
+    ano = anuidade.ano_referencia
+    primeiro_nome = membro.nome_completo.split(" ")[0]
+
+    if etapa in (LembreteAnuidade.ANTES_30, LembreteAnuidade.ANTES_15):
+        assunto = f"Sua anuidade {ano} vence em {venc}"
+        abertura = f"Sua anuidade {ano} na {associacao} vence em {venc}."
+    elif etapa == LembreteAnuidade.NO_DIA:
+        assunto = f"Sua anuidade {ano} vence hoje"
+        abertura = f"Sua anuidade {ano} na {associacao} vence hoje ({venc})."
+    else:
+        assunto = f"Anuidade {ano} em aberto"
+        abertura = (
+            f"Ainda não identificamos o pagamento da sua anuidade {ano} na {associacao}, "
+            f"vencida em {venc}. Com a anuidade em aberto, sua filiação fica como inadimplente."
+        )
+
+    texto = (
+        f"Olá, {primeiro_nome}.\n\n"
+        f"{abertura}\n\n"
+        f"Valor: {valor}\n\n"
+        "Você pode pagar pelo portal do associado. Se já pagou, desconsidere esta mensagem."
+    )
+    return assunto, texto
+
+
+def enviar_lembretes_anuidade(hoje: date | None = None, request=None) -> dict:
+    """
+    Régua de cobrança: envia, para cada anuidade em aberto, o lembrete da etapa
+    mais recente ainda não enviada. Idempotente — pode rodar várias vezes ao dia.
+    """
+    from core.emails import enviar_email, frontend_url, nome_associacao
+
+    hoje = hoje or timezone.now().date()
+    associacao = nome_associacao(request)
+    link = frontend_url("/app/portal/perfil")
+
+    anuidades = (
+        Anuidade.objects.filter(
+            status__in=[AnuidadeStatus.PENDENTE, AnuidadeStatus.VENCIDA],
+            valor__gt=0,
+            vencimento__gte=hoje - timedelta(days=_JANELA_DEPOIS),
+            vencimento__lte=hoje + timedelta(days=_JANELA_ANTES),
+            filiacao__membro__ativo=True,
+        )
+        .select_related("filiacao__membro")
+        .prefetch_related("lembretes")
+    )
+
+    enviados = 0
+    falhas = 0
+    por_etapa = {etapa: 0 for etapa in _ETAPAS_ORDEM}
+
+    for anuidade in anuidades:
+        etapa = etapa_devida(anuidade, hoje)
+        if not etapa:
+            continue
+        indice = _ETAPAS_ORDEM.index(etapa)
+        ja_enviadas = {lembrete.etapa for lembrete in anuidade.lembretes.all()}
+        if any(_ETAPAS_ORDEM.index(e) >= indice for e in ja_enviadas):
+            continue
+
+        email = anuidade.filiacao.membro.email
+        assunto, texto = _texto_lembrete(anuidade, etapa, associacao)
+        if enviar_email(email, assunto, texto, link=link, link_label="Pagar anuidade"):
+            LembreteAnuidade.objects.create(anuidade=anuidade, etapa=etapa, email=email)
+            enviados += 1
+            por_etapa[etapa] += 1
+        else:
+            falhas += 1
+
+    return {"enviados": enviados, "falhas": falhas, "por_etapa": por_etapa}
+
+
 def registrar_pagamento(anuidade: Anuidade, nf_numero: str = None, user=None) -> Anuidade:
     """Registra pagamento, reativa filiação e espelha no finance (idempotente)."""
+    if anuidade.status == AnuidadeStatus.PAGA:
+        return anuidade
     anuidade.status = AnuidadeStatus.PAGA
     anuidade.pago_em = timezone.now()
     if nf_numero:
@@ -147,6 +251,22 @@ def resumo_quadro() -> dict:
         "anuidades_pendentes": anuidades_pendentes,
         "anuidades_vencidas": anuidades_vencidas,
     }
+
+
+def membro_adimplente(membro: Membro | None) -> bool:
+    """Sócio em dia: filiação ativa/honorária e nenhuma anuidade em atraso (mesmo antes do cron marcar vencida)."""
+    if not membro or not membro.ativo:
+        return False
+    if not membro.filiacoes.filter(
+        status__in=[FiliacaoStatus.ATIVA, FiliacaoStatus.HONORARIA]
+    ).exists():
+        return False
+    return not Anuidade.objects.filter(
+        filiacao__membro=membro,
+        status__in=[AnuidadeStatus.PENDENTE, AnuidadeStatus.VENCIDA],
+        vencimento__lt=timezone.localdate(),
+        valor__gt=0,
+    ).exists()
 
 
 def vincular_user(membro: Membro, user) -> Membro:
