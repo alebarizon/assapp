@@ -7,6 +7,7 @@ import {
   converterContato,
   deleteContato,
   getContato,
+  getFichaContato,
   listEtiquetas,
   listNotas,
   updateContato,
@@ -22,9 +23,13 @@ import {
   type ContatoAssunto,
   type ContatoEtapa,
   type Etiqueta,
+  type FichaContato,
   type NotaContato,
 } from "@/types/contatos";
+import { BADGE_SITUACAO } from "@/components/membros/CartaoAssociado";
+import { formatBRL } from "@/utils/tenantSite";
 import "@/components/contatos/Contatos.css";
+import "@/components/membros/Membros.css";
 
 const TIPOS_FILIACAO = [
   { value: "", label: "Sem filiação por enquanto" },
@@ -56,8 +61,18 @@ export default function ContatoDetail() {
   const [tipoFiliacao, setTipoFiliacao] = useState("efetivo");
   const [convertendo, setConvertendo] = useState(false);
 
+  const [ficha, setFicha] = useState<FichaContato | null>(null);
+
   const loadNotas = useCallback(async () => {
     setNotas(await listNotas(id));
+  }, [id]);
+
+  const loadFicha = useCallback(async () => {
+    try {
+      setFicha(await getFichaContato(id));
+    } catch {
+      setFicha(null);
+    }
   }, [id]);
 
   useEffect(() => {
@@ -67,11 +82,12 @@ export default function ContatoDetail() {
         setContato(c);
         setEtiquetas(tags);
         await loadNotas();
+        void loadFicha();
       } catch (err) {
         setErro(apiErrorMessage(err, "Contato não encontrado."));
       }
     })();
-  }, [id, loadNotas]);
+  }, [id, loadNotas, loadFicha]);
 
   const salvar = async (payload: Partial<Contato>) => {
     setErro("");
@@ -121,7 +137,7 @@ export default function ContatoDetail() {
       setContato(r.contato);
       setShowConverter(false);
       setAviso(r.membro_criado ? "Associado cadastrado a partir deste contato." : "Contato vinculado ao associado já existente.");
-      await loadNotas();
+      await Promise.all([loadNotas(), loadFicha()]);
     } catch (err) {
       setErro(apiErrorMessage(err, "Erro ao converter."));
     } finally {
@@ -383,6 +399,69 @@ export default function ContatoDetail() {
           )}
         </div>
       </div>
+
+      {ficha && (
+        <div className="contato-card">
+          <h3>Ficha 360</h3>
+          {ficha.resumo.associado ? (
+            <p style={{ margin: "0 0 0.9rem", fontSize: "0.9rem", display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+              Associado: <Link to={`/app/membros/${ficha.resumo.associado.id}`}>{ficha.resumo.associado.nome}</Link>
+              <span className={`status-badge status-badge-${BADGE_SITUACAO[ficha.resumo.associado.situacao]}`}>
+                {ficha.resumo.associado.situacao_display}
+              </span>
+            </p>
+          ) : ficha.resumo.associado_mesmo_email ? (
+            <div className="highlight-banner" style={{ marginBottom: "0.9rem" }}>
+              Já existe um associado com este e-mail:{" "}
+              <Link to={`/app/membros/${ficha.resumo.associado_mesmo_email.id}`}>{ficha.resumo.associado_mesmo_email.nome}</Link>. Use
+              “Converter em associado” para vincular o contato a ele.
+            </div>
+          ) : null}
+          <div className="ficha-resumo">
+            <div className="ficha-resumo-item">
+              <span>Contatos recebidos</span>
+              <strong>{ficha.resumo.contatos}</strong>
+            </div>
+            <div className="ficha-resumo-item">
+              <span>Inscrições em eventos</span>
+              <strong>{ficha.resumo.eventos}</strong>
+            </div>
+            <div className="ficha-resumo-item">
+              <span>Trabalhos submetidos</span>
+              <strong>{ficha.resumo.trabalhos}</strong>
+            </div>
+            <div className="ficha-resumo-item">
+              <span>Compras pagas</span>
+              <strong>
+                {ficha.resumo.pedidos_pagos} · {formatBRL(ficha.resumo.total_pago)}
+              </strong>
+            </div>
+            <div className="ficha-resumo-item">
+              <span>Última atividade</span>
+              <strong>
+                {ficha.resumo.ultima_atividade ? new Date(ficha.resumo.ultima_atividade).toLocaleDateString("pt-BR") : "—"}
+              </strong>
+            </div>
+          </div>
+          {ficha.itens.length === 0 ? (
+            <p className="list-card-meta">Nenhuma atividade encontrada.</p>
+          ) : (
+            <ul className="membro-timeline">
+              {ficha.itens.map((item, i) => (
+                <li key={`${item.quando}-${i}`} className={`mt-${item.categoria}`}>
+                  <div className="membro-timeline-meta">
+                    {new Date(item.quando).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  </div>
+                  <div className="membro-timeline-titulo">
+                    {item.link ? <Link to={item.link}>{item.titulo}</Link> : item.titulo}
+                  </div>
+                  {item.detalhe && <div className="membro-timeline-detalhe">{item.detalhe}</div>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {showConverter && (
         <div className="dashboard-modal-overlay" onClick={() => setShowConverter(false)}>

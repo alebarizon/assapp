@@ -99,6 +99,13 @@ class ContatoViewSet(viewsets.ModelViewSet):
         notas = contato.notas.select_related("autor")
         return Response(NotaSerializer(notas, many=True).data)
 
+    @action(detail=True, methods=["get"])
+    def ficha(self, request, pk=None):
+        """Ficha 360: resumo e linha do tempo da pessoa em todos os módulos."""
+        from .ficha import ficha_contato
+
+        return Response(ficha_contato(self.get_object()))
+
     @action(detail=True, methods=["post"])
     def converter(self, request, pk=None):
         """POST {tipo_filiacao?} — cria/vincula o associado e move para 'Convertido'."""

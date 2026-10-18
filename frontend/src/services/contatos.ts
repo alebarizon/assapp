@@ -1,4 +1,4 @@
-import type { Contato, ContatoPublicoPayload, Etiqueta, NotaContato, ResumoFunil } from "@/types/contatos";
+import type { Contato, ContatoPublicoPayload, Etiqueta, FichaContato, NotaContato, ResumoFunil } from "@/types/contatos";
 import { api } from "./api";
 
 export interface ContatoFiltros {
@@ -26,6 +26,11 @@ export async function getResumoFunil(): Promise<ResumoFunil> {
 
 export async function getContato(id: string): Promise<Contato> {
   const { data } = await api.get<Contato>(`/api/contatos/${id}/`);
+  return data;
+}
+
+export async function getFichaContato(id: string): Promise<FichaContato> {
+  const { data } = await api.get<FichaContato>(`/api/contatos/${id}/ficha/`);
   return data;
 }
 

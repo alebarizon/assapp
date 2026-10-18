@@ -277,3 +277,26 @@ button.etiqueta-chip {
   color: #b42318;
   font-size: 0.85rem;
 }
+
+.ficha-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ficha-resumo-item {
+  background: #f9f9f7;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+.ficha-resumo-item span {
+  display: block;
+  font-size: 0.75rem;
+  color: #667085;
+}
+
+.ficha-resumo-item strong {
+  font-size: 1.05rem;
+}

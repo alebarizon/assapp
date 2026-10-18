@@ -34,6 +34,7 @@ GET/PATCH/DELETE /api/contatos/{id}/
 GET        /api/contatos/resumo/             contagem por etapa
 GET/POST   /api/contatos/{id}/notas/
 POST       /api/contatos/{id}/converter/     {tipo_filiacao?}
+GET        /api/contatos/{id}/ficha/         ficha 360: resumo + linha do tempo
 CRUD       /api/contatos/etiquetas/
 POST       /api/contatos/public/?schema=     formulário do site (sem login)
 ```
@@ -42,7 +43,17 @@ POST       /api/contatos/public/?schema=     formulário do site (sem login)
 
 - `/app/contatos` — funil (cartões por etapa), filtros, cadastro manual, gestão de etiquetas.
 - `/app/contatos/:id` — etapa, responsável (“Assumir atendimento”), dados, etiquetas, histórico/anotações,
-  converter em associado.
+  converter em associado e **Ficha 360**.
 - Site público: formulário na seção **Contato** da home (`ContatoSiteForm`).
 
-Testes: `contatos/tests.py`.
+## Ficha 360
+
+`contatos/ficha.py` junta tudo o que a associação sabe da pessoa:
+
+- Contatos com o mesmo e-mail (outras mensagens do site, com link).
+- Se o contato está vinculado a um associado: a linha do tempo do membro (`membros/timeline.py`) e a
+  situação da carteirinha (em dia / pendente / inativo), além de compras pagas.
+- Se não está: inscrições em eventos, trabalhos submetidos e formulários respondidos com o mesmo e-mail,
+  e o aviso de que já existe um associado com esse e-mail (para vincular pelo “Converter em associado”).
+
+Testes: `contatos/tests.py`, `contatos/test_ficha.py`.

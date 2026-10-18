@@ -99,7 +99,7 @@ export const STATUS_FILIACAO: Record<FiliacaoStatus, string> = {
 
 export type SituacaoCarteirinha = "em_dia" | "pendente" | "inativo";
 
-interface SituacaoAssociado {
+export interface SituacaoAssociado {
   situacao: SituacaoCarteirinha;
   situacao_display: string;
   valida_ate: string | null;

@@ -1,3 +1,5 @@
+import type { SituacaoAssociado, TimelineItem } from "@/types/membros";
+
 export type ContatoEtapa = "novo" | "em_atendimento" | "interessado" | "convertido" | "arquivado";
 export type ContatoOrigem = "site_contato" | "site_associe_se" | "evento" | "indicacao" | "redes_sociais" | "manual";
 export type ContatoAssunto = "filiacao" | "eventos" | "cursos" | "imprensa" | "parceria" | "outro";
@@ -82,3 +84,17 @@ export const ASSUNTO_LABEL: Record<ContatoAssunto, string> = {
   parceria: "Parcerias",
   outro: "Outro assunto",
 };
+
+export interface FichaContato {
+  resumo: {
+    associado: ({ id: string; nome: string } & SituacaoAssociado) | null;
+    associado_mesmo_email: { id: string; nome: string } | null;
+    contatos: number;
+    eventos: number;
+    trabalhos: number;
+    pedidos_pagos: number;
+    total_pago: string;
+    ultima_atividade: string | null;
+  };
+  itens: TimelineItem[];
+}
