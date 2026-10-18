@@ -130,6 +130,7 @@ Docker 29.6.2 · UFW: 22, 80, 443, 8080 · swap 2G · usuário `deploy`.
 ```
 assapp_nginx_staging
 assapp_frontend_staging
+assapp_agendador_staging   # desde 2026-10-18 (ver seção 11)
 assapp_backend_staging
 assapp_db_staging
 ```
@@ -197,7 +198,7 @@ Checklist: `.github/CHECKLIST_SECRETS.md`
 | `docker-compose.prod.yml` | Stack produção (pull-only) |
 | `nginx/nginx_assapp_staging.conf` | Proxy :8080 |
 | `nginx/nginx_assapp_prod.conf` | Proxy :80 |
-| `scripts/deploy.sh` | Pull + up + health check |
+| `scripts/deploy.sh` | Pull (antes de parar) + up + health check + limpeza de imagens sem tag |
 | `scripts/setup_digitalocean.sh` | Bootstrap droplet |
 | `env.staging.example` / `env.production.example` | Templates |
 
@@ -212,6 +213,7 @@ Checklist: `.github/CHECKLIST_SECRETS.md`
 | `npm run build` falha no CI | `frontend/src/vite-env.d.ts` |
 | Secrets em Environment errado | Mover para **Repository secrets** |
 | Deploy sem containers | Compose + `deploy.sh` + nginx |
+| Disco cheio derrubou produção (2026-10-18) | Pull antes do `down` + `docker image prune -f` após sucesso (seção 11) |
 
 ---
 
@@ -267,4 +269,48 @@ git checkout develop && git merge orb && git push origin develop
 
 # Actions
 open https://github.com/alebarizon/assapp/actions
+
+# Disco do droplet
+ssh root@159.203.183.184 'df -h /; docker system df'
 ```
+
+---
+
+## 11. Agendador e deploy resiliente (2026-10-18)
+
+Deploys do dia, todos validados em staging antes de `main`:
+
+| Commit | Conteúdo |
+|--------|----------|
+| `5106f5e` | Assembleias e votações, newsletter e diretório público; serviço de fila da newsletter no compose |
+| `53f9fed` | Serviço `newsletter` vira `agendador` (fila a cada minuto + régua de anuidades diária) |
+| `f3d0852` | `deploy.sh`: pull antes de parar a stack e limpeza de imagens sem tag |
+
+### Agendador
+
+- Novo comando `core/management/commands/agendador.py`, serviço `agendador` em `docker-compose.staging.yml` e
+  `docker-compose.prod.yml` (mesma imagem do backend, `environment: *backend_env`, `healthcheck: disable: true`).
+- Containers `assapp_agendador_staging` / `assapp_agendador_prod` (~60 MB). O antigo `assapp_newsletter_*` saiu;
+  `deploy.sh` ainda o remove por nome, por garantia.
+- Régua diária a partir de `REGUA_HORA` (padrão 8, Brasília); falha repete no minuto seguinte; idempotente.
+- Com `EMAIL_BACKEND` console (situação atual de staging e produção), roda `regua_anuidades --sem-email`: só marca
+  vencidas/inadimplentes, sem registrar lembretes que não saíram.
+- Primeira execução em produção: abciber com 3 anuidades → vencida e 2 filiações → inadimplente (impacto conferido
+  antes e aprovado).
+
+### Incidente: produção fora por ~1 h
+
+- **Causa:** disco do droplet em 98% (16 GB de imagens antigas acumuladas). O `deploy.sh` fazia `down` antes do
+  `docker pull`; o pull da imagem nova (~1 GB) falhou por falta de espaço e a produção ficou sem containers.
+  Staging e volumes não foram afetados.
+- **Recuperação:** conferidos `.env.production` e o volume `assapp_postgres_data_prod`; `docker image prune -f`
+  (16 GB) + `journalctl --vacuum-size=100M` (500 MB); `./scripts/deploy.sh production`. Disco em 31%.
+- **Correção (`f3d0852`):** pull antes do `down`; `docker image prune -f` após health OK; espaço livre no log do deploy.
+- **Processo:** `PROMPT_DEPLOY.md` agora permite `docker image prune -f` (sem `-a`), manda acompanhar o `/health/`
+  da produção durante o deploy (não só o container novo) e lista `no space left on device` entre os logs ruins.
+
+### Pendências de infra
+
+- Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — destrava lembretes da régua e newsletter.
+- Healthcheck do `frontend` aparece `unhealthy` em staging e produção, embora o site responda.
+- HTTPS (seção 9).

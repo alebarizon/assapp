@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-10-16 (sem hipóteses PIPE · plano de reaproveitamento WellSaaS)
+> **Última revisão:** 2026-10-18 (assembleias, newsletter, diretório, agendador da régua · deploy pull-antes-de-parar)
 
 ---
 
@@ -14,7 +14,9 @@
 | Dev Mac | http://localhost:5174 | `orb` |
 
 Droplet: `159.203.183.184` · HTTPS: **adiado**  
-Changelog do dia: [`CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md)
+Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter a cada minuto + régua de anuidades diária às `REGUA_HORA`), `frontend`, `nginx` — sufixo `_staging` / `_prod`.  
+E-mail em staging/prod ainda é console (nada é entregue; a régua roda só marcando vencidas) — falta provedor por API (DigitalOcean bloqueia SMTP).  
+Changelog recente: [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) · infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11) · deploy: [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md)
 
 **Login remoto (ABCiber):** `diretoria@abciber.org.br` / `abciber123` — requer `init_sistema_tenant.sh` no droplet.
 
@@ -192,6 +194,12 @@ Ver: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLU
 | [`docs/changelog/CHANGELOG_USUARIOS_PERFIS_2026_10.md`](docs/changelog/CHANGELOG_USUARIOS_PERFIS_2026_10.md) | Perfis de acesso, convite por e-mail, definição/redefinição de senha |
 | [`docs/modulos/WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md) | **Website público do tenant** |
 | [`docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md`](docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md) | Planejamento CMS 2026-08 |
+| [`docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) | **Roadmap 2026-10**: régua, pagamento online, loja, eventos, anais, carteirinha, ficha 360, publicações, assembleias, newsletter, diretório, agendador |
+| [`docs/modulos/MEMBROS.md`](docs/modulos/MEMBROS.md) | **Membros**: anuidades, régua diária, carteirinha, diretório público |
+| [`docs/modulos/PUBLICACOES.md`](docs/modulos/PUBLICACOES.md) | **Publicações** (dossiês, e-books, acesso por venda/associado) |
+| [`docs/modulos/GOVERNANCA.md`](docs/modulos/GOVERNANCA.md) | **Assembleias e votações** (quórum, cédula, ata com hash) |
+| [`docs/modulos/NEWSLETTER.md`](docs/modulos/NEWSLETTER.md) | **Newsletter** (público, fila, descadastro) |
+| [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md) | Roteiro de deploy staging → produção e regras de segurança do droplet |
 
 ---
 

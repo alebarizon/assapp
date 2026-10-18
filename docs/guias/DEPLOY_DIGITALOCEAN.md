@@ -1,7 +1,8 @@
 # Deploy DigitalOcean — AssApp
 
-**Última atualização:** 2026-08-17  
-**Changelog recente:** [`CHANGELOG_2026_08_17_DEPLOY_SEED.md`](../changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md) · [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](../changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md)
+**Última atualização:** 2026-10-18  
+**Changelog recente:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11 — agendador e deploy) · [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](../changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md)  
+**Roteiro de deploy:** [`PROMPT_DEPLOY.md`](../../PROMPT_DEPLOY.md)
 
 ---
 
@@ -115,7 +116,43 @@ python manage.py collectstatic --noinput &&
 gunicorn ...
 ```
 
-O [`scripts/deploy.sh`](../../scripts/deploy.sh) só faz pull + `up -d` e aguarda `/health/`. Se o health passou, as migrations já foram aplicadas.
+O [`scripts/deploy.sh`](../../scripts/deploy.sh), nesta ordem:
+
+1. `docker pull` das imagens — **antes** de parar a stack: se faltar disco ou rede, a versão anterior continua no ar.
+2. `down --remove-orphans` só do projeto do ambiente e `up -d` (a troca leva ~1–2 min fora do ar).
+3. Aguarda `/health/` por até 2 min. Se o health passou, as migrations já foram aplicadas.
+4. `docker image prune -f` — remove só imagens sem tag e sem container (cada deploy deixa ~1 GB de imagem antiga).
+
+Nunca `system prune`, `container prune`, `volume rm` nem `down -v` no droplet: staging e produção dividem o host.
+
+## Serviços de cada stack
+
+| Serviço | Container | Função |
+|---------|-----------|--------|
+| `db` | `assapp_db_<amb>` | PostgreSQL 14 (volume `assapp_postgres_data_<amb>`) |
+| `backend` | `assapp_backend_<amb>` | Migrations no startup + Gunicorn |
+| `agendador` | `assapp_agendador_<amb>` | `manage.py agendador`: lote da newsletter a cada minuto; régua de anuidades 1×/dia a partir de `REGUA_HORA` (padrão 8h Brasília). Sem healthcheck HTTP |
+| `frontend` | `assapp_frontend_<amb>` | Build Vite servido por nginx (o healthcheck aparece `unhealthy`, mas o site responde — pendente investigar) |
+| `nginx` | `assapp_nginx_<amb>` | Proxy na porta 80 (prod) / 8080 (staging) |
+
+Variáveis do `.env.<amb>` ligadas ao agendador: `NEWSLETTER_POR_MINUTO` (padrão 30) e `REGUA_HORA` (padrão 8).
+Enquanto o `EMAIL_BACKEND` for console, nada é entregue e a régua roda com `--sem-email`. Para enviar de verdade é
+preciso um provedor por API HTTP (Brevo, Resend, SES): a DigitalOcean bloqueia SMTP de saída.
+
+Na primeira subida após mudanças de modelo, o agendador pode logar `relation ... does not exist` uma vez (rodou antes
+das migrations do backend); o ciclo seguinte já funciona.
+
+## Disco do droplet
+
+24 GB. Conferir antes de investigar deploy falho:
+
+```bash
+ssh root@159.203.183.184 'df -h /; docker system df'
+```
+
+Se encher (`no space left on device` no pull): `docker image prune -f` e, se preciso, `journalctl --vacuum-size=100M`.
+Em 2026-10-18 o disco chegou a 98% (16 GB de imagens antigas), o pull falhou depois do `down` e a produção ficou
+~1 h fora — origem da reordenação do `deploy.sh`.
 
 ### Recuperação manual (só se o backend falhar ao subir)
 

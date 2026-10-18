@@ -159,4 +159,18 @@ retentados na execução seguinte.
   `scripts/deploy.sh` remove o container antigo. Variável nova: `REGUA_HORA`.
 - Testes: `core/test_agendador.py`.
 
+## Situação em produção (2026-10-18)
+
+- Tudo acima está em produção. Últimos deploys: `5106f5e` (assembleias, newsletter, diretório), `53f9fed`
+  (agendador) e `f3d0852` (correção do `deploy.sh`; incidente descrito em
+  [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md), seção 11).
+- Diretório público vem desligado: cada associação liga em Website e cada associado autoriza no portal.
+- E-mail ainda é console em staging e produção: convocações, newsletter e lembretes só aparecem no log.
+
+### Pendências (decisão do produto)
+
+- Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — a DigitalOcean bloqueia SMTP.
+- `PAGAMENTO_SIMULADO=False` + chave Asaas real em produção, ou manter simulado.
+- "Atualizar anais" nos eventos com anais já publicados, para gerar as páginas por trabalho.
+
 Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md) · [`CONTATOS.md`](../modulos/CONTATOS.md) · [`PUBLICACOES.md`](../modulos/PUBLICACOES.md) · [`GOVERNANCA.md`](../modulos/GOVERNANCA.md) · [`NEWSLETTER.md`](../modulos/NEWSLETTER.md)
