@@ -1,23 +1,25 @@
 /**
- * Detalhe do Evento — CFP, submissões, pareceres e geração de anais (H3)
+ * Detalhe do Evento — chamada de trabalhos, submissões, pareceres e geração de anais
  */
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, ClipboardList, FilePlus, Send, UserCheck } from "lucide-react";
+import { ArrowLeft, ClipboardList, FilePlus, Send } from "lucide-react";
 import { createFormulario, listFormularios } from "@/services/formularios";
 import type { FormularioResumo } from "@/types/formularios";
 import InscricoesCertificados from "@/components/eventos/InscricoesCertificados";
+import HotsiteEvento from "@/components/eventos/HotsiteEvento";
+import ProgramacaoEvento from "@/components/eventos/ProgramacaoEvento";
+import ChamadaTrabalhos from "@/components/eventos/ChamadaTrabalhos";
+import SubmissoesComissao from "@/components/eventos/SubmissoesComissao";
+import AnaisEvento from "@/components/eventos/AnaisEvento";
+import { podeEditar } from "@/utils/roles";
 import { FORMULARIO_STATUS_BADGE, novaPergunta } from "@/types/formularios";
 import type { EventoAcademico, SubmissaoTrabalho } from "@/types/eventos";
 import { useAuth } from "@/contexts/AuthContext";
 import { listMembros } from "@/services/membros";
 import type { Membro } from "@/types/membros";
 import {
-  abrirCfp,
-  atribuirParecerista,
-  concluirParecer,
   createSubmissao,
-  gerarAnais,
   getEvento,
   listSubmissoesEvento,
   submeterTrabalho,
@@ -25,26 +27,21 @@ import {
 
 export default function EventoDetail() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, tenantSchema } = useAuth();
   const navigate = useNavigate();
   const [evento, setEvento] = useState<EventoAcademico | null>(null);
   const [submissoes, setSubmissoes] = useState<SubmissaoTrabalho[]>([]);
   const [membros, setMembros] = useState<Membro[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
-  const [aba, setAba] = useState<"cfp" | "submissoes" | "anais" | "avaliacao" | "inscricoes">("submissoes");
+  const [aba, setAba] = useState<
+    "cfp" | "submissoes" | "anais" | "avaliacao" | "inscricoes" | "site" | "programacao"
+  >("submissoes");
   const [totalInscricoes, setTotalInscricoes] = useState<number | null>(null);
   const [avaliacoes, setAvaliacoes] = useState<FormularioResumo[]>([]);
 
-  const [showCfpForm, setShowCfpForm] = useState(false);
   const [showSubForm, setShowSubForm] = useState(false);
-  const [cfpForm, setCfpForm] = useState({
-    titulo: "",
-    instrucoes: "Submissões em português ou inglês. Resumo de até 500 palavras.",
-    data_abertura: "",
-    data_fechamento: "",
-    areas: "Cibercultura, Mídia Digital, Redes Sociais",
-  });
+  const editor = podeEditar(user, "eventos");
   const [subForm, setSubForm] = useState({
     titulo: "",
     resumo: "",
@@ -54,7 +51,6 @@ export default function EventoDetail() {
 
   const carregar = useCallback(async () => {
     if (!id) return;
-    setLoading(true);
     const [ev, subs, mbs, forms] = await Promise.all([
       getEvento(id),
       listSubmissoesEvento(id),
@@ -103,21 +99,6 @@ export default function EventoDetail() {
     navigate(`/app/formularios/${form.id}`);
   };
 
-  const handleAbrirCfp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!id) return;
-    await abrirCfp(id, {
-      titulo: cfpForm.titulo || `CFP — ${evento?.titulo}`,
-      instrucoes: cfpForm.instrucoes,
-      data_abertura: new Date(cfpForm.data_abertura).toISOString(),
-      data_fechamento: new Date(cfpForm.data_fechamento).toISOString(),
-      areas_tematicas: cfpForm.areas.split(",").map((a) => a.trim()),
-    });
-    setShowCfpForm(false);
-    setMsg("Call for Papers aberto!");
-    await carregar();
-  };
-
   const handleNovaSubmissao = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!evento?.call_for_papers) return;
@@ -132,33 +113,6 @@ export default function EventoDetail() {
     setShowSubForm(false);
     setSubForm({ titulo: "", resumo: "", area_tematica: "", membro_id: "" });
     setMsg("Trabalho submetido!");
-    await carregar();
-  };
-
-  const handleAtribuirParecer = async (submissaoId: string) => {
-    if (!user?.id) return;
-    await atribuirParecerista(submissaoId, user.id);
-    setMsg("Parecerista atribuído (você).");
-    await carregar();
-  };
-
-  const handleConcluirParecer = async (parecerId: string) => {
-    const rec = prompt("Recomendação: aceitar / aceitar_com_revisoes / rejeitar", "aceitar");
-    if (!rec || !["aceitar", "aceitar_com_revisoes", "rejeitar"].includes(rec)) return;
-    await concluirParecer(parecerId, {
-      recomendacao: rec as "aceitar" | "aceitar_com_revisoes" | "rejeitar",
-      nota: 4,
-      comentarios_autor: "Parecer registrado via AssApp.",
-    });
-    setMsg("Parecer concluído.");
-    await carregar();
-  };
-
-  const handleGerarAnais = async () => {
-    if (!id || !confirm("Gerar anais com trabalhos aceitos?")) return;
-    await gerarAnais(id);
-    setMsg("Anais publicados!");
-    setAba("anais");
     await carregar();
   };
 
@@ -211,19 +165,14 @@ export default function EventoDetail() {
       </div>
 
       <div className="filters-row">
-        {!evento.call_for_papers && (
-          <button type="button" className="dashboard-btn-new" onClick={() => setShowCfpForm(!showCfpForm)}>
-            <FilePlus size={16} /> Abrir CFP
+        {editor && !evento.call_for_papers && (
+          <button type="button" className="dashboard-btn-new" onClick={() => setAba("cfp")}>
+            <FilePlus size={16} /> Abrir chamada de trabalhos
           </button>
         )}
-        {evento.call_for_papers && (
+        {editor && evento.call_for_papers && (
           <button type="button" className="dashboard-btn-edit" onClick={() => setShowSubForm(!showSubForm)}>
-            <Send size={16} /> Nova submissão
-          </button>
-        )}
-        {submissoes.some((s) => s.status === "aceito" || s.status === "aceito_com_revisoes") && (
-          <button type="button" className="dashboard-btn-save" onClick={handleGerarAnais}>
-            <BookOpen size={16} /> Gerar anais
+            <Send size={16} /> Registrar trabalho recebido
           </button>
         )}
       </div>
@@ -241,79 +190,11 @@ export default function EventoDetail() {
         </div>
       )}
 
-      {showCfpForm && (
-        <div className="page-form-container" style={{ marginBottom: "1.25rem" }}>
-          <form className="page-form" onSubmit={handleAbrirCfp}>
-            <h3 className="page-form-title" style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
-              Abrir Call for Papers
-            </h3>
-            <div className="form-group">
-              <label className="form-label">Título do CFP</label>
-              <input
-                className="form-input"
-                placeholder="Título do CFP"
-                value={cfpForm.titulo}
-                onChange={(e) => setCfpForm({ ...cfpForm, titulo: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Instruções</label>
-              <textarea
-                className="form-input"
-                placeholder="Instruções"
-                value={cfpForm.instrucoes}
-                onChange={(e) => setCfpForm({ ...cfpForm, instrucoes: e.target.value })}
-                rows={3}
-              />
-            </div>
-            <div className="form-row-2">
-              <div className="form-group">
-                <label className="form-label">Abertura</label>
-                <input
-                  className="form-input"
-                  required
-                  type="datetime-local"
-                  value={cfpForm.data_abertura}
-                  onChange={(e) => setCfpForm({ ...cfpForm, data_abertura: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Fechamento</label>
-                <input
-                  className="form-input"
-                  required
-                  type="datetime-local"
-                  value={cfpForm.data_fechamento}
-                  onChange={(e) => setCfpForm({ ...cfpForm, data_fechamento: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Áreas temáticas (vírgula)</label>
-              <input
-                className="form-input"
-                placeholder="Áreas temáticas (vírgula)"
-                value={cfpForm.areas}
-                onChange={(e) => setCfpForm({ ...cfpForm, areas: e.target.value })}
-              />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="dashboard-btn-cancel" onClick={() => setShowCfpForm(false)}>
-                Cancelar
-              </button>
-              <button type="submit" className="dashboard-btn-save">
-                Abrir CFP
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
       {showSubForm && evento.call_for_papers && (
         <div className="page-form-container" style={{ marginBottom: "1.25rem" }}>
           <form className="page-form" onSubmit={handleNovaSubmissao}>
             <h3 className="page-form-title" style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
-              Nova submissão
+              Registrar trabalho recebido
             </h3>
             <div className="form-group">
               <label className="form-label">Título do trabalho</label>
@@ -350,13 +231,13 @@ export default function EventoDetail() {
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">Autor membro (H3 — integração)</label>
+              <label className="form-label">Autor associado</label>
               <select
                 className="form-select"
                 value={subForm.membro_id}
                 onChange={(e) => setSubForm({ ...subForm, membro_id: e.target.value })}
               >
-                <option value="">Autor membro (H3 — integração)</option>
+                <option value="">Selecione o associado</option>
                 {membros.map((m) => (
                   <option key={m.id} value={m.id}>{m.nome_completo}</option>
                 ))}
@@ -375,7 +256,7 @@ export default function EventoDetail() {
       )}
 
       <div className="dashboard-tabs">
-        {(["submissoes", "cfp", "anais", "inscricoes", "avaliacao"] as const).map((t) => (
+        {(["submissoes", "cfp", "programacao", "site", "anais", "inscricoes", "avaliacao"] as const).map((t) => (
           <button
             key={t}
             type="button"
@@ -385,7 +266,11 @@ export default function EventoDetail() {
             {t === "submissoes"
               ? `Submissões (${submissoes.length})`
               : t === "cfp"
-                ? "CFP"
+                ? "Chamada"
+                : t === "programacao"
+                ? "Programação"
+                : t === "site"
+                ? "Site e inscrição"
                 : t === "anais"
                   ? "Anais"
                   : t === "inscricoes"
@@ -394,6 +279,10 @@ export default function EventoDetail() {
           </button>
         ))}
       </div>
+
+      {aba === "site" && <HotsiteEvento evento={evento} onAtualizado={setEvento} />}
+
+      {aba === "programacao" && <ProgramacaoEvento evento={evento} />}
 
       {aba === "inscricoes" && (
         <InscricoesCertificados
@@ -439,106 +328,36 @@ export default function EventoDetail() {
         </div>
       )}
 
-      {aba === "cfp" && evento.call_for_papers && (
-        <div className="dashboard-content-panel">
-          <p className="list-card-title">{evento.call_for_papers.titulo}</p>
-          <p className="list-card-meta">{evento.call_for_papers.instrucoes}</p>
-          <p className="list-card-meta">
-            {new Date(evento.call_for_papers.data_abertura).toLocaleDateString("pt-BR")} —{" "}
-            {new Date(evento.call_for_papers.data_fechamento).toLocaleDateString("pt-BR")}
-          </p>
-          <p className="list-card-meta">Áreas: {evento.call_for_papers.areas_tematicas.join(", ")}</p>
-          <p className="list-card-meta">
-            Parecer duplo-cego: {evento.call_for_papers.anonimo ? "Sim" : "Não"}
-          </p>
-        </div>
+      {aba === "cfp" && (
+        <ChamadaTrabalhos
+          key={evento.call_for_papers?.id ?? "nova"}
+          evento={evento}
+          podeEditar={editor}
+          onSalvo={() => {
+            setMsg("Chamada de trabalhos salva.");
+            void carregar();
+          }}
+        />
       )}
 
       {aba === "submissoes" && (
-        <div className="dashboard-content-panel">
-          {submissoes.length === 0 ? (
-            <div className="dashboard-empty">Nenhuma submissão ainda.</div>
-          ) : (
-            <div className="list-stack">
-              {submissoes.map((s) => (
-                <div key={s.id} className="list-card" style={{ alignItems: "flex-start", flexDirection: "column" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "1rem" }}>
-                    <div>
-                      <p className="list-card-title">{s.titulo}</p>
-                      <p className="list-card-meta">
-                        {s.membro_nome ? `Membro: ${s.membro_nome}` : s.autor_email} · {s.area_tematica}
-                      </p>
-                      <p className="list-card-meta">{s.resumo}</p>
-                    </div>
-                    <span className={`status-badge status-badge-${s.status}`}>
-                      {s.status_display}
-                    </span>
-                  </div>
-
-                  <div className="filters-row" style={{ marginBottom: 0, marginTop: "0.75rem" }}>
-                    {s.status === "submetido" && (
-                      <button
-                        type="button"
-                        className="dashboard-btn-secondary"
-                        onClick={() => handleAtribuirParecer(s.id)}
-                      >
-                        <UserCheck size={14} /> Atribuir parecerista
-                      </button>
-                    )}
-                    {s.pareceres?.map((p) => (
-                      <div key={p.id} className="list-card-meta" style={{ margin: 0 }}>
-                        Parecer: {p.parecerista_email} —{" "}
-                        {p.concluido ? (
-                          <span className="status-badge status-badge-aceito">{p.recomendacao_display}</span>
-                        ) : (
-                          <button
-                            type="button"
-                            className="dashboard-btn-edit"
-                            onClick={() => handleConcluirParecer(p.id)}
-                          >
-                            concluir
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <SubmissoesComissao
+          evento={evento}
+          submissoes={submissoes}
+          podeEditar={editor}
+          onAtualizar={() => void carregar()}
+          onMensagem={setMsg}
+        />
       )}
 
       {aba === "anais" && (
-        <div className="dashboard-content-panel">
-          {evento.anais ? (
-            <div>
-              <p className="list-card-title">{evento.anais.titulo}</p>
-              <p className="list-card-meta">
-                Publicado em{" "}
-                {evento.anais.publicado_em &&
-                  new Date(evento.anais.publicado_em).toLocaleDateString("pt-BR")}
-              </p>
-              <p className="list-card-meta">
-                {evento.anais.metadata?.total_trabalhos ?? 0} trabalho(s) nos anais:
-              </p>
-              <div className="list-stack" style={{ marginTop: "0.75rem" }}>
-                {evento.anais.metadata?.trabalhos?.map((t) => (
-                  <div key={t.id} className="list-card">
-                    <div>
-                      <p className="list-card-title">{t.titulo}</p>
-                      <p className="list-card-meta">{t.autor}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="dashboard-empty">
-              Anais ainda não publicados. Aceite trabalhos e clique em &quot;Gerar anais&quot;.
-            </div>
-          )}
-        </div>
+        <AnaisEvento
+          evento={evento}
+          temAceitos={submissoes.some((s) => s.status === "aceito" || s.status === "aceito_com_revisoes")}
+          podeEditar={editor}
+          tenantSchema={tenantSchema}
+          onAtualizado={() => void carregar()}
+        />
       )}
     </div>
   );

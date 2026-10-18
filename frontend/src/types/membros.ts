@@ -13,6 +13,27 @@ export interface Anuidade {
   status_display: string;
   pago_em?: string;
   nf_numero?: string;
+  ultimo_lembrete?: { etapa: string; enviado_em: string } | null;
+}
+
+export type CategoriaTimeline =
+  | "filiacao"
+  | "anuidade"
+  | "lembrete"
+  | "pagamento"
+  | "pedido"
+  | "evento"
+  | "curso"
+  | "mensagem"
+  | "formulario"
+  | "contato";
+
+export interface TimelineItem {
+  quando: string;
+  categoria: CategoriaTimeline;
+  titulo: string;
+  detalhe: string;
+  link: string;
 }
 
 export interface Filiacao {
@@ -75,3 +96,31 @@ export const STATUS_FILIACAO: Record<FiliacaoStatus, string> = {
   cancelada: "Cancelada",
   honoraria: "Honorária",
 };
+
+export type SituacaoCarteirinha = "em_dia" | "pendente" | "inativo";
+
+interface SituacaoAssociado {
+  situacao: SituacaoCarteirinha;
+  situacao_display: string;
+  valida_ate: string | null;
+  honoraria: boolean;
+  tipo: string;
+  membro_desde: string | null;
+}
+
+export interface Carteirinha extends SituacaoAssociado {
+  nome: string;
+  matricula: string;
+  instituicao: string;
+  associacao: string;
+  codigo: string;
+  url_verificacao: string;
+  qr: string;
+}
+
+export interface VerificacaoCarteirinha extends SituacaoAssociado {
+  nome: string;
+  matricula: string;
+  associacao: string;
+  verificado_em: string;
+}

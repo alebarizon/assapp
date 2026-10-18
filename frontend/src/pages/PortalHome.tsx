@@ -1,5 +1,14 @@
 import { Link } from "react-router-dom";
-import { ClipboardList, FileText, GraduationCap, MessageSquare, ShoppingBag, UserRound } from "lucide-react";
+import {
+  ClipboardList,
+  CreditCard,
+  FileText,
+  GraduationCap,
+  MessageSquare,
+  ScrollText,
+  ShoppingBag,
+  UserRound,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function PortalHome() {
@@ -28,6 +37,24 @@ export default function PortalHome() {
             <div>
               <p className="list-card-title">Meu perfil</p>
               <p className="list-card-meta">Dados cadastrais, filiação e anuidades</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/carteirinha" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <CreditCard size={20} />
+            <div>
+              <p className="list-card-title">Carteirinha</p>
+              <p className="list-card-meta">Carteira de associado com QR code e situação da anuidade</p>
+            </div>
+          </div>
+        </Link>
+        <Link to="/app/portal/trabalhos" className="list-card" style={{ textDecoration: "none", color: "inherit" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <ScrollText size={20} />
+            <div>
+              <p className="list-card-title">Trabalhos científicos</p>
+              <p className="list-card-meta">Submeta trabalhos aos eventos e acompanhe a avaliação</p>
             </div>
           </div>
         </Link>

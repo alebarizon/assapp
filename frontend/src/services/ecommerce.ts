@@ -88,7 +88,7 @@ export async function clearCart(): Promise<Cart> {
 
 export async function checkoutCart(payload?: {
   notes?: string;
-  payment_method?: "simulated" | "manual";
+  payment_method?: "simulated" | "manual" | "online";
 }): Promise<Order> {
   const { data } = await api.post<Order>("/api/ecommerce/cart/checkout/", payload ?? {});
   return data;

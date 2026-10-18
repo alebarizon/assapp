@@ -88,6 +88,30 @@
   cursor: pointer;
 }
 
+.tenant-site-btn-primary,
+.tenant-site-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid var(--ts-primary);
+}
+
+.tenant-site-btn-primary {
+  background: var(--ts-primary);
+  color: #fff;
+}
+
+.tenant-site-btn-outline {
+  background: transparent;
+  color: var(--ts-primary);
+}
+
 .tenant-site-section {
   max-width: 1100px;
   margin: 0 auto;

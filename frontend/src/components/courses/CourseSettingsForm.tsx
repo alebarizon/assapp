@@ -30,6 +30,7 @@ export default function CourseSettingsForm({ course, onSaved }: CourseSettingsFo
   const [removeCover, setRemoveCover] = useState(false);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [price, setPrice] = useState("");
+  const [memberPrice, setMemberPrice] = useState("");
   const [saving, setSaving] = useState(false);
   const [creatingItem, setCreatingItem] = useState(false);
   const [erro, setErro] = useState("");
@@ -79,7 +80,7 @@ export default function CourseSettingsForm({ course, onSaved }: CourseSettingsFo
     setErro("");
     setCreatingItem(true);
     try {
-      const saved = await createCourseCatalogItem(course.id, price || "0");
+      const saved = await createCourseCatalogItem(course.id, price || "0", memberPrice);
       setForm((prev) => ({ ...prev, catalog_item: saved.catalog_item || "" }));
       setMsg("Item criado na loja e vinculado ao curso.");
       onSaved(saved);
@@ -252,6 +253,17 @@ export default function CourseSettingsForm({ course, onSaved }: CourseSettingsFo
                   style={{ maxWidth: 160 }}
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
+                />
+                <input
+                  className="form-input"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Sócio em dia (R$)"
+                  title="Opcional: preço para sócio com a anuidade em dia"
+                  style={{ maxWidth: 180 }}
+                  value={memberPrice}
+                  onChange={(e) => setMemberPrice(e.target.value)}
                 />
                 <button
                   type="button"

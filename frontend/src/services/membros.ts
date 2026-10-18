@@ -1,4 +1,13 @@
-import type { Anuidade, Membro, ResumoMembros, TipoFiliacao } from "@/types/membros";
+import type {
+  Anuidade,
+  Carteirinha,
+  Membro,
+  ResumoMembros,
+  TimelineItem,
+  TipoFiliacao,
+  VerificacaoCarteirinha,
+} from "@/types/membros";
+import { downloadBlob } from "@/utils/download";
 import { api } from "./api";
 
 function unwrapList<T>(data: { results?: T[] } | T[]): T[] {
@@ -76,6 +85,20 @@ export async function registrarPagamentoAnuidade(
   return data;
 }
 
+export async function enviarLembretesAnuidade(): Promise<{
+  enviados: number;
+  falhas: number;
+  por_etapa: Record<string, number>;
+}> {
+  const { data } = await api.post("/api/membros/anuidades/enviar_lembretes/", {});
+  return data;
+}
+
+export async function getTimelineMembro(id: string): Promise<TimelineItem[]> {
+  const { data } = await api.get<TimelineItem[]>(`/api/membros/membros/${id}/timeline/`);
+  return data;
+}
+
 export async function getMeuMembro(): Promise<Membro> {
   const { data } = await api.get<Membro>("/api/membros/meu/");
   return data;
@@ -102,5 +125,35 @@ export async function desvincularUserMembro(membroId: string): Promise<Membro> {
     `/api/membros/membros/${membroId}/desvincular_user/`,
     {}
   );
+  return data;
+}
+
+export async function getMinhaCarteirinha(): Promise<Carteirinha> {
+  const { data } = await api.get<Carteirinha>("/api/membros/meu/carteirinha/");
+  return data;
+}
+
+export async function downloadMinhaCarteirinha() {
+  await downloadBlob("/api/membros/meu/carteirinha/pdf/", "");
+}
+
+export async function getCarteirinhaMembro(id: string): Promise<Carteirinha> {
+  const { data } = await api.get<Carteirinha>(`/api/membros/membros/${id}/carteirinha/`);
+  return data;
+}
+
+export async function downloadCarteirinhaMembro(id: string) {
+  await downloadBlob(`/api/membros/membros/${id}/carteirinha/pdf/`, "");
+}
+
+export async function renovarCarteirinha(id: string): Promise<Carteirinha> {
+  const { data } = await api.post<Carteirinha>(`/api/membros/membros/${id}/carteirinha/renovar/`, {});
+  return data;
+}
+
+export async function verificarCarteirinha(schema: string, codigo: string): Promise<VerificacaoCarteirinha> {
+  const { data } = await api.get<VerificacaoCarteirinha>(`/api/membros/public/carteirinha/${codigo}/`, {
+    params: { schema },
+  });
   return data;
 }

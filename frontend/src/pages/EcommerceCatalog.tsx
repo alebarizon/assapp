@@ -11,6 +11,7 @@ import {
 import type { CatalogItem, CatalogItemType, EcommerceResumo } from "@/types/ecommerce";
 import { CATALOG_ITEM_TYPES } from "@/types/ecommerce";
 import { TIPOS_FILIACAO as FILIACAO_OPTS } from "@/types/membros";
+import { formatBRL, temPrecoSocio } from "@/utils/tenantSite";
 
 export default function EcommerceCatalog() {
   const [items, setItems] = useState<CatalogItem[]>([]);
@@ -28,6 +29,7 @@ export default function EcommerceCatalog() {
     description: "",
     item_type: "material" as CatalogItemType,
     price: "",
+    member_price: "",
     inventory_count: "",
     image_url: "",
     is_active: true,
@@ -65,6 +67,7 @@ export default function EcommerceCatalog() {
       description: "",
       item_type: "material",
       price: "",
+      member_price: "",
       inventory_count: "",
       image_url: "",
       is_active: true,
@@ -82,6 +85,7 @@ export default function EcommerceCatalog() {
       description: item.description ?? "",
       item_type: item.item_type,
       price: item.price,
+      member_price: item.member_price ?? "",
       inventory_count: item.inventory_count != null ? String(item.inventory_count) : "",
       image_url: item.image_url ?? "",
       is_active: item.is_active,
@@ -98,6 +102,7 @@ export default function EcommerceCatalog() {
       description: form.description || null,
       item_type: form.item_type,
       price: form.price,
+      member_price: form.item_type !== "anuidade" && form.member_price !== "" ? form.member_price : null,
       image_url: form.image_url || null,
       is_active: form.is_active,
       currency: "BRL",
@@ -138,10 +143,9 @@ export default function EcommerceCatalog() {
       resetForm();
       await load();
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        "Erro ao salvar item.";
-      setErro(String(msg));
+      const data = (err as { response?: { data?: Record<string, string | string[]> } })?.response?.data;
+      const primeiro = data ? data.detail ?? Object.values(data)[0] : undefined;
+      setErro(String((Array.isArray(primeiro) ? primeiro[0] : primeiro) || "Erro ao salvar item."));
     } finally {
       setSalvando(false);
     }
@@ -266,6 +270,21 @@ export default function EcommerceCatalog() {
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                 />
               </div>
+              {form.item_type !== "anuidade" && (
+                <div className="form-group">
+                  <label className="form-label">Preço para sócio em dia (R$)</label>
+                  <input
+                    className="form-input"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max={form.price || undefined}
+                    placeholder="Vazio = mesmo preço"
+                    value={form.member_price}
+                    onChange={(e) => setForm({ ...form, member_price: e.target.value })}
+                  />
+                </div>
+              )}
               {form.item_type === "material" && (
                 <div className="form-group">
                   <label className="form-label">Estoque *</label>
@@ -386,7 +405,8 @@ export default function EcommerceCatalog() {
                 <div>
                   <p className="list-card-title">{item.name}</p>
                   <p className="list-card-meta">
-                    {item.item_type_display} · R$ {item.price}
+                    {item.item_type_display} · {formatBRL(item.price, item.currency)}
+                    {temPrecoSocio(item) ? ` · sócio ${formatBRL(item.member_price!, item.currency)}` : ""}
                     {item.anuidade_ano ? ` · ${item.anuidade_ano}` : ""}
                     {item.evento_titulo ? ` · ${item.evento_titulo}` : ""}
                     {!item.is_active ? " · inativo" : ""}

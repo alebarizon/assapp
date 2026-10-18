@@ -40,8 +40,17 @@ export function resolveTenantSchema(searchParams: URLSearchParams): string {
   return "demo";
 }
 
+export function formatBRL(raw: string | number, currency = "BRL"): string {
+  const value = Number(raw);
+  if (Number.isNaN(value)) return String(raw);
+  return value.toLocaleString("pt-BR", { style: "currency", currency: currency || "BRL" });
+}
+
 export function formatCatalogPrice(item: CatalogPriceLike): string {
-  const value = Number(item.price);
-  if (Number.isNaN(value)) return item.price;
-  return value.toLocaleString("pt-BR", { style: "currency", currency: item.currency || "BRL" });
+  return formatBRL(item.price, item.currency);
+}
+
+/** Preço de sócio só conta quando é menor que o cheio. */
+export function temPrecoSocio(item: Pick<CatalogItem, "price" | "member_price">): boolean {
+  return item.member_price != null && Number(item.member_price) < Number(item.price);
 }

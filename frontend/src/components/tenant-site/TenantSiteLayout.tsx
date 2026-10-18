@@ -60,6 +60,7 @@ export function SiteShell({
           <nav className="tenant-site-nav">
             <Link to={`/site${q}#sobre`}>A instituição</Link>
             <Link to={`/site${q}#noticias`}>Notícias</Link>
+            <Link to={`/site/eventos${q}`}>Eventos</Link>
             <Link to={`/site/cursos${q}`}>Cursos</Link>
             <Link to={`/site${q}#associe-se`}>Associe-se</Link>
             <Link to={`/site${q}#contato`}>Contato</Link>

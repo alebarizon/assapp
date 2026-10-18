@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Eye,
@@ -13,10 +13,14 @@ import {
   GraduationCap,
   ClipboardList,
   MessageSquare,
+  FileSearch,
+  ScrollText,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { BOARD_NAV, PERFIL_LABEL, moduloDaRota } from "@/utils/modulos";
-import { homePathForUser, isMember, nivelModulo, podeVer } from "@/utils/roles";
+import { homePathForUser, isMember, isPortalUser, isReviewer, nivelModulo, podeVer } from "@/utils/roles";
+import { listMeusPareceres } from "@/services/eventos";
 import { buildTenantSiteQuery } from "@/utils/tenantSite";
 import "./AppLayout.css";
 
@@ -25,10 +29,18 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [temPareceres, setTemPareceres] = useState(false);
+
+  useEffect(() => {
+    if (!user || !setupCompleted || isReviewer(user.role)) return;
+    listMeusPareceres()
+      .then((lista) => setTemPareceres(lista.length > 0))
+      .catch(() => setTemPareceres(false));
+  }, [user, setupCompleted]);
 
   const boardNav = BOARD_NAV.filter((item) => podeVer(user, item.modulo));
   const moduloAtual = moduloDaRota(location.pathname);
-  const restrito = !isMember(user?.role) && Boolean(user?.modulos);
+  const restrito = !isPortalUser(user?.role) && Boolean(user?.modulos);
   const semAcesso = restrito && moduloAtual !== null && !podeVer(user, moduloAtual);
   const somenteLeitura = restrito && moduloAtual !== null && nivelModulo(user, moduloAtual) === "leitura";
 
@@ -37,17 +49,29 @@ export default function AppLayout() {
     { to: "/app/portal/cursos", label: "Meus cursos", icon: GraduationCap },
     { to: "/app/portal/formularios", label: "Formulários", icon: ClipboardList },
     { to: "/app/portal/mensagens", label: "Mensagens", icon: MessageSquare },
+    { to: "/app/portal/trabalhos", label: "Trabalhos científicos", icon: ScrollText },
+    ...(temPareceres ? [{ to: "/app/portal/pareceres", label: "Pareceres", icon: FileSearch }] : []),
     { to: "/app/portal/loja", label: "Loja", icon: ShoppingBag },
     { to: "/app/portal/carrinho", label: "Carrinho", icon: ShoppingBag },
     { to: "/app/portal/perfil", label: "Meu perfil", icon: UserRound },
+    { to: "/app/portal/carteirinha", label: "Carteirinha", icon: CreditCard },
     { to: "/app/portal/documentos", label: "Meus documentos", icon: FileText },
+  ];
+
+  const reviewerNav = [
+    { to: "/app/portal/pareceres", label: "Pareceres", icon: FileSearch },
+    { to: "/app/portal/trabalhos", label: "Trabalhos científicos", icon: ScrollText },
   ];
 
   const setupNav = [{ to: "/app/setup", label: "Setup da associação", icon: Settings }];
 
   let nav = setupNav;
-  if (setupCompleted) {
-    nav = isMember(user?.role) ? memberNav : boardNav;
+  if (isReviewer(user?.role)) {
+    nav = reviewerNav;
+  } else if (setupCompleted) {
+    nav = isMember(user?.role)
+      ? memberNav
+      : [...boardNav, ...(temPareceres ? [{ to: "/app/pareceres", label: "Meus pareceres", icon: FileSearch }] : [])];
   }
 
   const initials =
@@ -122,7 +146,7 @@ export default function AppLayout() {
             <Menu size={18} />
           </button>
           <div className="header-actions">
-            {setupCompleted && !isMember(user?.role) && tenantSchema && (
+            {setupCompleted && !isPortalUser(user?.role) && tenantSchema && (
               <a
                 href={`/site${buildTenantSiteQuery(tenantSchema)}`}
                 target="_blank"
@@ -136,6 +160,8 @@ export default function AppLayout() {
               Gesttora ·{" "}
               {user?.role === "member"
                 ? "associado"
+                : user?.role === "reviewer"
+                ? "parecerista"
                 : (user?.perfis || []).map((p) => PERFIL_LABEL[p]).join(" + ") || "—"}
             </span>
           </div>

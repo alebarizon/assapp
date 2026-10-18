@@ -15,6 +15,10 @@ export interface CatalogItem {
   item_type: CatalogItemType;
   item_type_display: string;
   price: string;
+  /** Preço para sócio adimplente; null = mesmo preço para todos */
+  member_price?: string | null;
+  /** Preço que o associado logado paga (só no portal) */
+  preco_final?: string | null;
   currency: string;
   inventory_count?: number | null;
   image_url?: string;
@@ -41,6 +45,8 @@ export interface Cart {
   membro_nome: string;
   items: CartItem[];
   total: string;
+  total_cheio: string;
+  adimplente: boolean;
   item_count: number;
   updated_at: string;
 }
@@ -53,6 +59,7 @@ export interface OrderItem {
   item_type_display: string;
   quantity: number;
   price_at_purchase: string;
+  list_price?: string | null;
   subtotal: string;
   fulfillment_ref?: Record<string, unknown> | null;
   created_at: string;

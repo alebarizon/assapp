@@ -7,7 +7,13 @@ import { useSiteShell } from "@/components/courses/useSiteShell";
 import { getPublicCourse, getPublicLessonPreview } from "@/services/courses";
 import type { PortalLesson, PublicCourse } from "@/types/courses";
 import { COURSE_LEVELS, LESSON_TYPE_LABELS } from "@/types/courses";
-import { buildAssocieSeCtaLink, buildTenantSiteQuery, formatCatalogPrice } from "@/utils/tenantSite";
+import {
+  buildAssocieSeCtaLink,
+  buildTenantSiteQuery,
+  formatBRL,
+  formatCatalogPrice,
+  temPrecoSocio,
+} from "@/utils/tenantSite";
 import "@/components/tenant-site/TenantSite.css";
 import "@/components/courses/Courses.css";
 
@@ -108,6 +114,14 @@ export default function TenantSiteCourseDetail() {
                     : "Gratuito"
                   : "Exclusivo para associados"}
               </strong>
+              {course.catalog_item_info && temPrecoSocio(course.catalog_item_info) && (
+                <span className="course-muted">
+                  Associado em dia paga{" "}
+                  {Number(course.catalog_item_info.member_price) > 0
+                    ? formatBRL(course.catalog_item_info.member_price!, course.catalog_item_info.currency)
+                    : "nada"}
+                </span>
+              )}
               <a className="tenant-site-btn" href={buildAssocieSeCtaLink(schema)}>
                 {course.catalog_item_info ? "Entrar e matricular-se" : "Área do associado"}
               </a>

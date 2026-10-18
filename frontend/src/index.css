@@ -41,6 +41,7 @@ body {
 
 .status-badge-ativo,
 .status-badge-aceito,
+.status-badge-aceito_com_revisoes,
 .status-badge-ativa {
   background: #ecfdf3;
   color: #027a48;
@@ -49,6 +50,7 @@ body {
 
 .status-badge-transicao,
 .status-badge-em_avaliacao,
+.status-badge-em_parecer,
 .status-badge-pendente {
   background: #fffaeb;
   color: #b54708;
@@ -62,7 +64,15 @@ body {
   color: #667085;
 }
 
+.status-badge-rejeitado,
+.status-badge-retirado {
+  background: #fef3f2;
+  color: #b42318;
+  border-color: #fecdca;
+}
+
 .status-badge-rascunho,
+.status-badge-submetido,
 .status-badge-planejado {
   background: #f0f4ff;
   color: #3538cd;

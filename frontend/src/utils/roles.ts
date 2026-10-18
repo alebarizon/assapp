@@ -15,6 +15,16 @@ export function isMember(role?: string | null): boolean {
   return role === "member";
 }
 
+/** Parecerista externo: sem cadastro de associado nem acesso ao painel. */
+export function isReviewer(role?: string | null): boolean {
+  return role === "reviewer";
+}
+
+/** Usuários que navegam pelo portal (`/app/portal/*`), não pelo painel da equipe. */
+export function isPortalUser(role?: string | null): boolean {
+  return isMember(role) || isReviewer(role);
+}
+
 export function nivelModulo(user: User | null | undefined, modulo: ModuloPainel): NivelAcesso | null {
   return user?.modulos?.[modulo] ?? null;
 }
@@ -45,6 +55,7 @@ const HOME_POR_MODULO: [ModuloPainel, string][] = [
 export function homePathForUser(user: User | null | undefined, setupCompleted = true): string {
   if (!setupCompleted && isBoardOrAdmin(user?.role)) return "/app/setup";
   if (isMember(user?.role)) return "/app/portal";
+  if (isReviewer(user?.role)) return "/app/portal/pareceres";
   if (!user?.modulos) return "/app/memoria";
   const destino = HOME_POR_MODULO.find(([m]) => podeVer(user, m));
   return destino ? destino[1] : "/app/suporte";

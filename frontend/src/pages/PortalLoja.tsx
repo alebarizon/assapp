@@ -1,8 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircle, Plus, ShoppingCart } from "lucide-react";
+import { AlertCircle, BadgePercent, Plus, ShoppingCart } from "lucide-react";
 import { addToCart, listLojaItems } from "@/services/ecommerce";
 import type { CatalogItem } from "@/types/ecommerce";
+import { formatBRL, temPrecoSocio } from "@/utils/tenantSite";
+
+function PrecoItem({ item }: { item: CatalogItem }) {
+  const final = item.preco_final ?? item.price;
+  if (!temPrecoSocio(item)) return <>{formatBRL(item.price, item.currency)}</>;
+  if (Number(final) < Number(item.price)) {
+    return (
+      <>
+        <s>{formatBRL(item.price, item.currency)}</s> <strong>{formatBRL(final, item.currency)}</strong> · preço de
+        sócio
+      </>
+    );
+  }
+  return (
+    <>
+      {formatBRL(item.price, item.currency)} · sócio em dia paga {formatBRL(item.member_price!, item.currency)}
+    </>
+  );
+}
 
 export default function PortalLoja() {
   const [items, setItems] = useState<CatalogItem[]>([]);
@@ -36,6 +55,10 @@ export default function PortalLoja() {
     }
   };
 
+  const perdeDesconto = items.some(
+    (item) => temPrecoSocio(item) && Number(item.preco_final ?? item.price) >= Number(item.price)
+  );
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-header dashboard-header-row">
@@ -56,6 +79,16 @@ export default function PortalLoja() {
         </div>
       )}
 
+      {perdeDesconto && (
+        <div className="alert-banner alert-banner-info" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <BadgePercent size={16} />
+          <span>
+            Associados com a anuidade em dia pagam o preço de sócio.{" "}
+            <Link to="/app/portal/perfil">Regularizar minha anuidade</Link>
+          </span>
+        </div>
+      )}
+
       <div className="dashboard-content-panel">
         {loading ? (
           <div className="dashboard-loading">
@@ -71,7 +104,7 @@ export default function PortalLoja() {
                 <div>
                   <p className="list-card-title">{item.name}</p>
                   <p className="list-card-meta">
-                    {item.item_type_display} · R$ {item.price}
+                    {item.item_type_display} · <PrecoItem item={item} />
                   </p>
                   {item.description && (
                     <p style={{ margin: "0.35rem 0 0", fontSize: "0.875rem" }}>{item.description}</p>

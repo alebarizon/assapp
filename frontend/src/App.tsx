@@ -30,6 +30,12 @@ import CourseDetail from "@/pages/CourseDetail";
 import MeusCursos from "@/pages/MeusCursos";
 import CoursePlayer from "@/pages/CoursePlayer";
 import TenantSiteCourses from "@/pages/TenantSiteCourses";
+import TenantSiteEventos from "@/pages/TenantSiteEventos";
+import TenantSiteEventoDetail from "@/pages/TenantSiteEventoDetail";
+import TenantSiteAnais from "@/pages/TenantSiteAnais";
+import TenantSiteTrabalho from "@/pages/TenantSiteTrabalho";
+import TenantSiteCarteirinha from "@/pages/TenantSiteCarteirinha";
+import MinhaCarteirinha from "@/pages/MinhaCarteirinha";
 import TenantSiteCourseDetail from "@/pages/TenantSiteCourseDetail";
 import TenantSiteCertificate from "@/pages/TenantSiteCertificate";
 import Formularios from "@/pages/Formularios";
@@ -45,10 +51,12 @@ import Mensagens from "@/pages/Mensagens";
 import MensagemDetail from "@/pages/MensagemDetail";
 import MinhasMensagens from "@/pages/MinhasMensagens";
 import PortalMensagem from "@/pages/PortalMensagem";
+import MeusTrabalhos from "@/pages/MeusTrabalhos";
+import MeusPareceres from "@/pages/MeusPareceres";
 import Usuarios from "@/pages/Usuarios";
 import DefinirSenha from "@/pages/DefinirSenha";
 import EsqueciSenha from "@/pages/EsqueciSenha";
-import { homePathForUser, isMember } from "@/utils/roles";
+import { homePathForUser, isMember, isReviewer } from "@/utils/roles";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -91,6 +99,13 @@ function SetupGate({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  if (isReviewer(user?.role)) {
+    const permitido = ["/app/portal/pareceres", "/app/portal/trabalhos"].some((p) =>
+      location.pathname.startsWith(p)
+    );
+    return permitido ? <>{children}</> : <Navigate to="/app/portal/pareceres" replace />;
+  }
+
   if (!setupCompleted && !onSetup) {
     return <Navigate to="/app/setup" replace />;
   }
@@ -112,7 +127,12 @@ function AppRoutes() {
       <Route path="/site/p/:slug" element={<TenantSitePage />} />
       <Route path="/site/cursos" element={<TenantSiteCourses />} />
       <Route path="/site/cursos/:slug" element={<TenantSiteCourseDetail />} />
+      <Route path="/site/eventos" element={<TenantSiteEventos />} />
+      <Route path="/site/eventos/:slug" element={<TenantSiteEventoDetail />} />
+      <Route path="/site/eventos/:slug/anais" element={<TenantSiteAnais />} />
+      <Route path="/site/eventos/:slug/anais/:trabalho" element={<TenantSiteTrabalho />} />
       <Route path="/site/certificados" element={<TenantSiteCertificate />} />
+      <Route path="/site/carteirinha/:codigo" element={<TenantSiteCarteirinha />} />
       <Route path="/site/formularios/:token" element={<PublicFormulario />} />
       <Route path="/site/formularios/convite/:token" element={<PublicFormulario convite />} />
       <Route
@@ -129,6 +149,7 @@ function AppRoutes() {
         <Route path="setup" element={<AssociationSetup />} />
         <Route path="portal" element={<PortalHome />} />
         <Route path="portal/perfil" element={<MeuPerfil />} />
+        <Route path="portal/carteirinha" element={<MinhaCarteirinha />} />
         <Route path="portal/documentos" element={<MeusDocumentos />} />
         <Route path="portal/loja" element={<PortalLoja />} />
         <Route path="portal/carrinho" element={<PortalCarrinho />} />
@@ -138,6 +159,9 @@ function AppRoutes() {
         <Route path="portal/formularios/:id" element={<PortalFormulario />} />
         <Route path="portal/mensagens" element={<MinhasMensagens />} />
         <Route path="portal/mensagens/:id" element={<PortalMensagem />} />
+        <Route path="portal/trabalhos" element={<MeusTrabalhos />} />
+        <Route path="portal/pareceres" element={<MeusPareceres />} />
+        <Route path="pareceres" element={<MeusPareceres />} />
         <Route path="memoria" element={<MemoriaInstitucional />} />
         <Route path="membros" element={<Membros />} />
         <Route path="membros/:id" element={<MembroDetail />} />

@@ -11,6 +11,7 @@ export interface CatalogItemInfo {
   slug: string;
   name: string;
   price: string;
+  member_price?: string | null;
   currency: string;
   is_active: boolean;
 }

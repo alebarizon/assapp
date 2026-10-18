@@ -1,0 +1,138 @@
+.membro-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.membro-timeline li {
+  border-left: 2px solid #e8e8e4;
+  padding: 0 0 1rem 0.9rem;
+  position: relative;
+}
+
+.membro-timeline li:last-child {
+  padding-bottom: 0;
+}
+
+.membro-timeline li::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #c7c7c0;
+}
+
+.membro-timeline li.mt-anuidade::before,
+.membro-timeline li.mt-pagamento::before {
+  background: #1a5f4a;
+}
+
+.membro-timeline li.mt-lembrete::before {
+  background: #d97706;
+}
+
+.membro-timeline li.mt-evento::before,
+.membro-timeline li.mt-curso::before {
+  background: #2563eb;
+}
+
+.membro-timeline li.mt-mensagem::before,
+.membro-timeline li.mt-contato::before {
+  background: #5925dc;
+}
+
+.membro-timeline-meta {
+  font-size: 0.75rem;
+  color: #667085;
+  margin-bottom: 0.2rem;
+}
+
+.membro-timeline-titulo {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.membro-timeline-detalhe {
+  font-size: 0.8125rem;
+  color: #475467;
+}
+
+.cartao-associado {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 85.6 / 54;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #ecebe6;
+  box-shadow: 0 6px 24px rgba(19, 19, 19, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.cartao-associado-topo {
+  background: #1a5f4a;
+  color: #fff;
+  padding: 0.7rem 1rem;
+}
+
+.cartao-associado-assoc {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.cartao-associado-sub {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.cartao-associado-corpo {
+  flex: 1;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  align-items: center;
+}
+
+.cartao-associado-dados {
+  flex: 1;
+  min-width: 0;
+}
+
+.cartao-associado-nome {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cartao-associado-campo {
+  font-size: 0.65rem;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cartao-associado-valor {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.cartao-associado-qr {
+  width: 34%;
+  max-width: 130px;
+  flex-shrink: 0;
+}
+
+.cartao-associado-qr img {
+  width: 100%;
+  display: block;
+}

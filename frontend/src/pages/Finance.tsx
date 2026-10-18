@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Mail, Plus, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { CreditCard, Mail, Plus, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import PagamentoOnlineModal from "@/components/pagamentos/PagamentoOnlineModal";
+import { podeEditar } from "@/utils/roles";
 import {
   createTransaction,
   deleteTransaction,
@@ -30,6 +33,8 @@ const MONTHS = [
 ];
 
 export default function Finance() {
+  const { user } = useAuth();
+  const [showPagamentoOnline, setShowPagamentoOnline] = useState(false);
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
@@ -189,11 +194,17 @@ export default function Finance() {
           <button type="button" className="dashboard-btn-secondary" onClick={() => setShowEmail(true)}>
             <Mail size={16} /> Enviar fechamento
           </button>
+          {podeEditar(user, "financeiro") && (
+            <button type="button" className="dashboard-btn-secondary" onClick={() => setShowPagamentoOnline(true)}>
+              <CreditCard size={16} /> Pagamento online
+            </button>
+          )}
         </div>
       </div>
 
       {error && <div className="alert-banner alert-banner-error">{error}</div>}
       {msg && <div className="alert-banner alert-banner-info">{msg}</div>}
+      {showPagamentoOnline && <PagamentoOnlineModal onClose={() => setShowPagamentoOnline(false)} />}
 
       {dashboard && (
         <div className="stats-grid">

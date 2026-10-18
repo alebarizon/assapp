@@ -56,8 +56,15 @@ export async function duplicateCourse(id: string): Promise<Course> {
   return data;
 }
 
-export async function createCourseCatalogItem(id: string, price: string): Promise<Course> {
-  const { data } = await api.post<Course>(`/api/courses/${id}/create-catalog-item/`, { price });
+export async function createCourseCatalogItem(
+  id: string,
+  price: string,
+  memberPrice?: string
+): Promise<Course> {
+  const { data } = await api.post<Course>(`/api/courses/${id}/create-catalog-item/`, {
+    price,
+    member_price: memberPrice || null,
+  });
   return data;
 }
 

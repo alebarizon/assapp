@@ -112,6 +112,7 @@ export default function EcommerceOrders() {
                       {order.items.map((it) => (
                         <li key={it.id}>
                           {it.catalog_item_name} ×{it.quantity} — R$ {it.subtotal}
+                          {it.list_price && Number(it.list_price) > Number(it.price_at_purchase) && " (preço de sócio)"}
                         </li>
                       ))}
                     </ul>

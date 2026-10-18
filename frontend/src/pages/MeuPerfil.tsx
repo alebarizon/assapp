@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { Anuidade, Membro } from "@/types/membros";
+import type { DisponibilidadePagamento } from "@/types/pagamentos";
 import { getMeuMembro, listMinhasAnuidades } from "@/services/membros";
+import { getDisponibilidadePagamento } from "@/services/pagamentos";
+import PagarAnuidadeModal from "@/components/pagamentos/PagarAnuidadeModal";
 
 export default function MeuPerfil() {
   const [membro, setMembro] = useState<Membro | null>(null);
   const [anuidades, setAnuidades] = useState<Anuidade[]>([]);
+  const [disponibilidade, setDisponibilidade] = useState<DisponibilidadePagamento | null>(null);
+  const [pagando, setPagando] = useState<Anuidade | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -21,7 +26,16 @@ export default function MeuPerfil() {
       } finally {
         setLoading(false);
       }
+      try {
+        setDisponibilidade(await getDisponibilidadePagamento());
+      } catch {
+        setDisponibilidade(null);
+      }
     })();
+  }, []);
+
+  const recarregarAnuidades = useCallback(async () => {
+    setAnuidades(await listMinhasAnuidades());
   }, []);
 
   if (loading) {
@@ -43,6 +57,9 @@ export default function MeuPerfil() {
       </div>
     );
   }
+
+  const pagamentoOnline = Boolean(disponibilidade?.habilitado && disponibilidade.metodos.length > 0);
+  const emAberto = (a: Anuidade) => (a.status === "pendente" || a.status === "vencida") && parseFloat(a.valor) > 0;
 
   return (
     <div className="dashboard-page">
@@ -95,15 +112,36 @@ export default function MeuPerfil() {
                     {a.ano_referencia} — R$ {parseFloat(a.valor).toFixed(2)}
                   </p>
                   <p className="list-card-meta">
-                    Vencimento: {new Date(a.vencimento).toLocaleDateString("pt-BR")}
+                    Vencimento: {new Date(`${a.vencimento}T00:00:00`).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
-                <span className={`status-badge status-badge-${a.status}`}>{a.status_display}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <span className={`status-badge status-badge-${a.status}`}>{a.status_display}</span>
+                  {emAberto(a) && pagamentoOnline && (
+                    <button type="button" className="dashboard-btn-save" onClick={() => setPagando(a)}>
+                      Pagar
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
+        {anuidades.some(emAberto) && !pagamentoOnline && (
+          <p className="list-card-meta" style={{ marginTop: "1rem" }}>
+            Para pagar, fale com a secretaria da associação.
+          </p>
+        )}
       </div>
+
+      {pagando && disponibilidade && (
+        <PagarAnuidadeModal
+          anuidade={pagando}
+          disponibilidade={disponibilidade}
+          onClose={() => setPagando(null)}
+          onPago={recarregarAnuidades}
+        />
+      )}
     </div>
   );
 }

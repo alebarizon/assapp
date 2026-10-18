@@ -1,27 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Link2, Link2Off } from "lucide-react";
-import type { Membro } from "@/types/membros";
+import type { Membro, TimelineItem } from "@/types/membros";
 import {
   desvincularUserMembro,
   getMembro,
+  getTimelineMembro,
   registrarPagamentoAnuidade,
   vincularUserMembro,
 } from "@/services/membros";
+import "@/components/membros/Membros.css";
+import CarteirinhaPainel from "@/components/membros/CarteirinhaPainel";
+import { useAuth } from "@/contexts/AuthContext";
+import { podeEditar } from "@/utils/roles";
+
+function dataCurta(iso: string) {
+  return new Date(iso.length === 10 ? `${iso}T00:00:00` : iso).toLocaleDateString("pt-BR");
+}
 
 export default function MembroDetail() {
   const { id } = useParams<{ id: string }>();
   const [membro, setMembro] = useState<Membro | null>(null);
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const [vinculando, setVinculando] = useState(false);
+  const { user } = useAuth();
 
   const carregar = async () => {
     if (!id) return;
     setLoading(true);
     try {
-      setMembro(await getMembro(id));
+      const [m, t] = await Promise.all([getMembro(id), getTimelineMembro(id)]);
+      setMembro(m);
+      setTimeline(t);
     } finally {
       setLoading(false);
     }
@@ -160,6 +173,8 @@ export default function MembroDetail() {
         </div>
       </div>
 
+      <CarteirinhaPainel membroId={membro.id} podeEditar={podeEditar(user, "membros")} />
+
       <div className="dashboard-content-panel" style={{ marginBottom: "1.25rem" }}>
         <div className="form-row-2" style={{ fontSize: "0.9rem" }}>
           {membro.cpf && (
@@ -229,7 +244,7 @@ export default function MembroDetail() {
                 <span className={`status-badge status-badge-${f.status}`}>{f.status_display}</span>
               </div>
               <span className="list-card-meta" style={{ margin: 0 }}>
-                desde {new Date(f.data_inicio).toLocaleDateString("pt-BR")}
+                desde {dataCurta(f.data_inicio)}
               </span>
             </div>
 
@@ -242,7 +257,14 @@ export default function MembroDetail() {
                         {a.ano_referencia} — R$ {parseFloat(a.valor).toFixed(2)}
                       </p>
                       <p className="list-card-meta">
-                        Vencimento: {new Date(a.vencimento).toLocaleDateString("pt-BR")}
+                        Vencimento: {dataCurta(a.vencimento)}
+                        {a.ultimo_lembrete && (
+                          <>
+                            {" "}
+                            · Último lembrete: {a.ultimo_lembrete.etapa.toLowerCase()} (
+                            {dataCurta(a.ultimo_lembrete.enviado_em)})
+                          </>
+                        )}
                       </p>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -265,6 +287,29 @@ export default function MembroDetail() {
             )}
           </div>
         ))}
+      </div>
+
+      <h2 className="dashboard-title" style={{ fontSize: "1.15rem", margin: "1.75rem 0 1rem" }}>
+        Linha do tempo
+      </h2>
+      <div className="dashboard-content-panel">
+        {timeline.length === 0 ? (
+          <div className="dashboard-empty">Nenhum registro ainda.</div>
+        ) : (
+          <ul className="membro-timeline">
+            {timeline.map((item, i) => (
+              <li key={`${item.quando}-${i}`} className={`mt-${item.categoria}`}>
+                <div className="membro-timeline-meta">
+                  {new Date(item.quando).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                </div>
+                <div className="membro-timeline-titulo">
+                  {item.link ? <Link to={item.link}>{item.titulo}</Link> : item.titulo}
+                </div>
+                {item.detalhe && <div className="membro-timeline-detalhe">{item.detalhe}</div>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

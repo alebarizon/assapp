@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import {
   AlertCircle,
   CheckCircle,
+  Mail,
   Plus,
   RefreshCw,
   Search,
@@ -16,6 +17,7 @@ import type { Membro, ResumoMembros } from "@/types/membros";
 import { TIPOS_FILIACAO } from "@/types/membros";
 import {
   atualizarAnuidadesVencidas,
+  enviarLembretesAnuidade,
   createMembro,
   gerarAnuidadesLote,
   getResumoMembros,
@@ -106,6 +108,22 @@ export default function Membros() {
     await carregar();
   };
 
+  const handleEnviarLembretes = async () => {
+    if (
+      !confirm(
+        "Enviar agora os lembretes de anuidade devidos? Cada associado recebe no máximo um lembrete por etapa (30 e 15 dias antes, no dia e 15 dias após o vencimento)."
+      )
+    )
+      return;
+    const r = await enviarLembretesAnuidade();
+    setMsg(
+      r.enviados === 0 && r.falhas === 0
+        ? "Nenhum lembrete pendente no momento."
+        : `${r.enviados} lembrete(s) enviado(s)${r.falhas ? `, ${r.falhas} falha(s) de e-mail` : ""}.`
+    );
+    await carregar();
+  };
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-header dashboard-header-row">
@@ -116,6 +134,9 @@ export default function Membros() {
         <div className="dashboard-header-actions">
           <button type="button" className="dashboard-btn-secondary" onClick={handleAtualizarVencidas}>
             <RefreshCw size={16} /> Atualizar vencidas
+          </button>
+          <button type="button" className="dashboard-btn-secondary" onClick={handleEnviarLembretes}>
+            <Mail size={16} /> Enviar lembretes
           </button>
           <button type="button" className="dashboard-btn-edit" onClick={handleGerarAnuidades}>
             Gerar anuidades {new Date().getFullYear()}
