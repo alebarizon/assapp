@@ -12,6 +12,7 @@
 | `Membro` | Dados do associado (nome, email, CPF, Lattes, ORCID) |
 | `Filiacao` | Histórico de filiação vinculado a mandato |
 | `Anuidade` | Cobrança anual por filiação |
+| `LembreteAnuidade` | Registro de cada lembrete de cobrança enviado (único por anuidade + etapa) |
 
 ## Valores padrão de anuidade
 
@@ -31,26 +32,75 @@
 | `GET /api/membros/membros/{id}/` | Detalhe com histórico |
 | `POST /api/membros/anuidades/gerar_lote/` | Gera anuidades do ano |
 | `POST /api/membros/anuidades/atualizar_vencidas/` | Marca inadimplentes |
-| `POST /api/membros/anuidades/{id}/registrar_pagamento/` | Registra pagamento |
+| `POST /api/membros/anuidades/{id}/registrar_pagamento/` | Registra pagamento (idempotente) |
+| `POST /api/membros/anuidades/enviar_lembretes/` | Marca vencidas e dispara a régua agora |
+| `GET /api/membros/membros/{id}/timeline/` | Linha do tempo do associado |
 
 ## Automação
 
 1. **Gerar lote** — cria anuidades para todas filiações ativas/inadimplentes sem cobrança no ano
 2. **Atualizar vencidas** — anuidades pendentes após vencimento → `vencida`; filiação → `inadimplente`
 3. **Registrar pagamento** — anuidade `paga`; reativa filiação inadimplente
+4. **Régua de cobrança** — e-mails 30 e 15 dias antes, no dia e 15 dias após o vencimento
+   (`membros/services.py::enviar_lembretes_anuidade`). Envia só a etapa mais recente ainda não enviada
+   (nunca uma anterior depois de uma posterior), ignora anuidades pagas, isentas, de inativos ou vencidas
+   há mais de 45 dias, e só registra `LembreteAnuidade` quando o e-mail sai — falha é retentada no dia seguinte.
+5. **Pagamento online** — o associado paga pelo portal (Pix, cartão, boleto via Asaas); a confirmação do
+   gateway quita a anuidade e lança no financeiro. Ver [`PAGAMENTOS.md`](PAGAMENTOS.md).
+
+### Comando diário (cron)
+
+```bash
+docker compose exec -T backend python manage.py regua_anuidades            # todos os tenants
+docker compose exec -T backend python manage.py regua_anuidades --schema x # um tenant
+docker compose exec -T backend python manage.py regua_anuidades --sem-email # só marca vencidas
+```
+
+Roda `atualizar_anuidades_vencidas` + régua em cada tenant ativo. É idempotente: pode rodar mais de uma vez por dia.
+
+## Linha do tempo do associado
+
+`membros/timeline.py::timeline_membro` junta, do mais recente ao mais antigo: filiações, anuidades
+(pagas/vencidas), lembretes, cobranças online, pedidos, inscrições e certificados de eventos, submissões,
+cursos, conversas, respostas de formulários e contatos do CRM. Exibida em `MembroDetail.tsx`.
+
+## Carteirinha digital
+
+`membros/carteirinha.py` (migration `membros/0004`: `Membro.matricula`, `Membro.carteirinha_codigo`).
+
+- Matrícula sequencial e código do QR atribuídos na primeira emissão (`garantir_carteirinha`).
+- Situação: **em dia** (`membro_adimplente`), **pendente** (filiação ativa com anuidade em atraso) ou **inativa**
+  (membro inativo, filiação cancelada/suspensa ou inexistente).
+- Validade: fim do último ano pago/isento, ou o vencimento da próxima anuidade ainda não vencida; honorário não
+  expira. Sem anuidade registrada, aparece "—".
+- O QR aponta para `/site/carteirinha/:codigo?schema=`, que consulta a situação **no momento da leitura** — por isso o
+  PDF impresso não traz a situação, só a validade. A verificação mostra nome, matrícula, categoria, situação e
+  validade; nunca e-mail, CPF ou contato.
+- "Gerar novo QR" (diretoria) troca o código; o anterior passa a responder 404.
+- Apple/Google Wallet ficam para depois.
+
+| Endpoint | Descrição |
+|----------|-----------|
+| `GET /api/membros/meu/carteirinha/[pdf/]` | Associado logado: dados + QR (SVG data URI) / PDF 85,6 × 54 mm |
+| `GET /api/membros/membros/{id}/carteirinha/[pdf/]` | Diretoria |
+| `POST /api/membros/membros/{id}/carteirinha/renovar/` | Novo QR (invalida o anterior) |
+| `GET /api/membros/public/carteirinha/{codigo}/?schema=` | Verificação pública |
 
 ## Frontend
 
 | Página | Rota |
 |--------|------|
 | `Membros.tsx` | `/app/membros` |
-| `MembroDetail.tsx` | `/app/membros/:id` |
+| `MembroDetail.tsx` | `/app/membros/:id` (painel Carteirinha) |
+| `MinhaCarteirinha.tsx` | `/app/portal/carteirinha` |
+| `TenantSiteCarteirinha.tsx` | `/site/carteirinha/:codigo` |
 
 UI: padrão WellSaaS (`dashboard-*`, KPIs `stats-grid`) — [`UI_PADRAO_WELLSAAS.md`](../guias/UI_PADRAO_WELLSAAS.md).
 
 ## Pendente
 
-- Stripe real no pagamento de anuidades (hoje: registro manual + espelho em `finance`)
+- Lembretes por WhatsApp (hoje só e-mail)
+- Cobrança recorrente / assinatura no cartão
 - Convite SMTP para associados (User criado a partir do Membro)
 
 ## Ponte User ↔ Membro
@@ -80,4 +130,4 @@ Ver: [`CHANGELOG_USER_MEMBRO_2026_07.md`](../changelog/CHANGELOG_USER_MEMBRO_202
 
 ---
 
-**Última atualização:** 2026-07-15
+**Última atualização:** 2026-10-17

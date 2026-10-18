@@ -71,9 +71,9 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 |--------|----------|
 | `public` | tenants (com `setup_completed`, `plan_slug`), domains, **support** (chamados de todas as associações) |
 | `sistema` | superadmin |
-| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, website, accounts |
+| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, website, accounts |
 
-> `adminpanel` / `payments` — stubs; Stripe continua simulado. `finance` e `documents` ativos no tenant.
+> `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via Asaas da própria associação.
 
 ---
 
@@ -83,8 +83,9 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 |-----|-----------|
 | `mandatos` | Mandatos, transição, onboarding da nova diretoria |
 | `memoria` | ContextoHistorico, timeline |
-| `eventos` | CFP, pareceres, anais |
-| `membros` | Filiados, anuidades |
+| `eventos` | Chamada de trabalhos (submissão pelo portal, parecer duplo-cego por critérios, decisão, certificados de autor/parecerista), anais com página citável por trabalho (`/site/eventos/:slug/anais`), programação e hotsite (`/site/eventos`) |
+| `membros` | Filiados, anuidades, régua de cobrança (`regua_anuidades`), linha do tempo do associado, carteirinha digital com QR (`/site/carteirinha/:codigo`) |
+| `payments` | Pagamento online de anuidades (Asaas: Pix, cartão, boleto) + webhook (`/app/finance` → Pagamento online) |
 | `finance` | Lançamentos OSC, dashboard, e-mail fechamento |
 | `ecommerce` | Catálogo, carrinho, pedidos (anuidade, evento, curso, material) |
 | `courses` | Cursos online: aulas, quiz, Q&A, certificado; venda via loja (`/app/courses`, `/app/portal/cursos`, `/site/cursos`) |
@@ -123,20 +124,21 @@ Gestão em `/app/usuarios` — ver [`USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_
 /api/eventos/    eventos
 /api/membros/    membros
 /api/finance/    finance (OSC)
+/api/pagamentos/ pagamento online (configuracao/, anuidades/{id}/cobrar/, cobrancas/{id}/, webhook/asaas/)
 /api/ecommerce/  catalog, cart, orders (+ public/catalog)
 /api/courses/    cursos (diretoria, my/ associado, public/ site + certificados)
 /api/formularios/ formulários (diretoria, my/ associado, public/f|r/ sem login)
 /api/contatos/   contatos/CRM (diretoria, etiquetas/, public/ formulário do site)
 /api/mensagens/  conversas (diretoria, my/ associado)
 /api/suporte/    chamados de suporte (diretoria da associação + superadmin)
-/api/certificados/{codigo}/[pdf/]  verificação pública de certificados (cursos e eventos)
+/api/certificados/{codigo}/[pdf/]  verificação pública de certificados (cursos, eventos, autoria e parecer)
 /api/documents/  documents (+ meus/)
 /api/website/    website CMS tenant (config, pages, public)
 /api/tenants/    resolve domínio → schema (public/resolve)
 ```
 
 Auth detalhado: [`docs/modulos/AUTH_SIGNUP_SETUP.md`](docs/modulos/AUTH_SIGNUP_SETUP.md)  
-Finance: [`docs/modulos/FINANCE.md`](docs/modulos/FINANCE.md) · Documents: [`docs/modulos/DOCUMENTS.md`](docs/modulos/DOCUMENTS.md)
+Finance: [`docs/modulos/FINANCE.md`](docs/modulos/FINANCE.md) · Pagamentos: [`docs/modulos/PAGAMENTOS.md`](docs/modulos/PAGAMENTOS.md) · Documents: [`docs/modulos/DOCUMENTS.md`](docs/modulos/DOCUMENTS.md)
 
 ---
 

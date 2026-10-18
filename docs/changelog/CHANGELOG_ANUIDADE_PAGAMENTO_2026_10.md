@@ -1,0 +1,107 @@
+# Changelog — Anuidade que se cobra sozinha (2026-10)
+
+Primeira entrega do roadmap de `nova-funcionalidades.md`: régua de cobrança, pagamento online e linha do tempo do associado.
+
+## Backend
+
+- **`membros.LembreteAnuidade`** (migration `membros/0003`) e `enviar_lembretes_anuidade`: e-mails 30 e 15 dias
+  antes, no dia e 15 dias após o vencimento; idempotente.
+- **Comando `regua_anuidades`**: marca vencidas + envia lembretes em todos os tenants ativos (`--schema`, `--sem-email`).
+- **`POST /api/membros/anuidades/enviar_lembretes/`** e **`GET /api/membros/membros/{id}/timeline/`**.
+- `registrar_pagamento` agora é idempotente (não duplica lançamento em `finance`).
+- **App `payments` agora é TENANT** (migration `payments/0001`): `ConfiguracaoPagamento`, `Cobranca`, gateway Asaas
+  (Pix, cartão, boleto) e simulado, webhook `/api/pagamentos/webhook/asaas/?schema=`.
+- Setting `PAGAMENTO_SIMULADO` (padrão = `DEBUG`).
+- Testes: `membros/tests.py` e `payments/tests.py`.
+
+## Frontend
+
+- Portal (`MeuPerfil`): botão **Pagar** nas anuidades abertas → `PagarAnuidadeModal` (QR Pix, copia-e-cola, fatura).
+- Financeiro: botão **Pagamento online** (só financeiro TOTAL) → `PagamentoOnlineModal`.
+- Membros: botão **Enviar lembretes**; detalhe do membro com **Linha do tempo** e "Último lembrete" por anuidade.
+
+## Deploy (staging / produção)
+
+```bash
+docker compose exec backend python manage.py migrate_schemas --shared
+docker compose exec backend python manage.py migrate_schemas
+```
+
+Variável no `.env` do droplet: `PAGAMENTO_SIMULADO=True` em staging/demo, `False` em produção.
+
+Cron diário no droplet (ex.: 8h, horário de Brasília):
+
+```cron
+0 11 * * * cd /caminho/assapp && docker compose exec -T backend python manage.py regua_anuidades >> /var/log/regua_anuidades.log 2>&1
+```
+
+O SMTP precisa estar configurado para os lembretes saírem; envios com falha são retentados na execução seguinte.
+
+## Desconto de sócio adimplente na loja
+
+- `CatalogItem.member_price` + `OrderItem.list_price` (migration `ecommerce/0003`).
+- `membros.services.membro_adimplente`: filiação ativa/honorária e nenhuma anuidade em atraso.
+- Vitrine (`preco_final`), carrinho (`total`, `total_cheio`, `adimplente`) e checkout usam o preço de sócio para quem está em dia.
+- Frontend: campo "Preço para sócio em dia" no Catálogo e na criação do item de venda do curso; loja e carrinho do
+  portal mostram o preço riscado, a economia ou o convite para regularizar a anuidade; site público do curso
+  mostra "Associado em dia paga…"; pedidos da diretoria marcam "(preço de sócio)".
+- Correção: `GET /api/ecommerce/public/catalog/` quebrava com `NameError` (`CatalogItemType` sem import).
+- Testes: `ecommerce/tests.py`.
+
+## Pagamento online dos pedidos da loja
+
+- `payments.Cobranca.pedido` (migration `payments/0002`) e `ecommerce.PaymentMethod.ONLINE` (`ecommerce/0004`).
+- `POST /api/pagamentos/pedidos/{id}/cobrar/`; checkout aceita `payment_method: "online"`.
+- Confirmação conclui o pedido (inscrição, matrícula) e espelha no financeiro; falha de fulfillment não desfaz o pagamento.
+- Carrinho do portal: "Pagar online — Pix, cartão ou boleto" e lista de pedidos aguardando pagamento com botão **Pagar**.
+- `PagamentoModal` genérico (anuidade e pedido).
+- **Segurança:** checkout `simulated` (pagamento imediato) agora só é aceito com `PAGAMENTO_SIMULADO`;
+  antes qualquer associado conseguia concluir pedidos sem pagar em produção. Padrão do checkout passou a `manual`.
+
+## Hotsite do evento
+
+- `EventoAcademico.publicado_site`, `resumo`, `capa` + modelo `AtividadeProgramacao` (migration `eventos/0003`).
+- API: capa, item de inscrição na loja (preço cheio e de sócio), programação, endpoints públicos.
+- Painel: abas **Programação** e **Site e inscrição** no detalhe do evento.
+- Site: `/site/eventos` e `/site/eventos/:slug` (programação por dia, chamada de trabalhos, inscrição, anais) e
+  link "Eventos" no menu.
+- Testes: `eventos/tests.py`.
+
+## Chamada de trabalhos científicos completa
+
+- Migration `eventos/0004`: critérios com peso, nota de corte e arquivo obrigatório na chamada; coautores e decisão
+  na submissão; notas por critério, nota ponderada e prazo no parecer; modelo `CertificadoPapel`.
+- Regras em `eventos/cientifico.py`: submissão pelo autor (janela, limite por autor, área, arquivo), conflito de
+  interesse (autor e coautores), nota ponderada, decisão da comissão com carta por e-mail e certificados de autoria
+  e de parecerista (verificáveis em `/site/certificados`).
+- O parecer não decide mais o trabalho: a comissão decide em `POST /api/eventos/submissoes/{id}/decidir/`.
+- Portal: **Trabalhos científicos** (`/app/portal/trabalhos`) e **Pareceres** (`/app/portal/pareceres`); equipe vê
+  **Meus pareceres** (`/app/pareceres`) quando tem trabalhos atribuídos; papel parecerista entra direto nos pareceres.
+- Painel do evento: aba **Chamada** com critérios e pesos; aba **Submissões** com escolha de parecerista e prazo,
+  notas, média × nota de corte, decisão e emissão de certificados.
+- Hotsite: botão "Submeter trabalho pelo portal" quando a chamada está aberta.
+- Correção: o upload da capa do evento enviava JSON em vez de multipart.
+- Testes: `eventos/test_cfp.py`.
+
+## Anais públicos por trabalho
+
+- Migration `eventos/0005`: `TrabalhoPublicado` e campos editoriais nos anais (ISBN, licença, apresentação,
+  editores, cidade).
+- `eventos/anais.py`: publicação idempotente (slug, DOI e PDF preservados), citações ABNT/APA/BibTeX e PDF com resumo.
+- Site: `/site/eventos/:slug/anais` (sumário por área com busca) e `/site/eventos/:slug/anais/:trabalho` (resumo,
+  autores com ORCID, como citar com botão copiar, PDF, DOI, licença, metadados `citation_*`).
+- Painel: aba **Anais** com dados editoriais, DOI e PDF final por trabalho e link para a página pública.
+- Botões do site em seções claras ganharam variantes visíveis (`tenant-site-btn-primary` / `-outline`).
+- Testes: `eventos/test_anais.py`.
+- Após o deploy, eventos com anais já publicados precisam de "Atualizar anais" para ganhar as páginas por trabalho.
+
+## Carteirinha digital
+
+- Migration `membros/0004`: matrícula e código do QR no `Membro`.
+- `membros/carteirinha.py`: situação (em dia / pendente / inativa), validade, QR SVG, PDF tamanho cartão.
+- Portal: **Carteirinha** (`/app/portal/carteirinha`) com cartão, QR, PDF e aviso para regularizar a anuidade.
+- Site: `/site/carteirinha/:codigo` — verificação pública da situação no momento da leitura, sem dados de contato.
+- Painel: carteirinha no detalhe do membro, com PDF e "Gerar novo QR" (invalida o anterior).
+- Testes: `membros/test_carteirinha.py`.
+
+Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md)

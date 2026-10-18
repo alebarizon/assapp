@@ -18,6 +18,17 @@ Catálogo unificado de ofertas da associação. Cada item tem **tipo** e, após 
 
 Comprador: **Membro** (associado com user vinculado).
 
+### Preço de sócio adimplente
+
+`CatalogItem.member_price` (opcional, ≤ `price`, não se aplica a anuidade) é o preço para quem está **em dia**:
+filiação ativa ou honorária e nenhuma anuidade em atraso (`membros.services.membro_adimplente`, que já considera
+anuidade pendente com vencimento passado mesmo antes do cron marcá-la como vencida).
+
+- Vitrine do associado devolve `preco_final` (o preço que ele paga); para a diretoria vem `null`.
+- Carrinho devolve `total`, `total_cheio` e `adimplente`; o portal mostra a economia ou quanto o inadimplente economizaria.
+- No checkout o preço é recalculado no servidor: `OrderItem.price_at_purchase` = preço pago, `list_price` = preço cheio.
+- Cursos: `POST /api/courses/{id}/create-catalog-item/` aceita `member_price`; o site público mostra "Associado em dia paga…".
+
 ---
 
 ## API REST
@@ -38,8 +49,9 @@ Comprador: **Membro** (associado com user vinculado).
 
 ### Checkout
 
-- `payment_method: simulated` — paga e cumpre na hora (dev/demo)
-- `payment_method: manual` — pedido `pending`; diretoria confirma depois
+- `payment_method: online` — pedido `pending` pago pelo associado via Asaas (ver [`PAGAMENTOS.md`](PAGAMENTOS.md))
+- `payment_method: manual` (padrão) — pedido `pending`; diretoria confirma depois
+- `payment_method: simulated` — paga e cumpre na hora; **só com `PAGAMENTO_SIMULADO`** (dev/demo)
 
 ---
 
@@ -64,6 +76,10 @@ docker compose exec backend python manage.py migrate_schemas
 
 ## Pendente
 
-- Stripe real (`payments/` + webhook)
+- Preço de sócio por tipo de filiação (ex.: estudante) e cupons
 - Sincronização automática catálogo ↔ lote de anuidades
 - **Associe-se no site público** — bloco home + página `/site/associe-se` → catálogo (ver [`WEBSITE_CMS_TENANT.md`](WEBSITE_CMS_TENANT.md))
+
+---
+
+**Última atualização:** 2026-10-17
