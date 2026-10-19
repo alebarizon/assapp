@@ -183,3 +183,18 @@
   background: #1a5f4a;
   transition: width 0.4s ease;
 }
+
+.nl-regua-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.nl-regua-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}

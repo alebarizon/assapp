@@ -154,42 +154,72 @@ def _personalizar(texto: str, nome: str) -> str:
     return texto.replace("{nome}", primeiro)
 
 
-def montar_email(campanha: Campanha, email: str, nome: str, schema: str, conexao=None, assunto=None):
-    corpo = _personalizar(campanha.corpo, nome)
-    sair = link_descadastro(email, schema, campanha.pk)
+def montar_mensagem(
+    assunto: str,
+    corpo: str,
+    email: str,
+    schema: str,
+    link: str = "",
+    link_label: str = "",
+    campanha_id=None,
+    conexao=None,
+    descadastro: bool = True,
+):
+    """E-mail no padrão da newsletter; com `descadastro`, leva rodapé e cabeçalho one-click."""
     associacao = getattr(getattr(connection, "tenant", None), "name", "") or "a associação"
+    rotulo = link_label or "Saiba mais"
     texto = corpo
-    if campanha.link:
-        texto += f"\n\n{campanha.link_label or 'Saiba mais'}: {campanha.link}"
-    texto += f"\n\n--\nVocê recebe este e-mail por seu vínculo com {associacao}.\nPara não receber mais: {sair}"
+    if link:
+        texto += f"\n\n{rotulo}: {link}"
 
     botao = ""
-    if campanha.link:
+    if link:
         botao = (
-            f'<p style="margin-top:24px"><a href="{escape(campanha.link)}" '
+            f'<p style="margin-top:24px"><a href="{escape(link)}" '
             'style="background:#1a5f4a;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none">'
-            f"{escape(campanha.link_label or 'Saiba mais')}</a></p>"
+            f"{escape(rotulo)}</a></p>"
         )
+    rodape = ""
+    headers = {}
+    if descadastro:
+        sair = link_descadastro(email, schema, campanha_id)
+        texto += f"\n\n--\nVocê recebe este e-mail por seu vínculo com {associacao}.\nPara não receber mais: {sair}"
+        rodape = (
+            '<hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0 12px">'
+            f'<p style="color:#64748b;font-size:12px">Você recebe este e-mail por seu vínculo com {escape(associacao)}. '
+            f'<a href="{escape(sair)}" style="color:#64748b">Não quero mais receber</a>.</p>'
+        )
+        headers = {
+            "List-Unsubscribe": f"<{_url_one_click(email, schema, campanha_id)}>",
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        }
     html = (
         '<div style="font-family:Arial,sans-serif;font-size:15px;color:#0f172a;max-width:640px">'
-        f"{linebreaks(urlize(corpo, autoescape=True))}{botao}"
-        '<hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0 12px">'
-        f'<p style="color:#64748b;font-size:12px">Você recebe este e-mail por seu vínculo com {escape(associacao)}. '
-        f'<a href="{escape(sair)}" style="color:#64748b">Não quero mais receber</a>.</p></div>'
+        f"{linebreaks(urlize(corpo, autoescape=True))}{botao}{rodape}</div>"
     )
     msg = EmailMultiAlternatives(
-        subject=assunto or campanha.assunto,
+        subject=assunto,
         body=texto,
         from_email=_remetente(),
         to=[email],
         connection=conexao,
-        headers={
-            "List-Unsubscribe": f"<{_url_one_click(email, schema, campanha.pk)}>",
-            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-        },
+        headers=headers,
     )
     msg.attach_alternative(html, "text/html")
     return msg
+
+
+def montar_email(campanha: Campanha, email: str, nome: str, schema: str, conexao=None, assunto=None):
+    return montar_mensagem(
+        assunto or campanha.assunto,
+        _personalizar(campanha.corpo, nome),
+        email,
+        schema,
+        link=campanha.link,
+        link_label=campanha.link_label,
+        campanha_id=campanha.pk,
+        conexao=conexao,
+    )
 
 
 def enviar_teste(campanha: Campanha, email: str, nome: str = "") -> bool:

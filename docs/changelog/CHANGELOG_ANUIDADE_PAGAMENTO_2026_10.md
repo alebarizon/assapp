@@ -159,6 +159,23 @@ retentados na execução seguinte.
   `scripts/deploy.sh` remove o container antigo. Variável nova: `REGUA_HORA`.
 - Testes: `core/test_agendador.py`.
 
+## Réguas automáticas de relacionamento (2026-10-19)
+
+- Novos modelos `newsletter.Regua` e `newsletter.EnvioRegua` (migration `newsletter/0002`) e `newsletter/reguas.py`:
+  - **Boas-vindas** (ligada): filiação ativa iniciada nos últimos 7 dias; uma vez por associado.
+  - **Reengajamento de inativos** (desligada): filiado há mais de 6 meses e sem login, inscrição, curso,
+    formulário ou submissão nesse período; no máximo um e-mail a cada 6 meses.
+  - **Autor aprovado que não é sócio** (ligada): autores e coautores de trabalho aceito nos últimos 30 dias;
+    convite para o associe-se do site; uma vez por pessoa e evento.
+- Texto, assunto e prazo editáveis por associação, com variáveis (`{nome}`, `{associacao}`, `{proximo_evento}`,
+  `{trabalho}`, `{evento}`). Inativos e autor respeitam descadastros e levam rodapé/one-click.
+- Comando `reguas_relacionamento`, chamado pelo `agendador` uma vez por dia (só com provedor de e-mail real);
+  até 200 por régua por dia em cada associação.
+- `newsletter.services.montar_mensagem`: montagem genérica (a campanha passou a usá-la).
+- Painel: aba **Réguas automáticas** em `/app/newsletter` (ativar com confirmação do volume, prévia de quem
+  receberia, teste, texto padrão, histórico). Linha do tempo do associado mostra os e-mails automáticos.
+- Testes: `newsletter/test_reguas.py`; `core/test_agendador.py` atualizado.
+
 ## Situação em produção (2026-10-18)
 
 - Tudo acima está em produção. Últimos deploys: `5106f5e` (assembleias, newsletter, diretório), `53f9fed`

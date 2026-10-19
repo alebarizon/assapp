@@ -67,6 +67,9 @@ def timeline_membro(membro: Membro, limite: int = 200) -> list[dict]:
             lembrete.get_etapa_display(),
         )
 
+    for envio in membro.envios_regua.all():
+        add(envio.enviado_em, "lembrete", f"E-mail automático: {envio.get_tipo_display().lower()}", envio.detalhe)
+
     try:
         from payments.models import Cobranca
 

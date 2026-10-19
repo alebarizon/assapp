@@ -1,9 +1,12 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework import serializers
 
 from contatos.models import Etiqueta
 from eventos.models import EventoAcademico
 
-from .models import Campanha, Descadastro, EnvioCampanha, StatusCampanha
+from .models import Campanha, Descadastro, EnvioCampanha, EnvioRegua, Regua, StatusCampanha, TipoRegua
 from .services import SITUACOES, estatisticas
 
 TIPOS_FILIACAO = ("efetivo", "estudante", "honorario", "institucional")
@@ -65,6 +68,56 @@ class EnvioSerializer(serializers.ModelSerializer):
     class Meta:
         model = EnvioCampanha
         fields = ["id", "email", "nome", "status", "tentativas", "erro", "enviado_em"]
+
+
+class ReguaSerializer(serializers.ModelSerializer):
+    nome = serializers.CharField(source="get_tipo_display", read_only=True)
+    padrao = serializers.SerializerMethodField()
+    enviados_30_dias = serializers.SerializerMethodField()
+    enviados_total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Regua
+        fields = [
+            "tipo", "nome", "ativa", "assunto", "corpo", "dias", "padrao",
+            "enviados_30_dias", "enviados_total", "updated_at",
+        ]
+        read_only_fields = ["tipo", "updated_at"]
+
+    def get_padrao(self, obj):
+        from .reguas import PADROES
+
+        p = PADROES[obj.tipo]
+        return {"assunto": p["assunto"], "corpo": p["corpo"], "dias": p["dias"]}
+
+    def _envios(self, obj):
+        return EnvioRegua.objects.filter(tipo=obj.tipo)
+
+    def get_enviados_30_dias(self, obj):
+        return self._envios(obj).filter(enviado_em__gte=timezone.now() - timedelta(days=30)).count()
+
+    def get_enviados_total(self, obj):
+        return self._envios(obj).count()
+
+    def validate_dias(self, value):
+        limite = 24 if self.instance and self.instance.tipo == TipoRegua.INATIVOS else 90
+        if not 1 <= value <= limite:
+            raise serializers.ValidationError(f"Use um valor entre 1 e {limite}.")
+        return value
+
+    def validate(self, attrs):
+        for campo in ("assunto", "corpo"):
+            if campo in attrs and not attrs[campo].strip():
+                raise serializers.ValidationError({campo: "Não pode ficar em branco."})
+        return attrs
+
+
+class EnvioReguaSerializer(serializers.ModelSerializer):
+    tipo_nome = serializers.CharField(source="get_tipo_display", read_only=True)
+
+    class Meta:
+        model = EnvioRegua
+        fields = ["id", "tipo", "tipo_nome", "email", "nome", "membro", "detalhe", "enviado_em"]
 
 
 class DescadastroSerializer(serializers.ModelSerializer):

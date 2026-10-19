@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Plus, UserX } from "lucide-react";
+import { Mail, Plus, Repeat, UserX } from "lucide-react";
+import ReguasPanel from "@/components/newsletter/ReguasPanel";
+import "@/components/newsletter/Newsletter.css";
 import { useAuth } from "@/contexts/AuthContext";
 import { getOpcoesPublico, listCampanhas, listDescadastros, reinscrever } from "@/services/newsletter";
 import {
@@ -23,7 +25,7 @@ export default function Newsletter() {
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
   const [descadastros, setDescadastros] = useState<Descadastro[]>([]);
   const [opcoes, setOpcoes] = useState<OpcoesPublico>();
-  const [aba, setAba] = useState<"campanhas" | "descadastros">("campanhas");
+  const [aba, setAba] = useState<"campanhas" | "reguas" | "descadastros">("campanhas");
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
@@ -63,7 +65,9 @@ export default function Newsletter() {
       <div className="dashboard-header dashboard-header-row">
         <div>
           <h1 className="dashboard-title">Newsletter</h1>
-          <p className="dashboard-subtitle">Campanhas por e-mail para associados, inscritos em eventos e contatos</p>
+          <p className="dashboard-subtitle">
+            Campanhas por e-mail e réguas automáticas para associados, inscritos em eventos e contatos
+          </p>
         </div>
         {editavel && (
           <div className="dashboard-header-actions">
@@ -79,6 +83,9 @@ export default function Newsletter() {
       <div className="dashboard-tabs">
         <button type="button" className={`dashboard-tab${aba === "campanhas" ? " active" : ""}`} onClick={() => setAba("campanhas")}>
           Campanhas ({campanhas.length})
+        </button>
+        <button type="button" className={`dashboard-tab${aba === "reguas" ? " active" : ""}`} onClick={() => setAba("reguas")}>
+          <Repeat size={14} /> Réguas automáticas
         </button>
         <button type="button" className={`dashboard-tab${aba === "descadastros" ? " active" : ""}`} onClick={() => setAba("descadastros")}>
           <UserX size={14} /> Descadastros ({descadastros.length})
@@ -119,6 +126,8 @@ export default function Newsletter() {
           )}
         </div>
       )}
+
+      {aba === "reguas" && <ReguasPanel editavel={editavel} />}
 
       {aba === "descadastros" && (
         <div className="dashboard-content-panel">

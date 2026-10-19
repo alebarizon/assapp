@@ -131,12 +131,13 @@ Nunca `system prune`, `container prune`, `volume rm` nem `down -v` no droplet: s
 |---------|-----------|--------|
 | `db` | `assapp_db_<amb>` | PostgreSQL 14 (volume `assapp_postgres_data_<amb>`) |
 | `backend` | `assapp_backend_<amb>` | Migrations no startup + Gunicorn |
-| `agendador` | `assapp_agendador_<amb>` | `manage.py agendador`: lote da newsletter a cada minuto; régua de anuidades 1×/dia a partir de `REGUA_HORA` (padrão 8h Brasília). Sem healthcheck HTTP |
+| `agendador` | `assapp_agendador_<amb>` | `manage.py agendador`: lote da newsletter a cada minuto; régua de anuidades e réguas de relacionamento (`reguas_relacionamento`) 1×/dia a partir de `REGUA_HORA` (padrão 8h Brasília). Sem healthcheck HTTP |
 | `frontend` | `assapp_frontend_<amb>` | Build Vite servido por nginx (o healthcheck aparece `unhealthy`, mas o site responde — pendente investigar) |
 | `nginx` | `assapp_nginx_<amb>` | Proxy na porta 80 (prod) / 8080 (staging) |
 
 Variáveis do `.env.<amb>` ligadas ao agendador: `NEWSLETTER_POR_MINUTO` (padrão 30) e `REGUA_HORA` (padrão 8).
-Enquanto o `EMAIL_BACKEND` for console, nada é entregue e a régua roda com `--sem-email`. Para enviar de verdade é
+Enquanto o `EMAIL_BACKEND` for console, nada é entregue: a régua de anuidades roda com `--sem-email` e as réguas
+de relacionamento nem rodam. Para enviar de verdade é
 preciso um provedor por API HTTP (Brevo, Resend, SES): a DigitalOcean bloqueia SMTP de saída.
 
 Na primeira subida após mudanças de modelo, o agendador pode logar `relation ... does not exist` uma vez (rodou antes
