@@ -189,5 +189,18 @@ retentados na execução seguinte.
 - Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — a DigitalOcean bloqueia SMTP.
 - `PAGAMENTO_SIMULADO=False` + chave Asaas real em produção, ou manter simulado.
 - "Atualizar anais" nos eventos com anais já publicados, para gerar as páginas por trabalho.
+- Domínio `gesttora.com.br` em registro (2026-10-19): e-mail e HTTPS ficam para depois dele.
+
+### Roadmap adiado (decisão de 2026-10-19)
+
+Ficam para depois, sem data:
+
+- Onda 2: conta institucional (organização + indicados), CRM de patrocínio, regra `exige_adimplencia` em
+  documentos, DOI Crossref + ORCID OAuth, importação do Lattes (XML).
+- Eventos: credenciamento por QR, distribuição automática de pareceristas, programação por salas com choque
+  de horário e trabalho aceito → atividade.
+- Relacionamento: régua de lead parado em contatos, scoring de engajamento.
+- Onda 3 inteira: ponte OJS, GTs/SIGs, prêmios e editais, educação continuada, PWA, WhatsApp, acervo
+  histórico, perfil científico público.
 
 Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md) · [`CONTATOS.md`](../modulos/CONTATOS.md) · [`PUBLICACOES.md`](../modulos/PUBLICACOES.md) · [`GOVERNANCA.md`](../modulos/GOVERNANCA.md) · [`NEWSLETTER.md`](../modulos/NEWSLETTER.md)
