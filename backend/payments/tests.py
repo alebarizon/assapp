@@ -9,14 +9,17 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from finance.models import Transaction
 from membros.models import Anuidade, AnuidadeStatus, Filiacao, FiliacaoStatus
-from payments.gateways import AsaasGateway, GatewayError
+from payments.gateways import PAGO, AsaasGateway, GatewayError, MercadoPagoGateway, PagBankGateway
 from payments.models import Cobranca, ConfiguracaoPagamento
 from payments.views import (
     CobrarAnuidadeView,
     ConfiguracaoPagamentoView,
     DisponibilidadeView,
+    MinhaCobrancaView,
     SimularPagamentoView,
     WebhookAsaasView,
+    WebhookMercadoPagoView,
+    WebhookPagBankView,
 )
 
 factory = APIRequestFactory()
@@ -324,3 +327,294 @@ class TestPedidoOnline:
             assert cobranca.status == Cobranca.PAGA
             assert pedido.status == OrderStatus.PENDING
             assert "não concluído" in pedido.notes
+
+
+def _resposta(status_code, json_data, content=b""):
+    resp = MagicMock(status_code=status_code, content=content)
+    resp.json.return_value = json_data
+    return resp
+
+
+def _membro_fake(**kwargs):
+    dados = dict(id="m1", nome_completo="Ana Maria Souza", email="ana@x.org", cpf="123.456.789-09", cnpj=None, telefone="")
+    dados.update(kwargs)
+    return MagicMock(**dados)
+
+
+def _cobranca_fake(metodo="pix", **kwargs):
+    dados = dict(id="c1", metodo=metodo, valor=Decimal("80.50"), vencimento=date(2020, 1, 1), descricao="Anuidade 2026")
+    dados.update(kwargs)
+    return MagicMock(**dados)
+
+
+class _Gravador:
+    def __init__(self, *respostas):
+        self.respostas = iter(respostas)
+        self.chamadas = []
+
+    def __call__(self, method, url, **kwargs):
+        self.chamadas.append({"method": method, "url": url, **kwargs})
+        return next(self.respostas)
+
+
+class TestPagBankGateway:
+    def test_pix_cria_pedido_com_qrcode(self, monkeypatch):
+        gravador = _Gravador(
+            _resposta(201, {
+                "id": "ORDE_1",
+                "qr_codes": [{"text": "000201PAGBANK", "links": [{"rel": "QRCODE.PNG", "href": "https://pb/qr.png"}]}],
+            })
+        )
+        monkeypatch.setattr("payments.gateways.requests.request", gravador)
+        monkeypatch.setattr("payments.gateways.requests.get", lambda *a, **k: _resposta(200, {}, content=b"PNG"))
+
+        gateway = PagBankGateway("tok", sandbox=True, notification_url="https://x/webhook")
+        resultado = gateway.criar_cobranca(_cobranca_fake(), _membro_fake())
+
+        chamada = gravador.chamadas[0]
+        assert chamada["url"] == "https://sandbox.api.pagseguro.com/orders"
+        assert chamada["headers"]["Authorization"] == "Bearer tok"
+        assert chamada["json"]["reference_id"] == "c1"
+        assert chamada["json"]["customer"]["tax_id"] == "12345678909"
+        assert chamada["json"]["qr_codes"][0]["amount"]["value"] == 8050
+        assert chamada["json"]["notification_urls"] == ["https://x/webhook"]
+        assert resultado.external_id == "ORDE_1"
+        assert resultado.pix_copia_cola == "000201PAGBANK"
+        assert resultado.pix_qrcode_base64 == "UE5H"
+
+    def test_cartao_usa_checkout_hospedado_sem_notificacao_em_http(self, monkeypatch):
+        gravador = _Gravador(
+            _resposta(201, {"id": "CHEC_1", "links": [{"rel": "PAY", "href": "https://pagamento.pagbank/x"}]})
+        )
+        monkeypatch.setattr("payments.gateways.requests.request", gravador)
+
+        resultado = PagBankGateway("tok", sandbox=False).criar_cobranca(_cobranca_fake("cartao"), _membro_fake())
+
+        chamada = gravador.chamadas[0]
+        assert chamada["url"] == "https://api.pagseguro.com/checkouts"
+        assert chamada["json"]["payment_methods"] == [{"type": "CREDIT_CARD"}]
+        assert "payment_notification_urls" not in chamada["json"]
+        assert resultado.external_id == "CHEC_1"
+        assert resultado.url_pagamento == "https://pagamento.pagbank/x"
+
+    def test_erro_vira_mensagem(self, monkeypatch):
+        monkeypatch.setattr(
+            "payments.gateways.requests.request",
+            lambda *a, **k: _resposta(400, {"error_messages": [{"description": "invalid", "parameter_name": "customer.tax_id"}]}),
+        )
+        with pytest.raises(GatewayError, match="customer.tax_id"):
+            PagBankGateway("tok").criar_cobranca(_cobranca_fake(), _membro_fake())
+
+    def test_estado_do_pedido(self):
+        assert PagBankGateway.estado_do_pedido({"charges": [{"status": "PAID"}]}) == "pago"
+        assert PagBankGateway.estado_do_pedido({"charges": [{"status": "CANCELED"}]}) == "cancelado"
+        assert PagBankGateway.estado_do_pedido({"charges": []}) == "pendente"
+
+
+class TestMercadoPagoGateway:
+    def test_pix_com_idempotencia(self, monkeypatch):
+        gravador = _Gravador(
+            _resposta(201, {
+                "id": 555,
+                "point_of_interaction": {"transaction_data": {"qr_code": "000201MP", "qr_code_base64": "iVBOR"}},
+            })
+        )
+        monkeypatch.setattr("payments.gateways.requests.request", gravador)
+
+        resultado = MercadoPagoGateway("APP_USR-x").criar_cobranca(_cobranca_fake(), _membro_fake())
+
+        chamada = gravador.chamadas[0]
+        assert chamada["url"] == "https://api.mercadopago.com/v1/payments"
+        assert chamada["headers"]["X-Idempotency-Key"] == "c1"
+        assert chamada["json"]["payment_method_id"] == "pix"
+        assert chamada["json"]["external_reference"] == "c1"
+        assert chamada["json"]["payer"]["identification"] == {"type": "CPF", "number": "12345678909"}
+        assert chamada["json"]["payer"]["first_name"] == "Ana"
+        assert resultado.external_id == "555"
+        assert resultado.pix_copia_cola == "000201MP"
+        assert resultado.pix_qrcode_base64 == "iVBOR"
+
+    def test_boleto_usa_checkout_pro_sem_cartao(self, monkeypatch):
+        gravador = _Gravador(_resposta(201, {"id": "123-abc", "init_point": "https://mp/checkout"}))
+        monkeypatch.setattr("payments.gateways.requests.request", gravador)
+
+        resultado = MercadoPagoGateway("tok").criar_cobranca(_cobranca_fake("boleto"), _membro_fake())
+
+        corpo = gravador.chamadas[0]["json"]
+        excluidos = {t["id"] for t in corpo["payment_methods"]["excluded_payment_types"]}
+        assert {"credit_card", "debit_card"} <= excluidos and "ticket" not in excluidos
+        assert corpo["expires"] is True
+        assert resultado.external_id == "123-abc"
+        assert resultado.url_pagamento == "https://mp/checkout"
+
+    def test_consultar_aprovado_pela_referencia(self, monkeypatch):
+        gravador = _Gravador(_resposta(200, {"results": [{"id": 1, "status": "rejected"}, {"id": 2, "status": "approved"}]}))
+        monkeypatch.setattr("payments.gateways.requests.request", gravador)
+
+        estado, pagamento = MercadoPagoGateway("tok").consultar(_cobranca_fake("cartao"))
+        assert estado == "pago" and pagamento["id"] == 2
+        assert gravador.chamadas[0]["params"]["external_reference"] == "c1"
+
+    def test_token_invalido(self, monkeypatch):
+        monkeypatch.setattr("payments.gateways.requests.request", lambda *a, **k: _resposta(401, {}))
+        with pytest.raises(GatewayError, match="inválida"):
+            MercadoPagoGateway("tok").testar()
+
+
+@pytest.mark.django_db
+class TestTrocaDeProvedor:
+    def _put(self, user, dados):
+        request = factory.put("/", dados, format="json")
+        force_authenticate(request, user=user)
+        return ConfiguracaoPagamentoView.as_view()(request)
+
+    def test_trocar_provedor_exige_nova_chave(self, test_tenant, board_user):
+        with schema_context(test_tenant.schema_name):
+            assert self._put(board_user, {"api_key": "$aact_1234", "ativo": True}).status_code == 200
+
+            resp = self._put(board_user, {"provedor": "pagbank"})
+            assert resp.status_code == 400
+            assert "novo provedor" in str(resp.data["api_key"])
+
+            resp = self._put(board_user, {"provedor": "pagbank", "api_key": "pb-token-9876"})
+            assert resp.status_code == 200, resp.data
+            assert resp.data["provedor"] == "pagbank"
+            assert resp.data["api_key_final"] == "…9876"
+            assert "/webhook/pagbank/" in resp.data["webhook_url"]
+            assert f"token={resp.data['webhook_token']}" in resp.data["webhook_url"]
+
+    def test_trocar_provedor_inativo_descarta_chave_antiga(self, test_tenant, board_user):
+        with schema_context(test_tenant.schema_name):
+            self._put(board_user, {"api_key": "$aact_1234"})
+            resp = self._put(board_user, {"provedor": "mercadopago"})
+            assert resp.status_code == 200
+            assert resp.data["tem_api_key"] is False
+
+
+@pytest.mark.django_db
+class TestWebhooksComToken:
+    def _config(self, provedor):
+        config = ConfiguracaoPagamento.atual()
+        config.provedor = provedor
+        config.api_key = "tok"
+        config.ativo = True
+        config.save()
+        return config
+
+    def _cobranca(self, membro, anuidade, provedor, external_id, metodo=Cobranca.PIX):
+        return Cobranca.objects.create(
+            membro=membro, anuidade=anuidade, descricao="Anuidade 2026", valor=anuidade.valor,
+            metodo=metodo, provedor=provedor, external_id=external_id, vencimento=anuidade.vencimento,
+        )
+
+    def test_pagbank_rele_pedido_e_quita(self, test_tenant, member, monkeypatch):
+        _, membro = member
+        with schema_context(test_tenant.schema_name):
+            token = self._config("pagbank").webhook_token
+            anuidade = _anuidade(membro)
+            cobranca = self._cobranca(membro, anuidade, "pagbank", "ORDE_9")
+        monkeypatch.setattr(
+            PagBankGateway, "pedido",
+            lambda self, order_id: {"id": order_id, "reference_id": str(cobranca.id), "charges": [{"status": "PAID"}]},
+        )
+
+        request = factory.post(f"/?schema=teste&token={token}", {"id": "ORDE_9", "charges": []}, format="json")
+        resp = WebhookPagBankView.as_view()(request)
+        assert resp.status_code == 200, resp.data
+        assert resp.data["resultado"] == "pago"
+        with schema_context(test_tenant.schema_name):
+            anuidade.refresh_from_db()
+            assert anuidade.status == AnuidadeStatus.PAGA
+
+    def test_pagbank_checkout_acha_cobranca_pelo_item(self, test_tenant, member, monkeypatch):
+        _, membro = member
+        with schema_context(test_tenant.schema_name):
+            token = self._config("pagbank").webhook_token
+            anuidade = _anuidade(membro)
+            cobranca = self._cobranca(membro, anuidade, "pagbank", "CHEC_1", metodo=Cobranca.CARTAO)
+        pedido = {"id": "ORDE_X", "reference_id": "outro", "items": [{"reference_id": str(cobranca.id)}],
+                  "charges": [{"status": "DECLINED"}]}
+        monkeypatch.setattr(PagBankGateway, "pedido", lambda self, order_id: pedido)
+
+        request = factory.post(f"/?schema=teste&token={token}", {"id": "ORDE_X"}, format="json")
+        assert WebhookPagBankView.as_view()(request).data["resultado"] == "ignorado"
+
+        pedido["charges"] = [{"status": "PAID"}]
+        request = factory.post(f"/?schema=teste&token={token}", {"id": "ORDE_X"}, format="json")
+        assert WebhookPagBankView.as_view()(request).data["resultado"] == "pago"
+
+    def test_token_errado(self, test_tenant):
+        with schema_context(test_tenant.schema_name):
+            self._config("pagbank")
+        request = factory.post("/?schema=teste&token=errado", {"id": "ORDE_1"}, format="json")
+        assert WebhookPagBankView.as_view()(request).status_code == 403
+
+    def test_mercadopago_usa_so_o_id_do_pagamento(self, test_tenant, member, monkeypatch):
+        _, membro = member
+        with schema_context(test_tenant.schema_name):
+            token = self._config("mercadopago").webhook_token
+            anuidade = _anuidade(membro)
+            cobranca = self._cobranca(membro, anuidade, "mercadopago", "pref-1", metodo=Cobranca.CARTAO)
+        monkeypatch.setattr(
+            MercadoPagoGateway, "pagamento",
+            lambda self, pid: {"id": int(pid), "status": "approved", "external_reference": str(cobranca.id)},
+        )
+
+        request = factory.post(
+            f"/?schema=teste&token={token}", {"type": "payment", "data": {"id": "777"}, "status": "fake"}, format="json"
+        )
+        resp = WebhookMercadoPagoView.as_view()(request)
+        assert resp.data["resultado"] == "pago"
+        with schema_context(test_tenant.schema_name):
+            cobranca.refresh_from_db()
+            assert cobranca.status == Cobranca.PAGA
+
+
+@pytest.mark.django_db
+class TestSincronizacao:
+    def test_portal_consulta_gateway_quando_webhook_nao_chega(self, test_tenant, member, monkeypatch):
+        from django.utils import timezone
+
+        user, membro = member
+        with schema_context(test_tenant.schema_name):
+            config = ConfiguracaoPagamento.atual()
+            config.provedor, config.api_key, config.ativo = "mercadopago", "tok", True
+            config.save()
+            anuidade = _anuidade(membro)
+            cobranca = Cobranca.objects.create(
+                membro=membro, anuidade=anuidade, descricao="Anuidade 2026", valor=anuidade.valor,
+                metodo=Cobranca.PIX, provedor="mercadopago", external_id="555", vencimento=anuidade.vencimento,
+            )
+            consultas = []
+            monkeypatch.setattr(
+                MercadoPagoGateway, "consultar",
+                lambda self, c: consultas.append(c.pk) or (PAGO, {"id": 555, "status": "approved"}),
+            )
+
+            request = factory.get("/")
+            force_authenticate(request, user=user)
+            resp = MinhaCobrancaView.as_view()(request, cobranca_id=cobranca.id)
+            assert resp.data["status"] == "pendente"
+            assert consultas == []
+
+            Cobranca.objects.filter(pk=cobranca.pk).update(updated_at=timezone.now() - timedelta(minutes=1))
+            resp = MinhaCobrancaView.as_view()(request, cobranca_id=cobranca.id)
+            assert resp.data["status"] == "paga"
+            anuidade.refresh_from_db()
+            assert anuidade.status == AnuidadeStatus.PAGA
+
+    def test_varredura_ignora_outro_provedor(self, test_tenant, member, monkeypatch):
+        from payments.services import sincronizar_pendentes
+
+        _, membro = member
+        with schema_context(test_tenant.schema_name):
+            config = ConfiguracaoPagamento.atual()
+            config.provedor, config.api_key, config.ativo = "pagbank", "tok", True
+            config.save()
+            anuidade = _anuidade(membro)
+            Cobranca.objects.create(
+                membro=membro, anuidade=anuidade, descricao="Anuidade 2026", valor=anuidade.valor,
+                metodo=Cobranca.PIX, provedor="asaas", external_id="pay_1", vencimento=anuidade.vencimento,
+            )
+            monkeypatch.setattr(PagBankGateway, "consultar", lambda self, c: pytest.fail("não deveria consultar"))
+            assert sincronizar_pendentes() == {"pago": 0, "cancelado": 0, "pendente": 0}

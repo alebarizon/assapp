@@ -2,6 +2,7 @@
 Tarefas periódicas do servidor (serviço `agendador` do compose).
 
 - A cada minuto: um lote da fila da newsletter (`enviar_newsletters`).
+- A cada 30 minutos: status das cobranças online pendentes (`sincronizar_cobrancas`).
 - Uma vez por dia, a partir de REGUA_HORA (horário de Brasília):
   - régua de anuidades (`regua_anuidades`): marca vencidas/inadimplentes e envia os lembretes;
   - réguas de relacionamento (`reguas_relacionamento`): boas-vindas, inativos, autor não sócio.
@@ -9,6 +10,7 @@ Tarefas periódicas do servidor (serviço `agendador` do compose).
     docker compose exec -T backend python manage.py agendador
 """
 import time
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.management import call_command
@@ -21,6 +23,7 @@ _BACKENDS_SEM_ENTREGA = {
     "django.core.mail.backends.dummy.EmailBackend",
     "django.core.mail.backends.filebased.EmailBackend",
 }
+INTERVALO_COBRANCAS = timedelta(minutes=30)
 
 
 def email_entregue() -> bool:
@@ -28,7 +31,10 @@ def email_entregue() -> bool:
 
 
 class Command(BaseCommand):
-    help = "Roda a fila da newsletter a cada minuto e as réguas diárias (anuidades e relacionamento)."
+    help = (
+        "Roda a fila da newsletter a cada minuto, a sincronização de cobranças a cada 30 minutos "
+        "e as réguas diárias (anuidades e relacionamento)."
+    )
 
     def _rodar(self, nome, comando, *args) -> bool:
         try:
@@ -52,6 +58,11 @@ class Command(BaseCommand):
         self._rodar("newsletter", "enviar_newsletters")
 
         agora = agora or timezone.localtime()
+        ultima = self.ultimas.get("sincronizar_cobrancas")
+        if ultima is None or agora - ultima >= INTERVALO_COBRANCAS:
+            self._rodar("cobranças online", "sincronizar_cobrancas")
+            self.ultimas["sincronizar_cobrancas"] = agora
+
         if agora.hour < getattr(settings, "REGUA_HORA", 8):
             return
         for nome, comando, args in self._diarias():

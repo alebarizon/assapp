@@ -14,7 +14,7 @@
 | Dev Mac | http://localhost:5174 | `orb` |
 
 Droplet: `159.203.183.184` · HTTPS: **adiado**  
-Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter a cada minuto + régua de anuidades e réguas de relacionamento diárias às `REGUA_HORA`), `frontend`, `nginx` — sufixo `_staging` / `_prod`.  
+Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter a cada minuto + status das cobranças online a cada 30 min + régua de anuidades e réguas de relacionamento diárias às `REGUA_HORA`), `frontend`, `nginx` — sufixo `_staging` / `_prod`.  
 E-mail em staging/prod ainda é console (nada é entregue; a régua roda só marcando vencidas) — falta provedor por API (DigitalOcean bloqueia SMTP).  
 Changelog recente: [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) · infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11) · deploy: [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md)
 
@@ -75,7 +75,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `sistema` | superadmin |
 | `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, publicacoes, governanca, newsletter, website, accounts |
 
-> `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via Asaas da própria associação.
+> `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via gateway da própria associação (Asaas, PagBank ou Mercado Pago).
 
 ---
 
@@ -87,7 +87,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `memoria` | ContextoHistorico, timeline |
 | `eventos` | Chamada de trabalhos (submissão pelo portal, parecer duplo-cego por critérios, decisão, certificados de autor/parecerista), anais com página citável por trabalho (`/site/eventos/:slug/anais`), programação e hotsite (`/site/eventos`) |
 | `membros` | Filiados, anuidades, régua de cobrança (`regua_anuidades`, diária pelo serviço `agendador`), linha do tempo do associado, carteirinha digital com QR (`/site/carteirinha/:codigo`), diretório público opt-in (`/site/associados`) |
-| `payments` | Pagamento online de anuidades (Asaas: Pix, cartão, boleto) + webhook (`/app/finance` → Pagamento online) |
+| `payments` | Pagamento online de anuidades e pedidos (Asaas, PagBank ou Mercado Pago: Pix, cartão, boleto) + webhooks + `sincronizar_cobrancas` a cada 30 min pelo `agendador` (`/app/finance` → Pagamento online) |
 | `finance` | Lançamentos OSC, dashboard, e-mail fechamento |
 | `ecommerce` | Catálogo, carrinho, pedidos (anuidade, evento, curso, material) |
 | `courses` | Cursos online: aulas, quiz, Q&A, certificado; venda via loja (`/app/courses`, `/app/portal/cursos`, `/site/cursos`) |

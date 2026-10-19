@@ -25,11 +25,11 @@ class AgendadorTests(SimpleTestCase):
     def test_diarias_rodam_uma_vez_por_dia_depois_da_hora(self, chamar):
         cmd = _comando()
         cmd.ciclo(datetime(2026, 10, 18, 7, 59))
-        self.assertEqual(_chamadas(chamar), [("enviar_newsletters",)])
+        self.assertEqual(_chamadas(chamar), [("enviar_newsletters",), ("sincronizar_cobrancas",)])
 
         chamar.reset_mock()
         cmd.ciclo(datetime(2026, 10, 18, 8, 0))
-        cmd.ciclo(datetime(2026, 10, 18, 9, 0))
+        cmd.ciclo(datetime(2026, 10, 18, 8, 10))
         self.assertEqual(
             _chamadas(chamar),
             [
@@ -63,6 +63,14 @@ class AgendadorTests(SimpleTestCase):
         cmd.ciclo(datetime(2026, 10, 18, 8, 1))
         self.assertEqual(_chamadas(chamar), [("enviar_newsletters",), ("regua_anuidades",)])
         self.assertEqual(cmd.ultimas["regua_anuidades"], date(2026, 10, 18))
+
+    @mock.patch("core.management.commands.agendador.call_command")
+    def test_cobrancas_sincronizam_a_cada_30_minutos(self, chamar):
+        cmd = _comando()
+        for minuto in (0, 10, 29, 30, 45, 59):
+            cmd.ciclo(datetime(2026, 10, 18, 3, minuto))
+        sincronizacoes = [c for c in _chamadas(chamar) if c == ("sincronizar_cobrancas",)]
+        self.assertEqual(len(sincronizacoes), 2)
 
     @override_settings(EMAIL_BACKEND=CONSOLE)
     @mock.patch("core.management.commands.agendador.call_command")

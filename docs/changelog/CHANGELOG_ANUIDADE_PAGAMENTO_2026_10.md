@@ -176,6 +176,22 @@ retentados na execução seguinte.
   receberia, teste, texto padrão, histórico). Linha do tempo do associado mostra os e-mails automáticos.
 - Testes: `newsletter/test_reguas.py`; `core/test_agendador.py` atualizado.
 
+## Gateways PagBank e Mercado Pago (2026-10-19)
+
+- `payments/gateways.py`: `PagBankGateway` (Pix por `/orders`, cartão/boleto pelo Checkout PagBank) e
+  `MercadoPagoGateway` (Pix por `/v1/payments`, cartão/boleto pelo Checkout Pro). Asaas segue igual.
+- `ConfiguracaoPagamento.provedor` passa a ser escolhido pela associação (migration `payments/0003`); trocar de
+  gateway exige a chave do novo.
+- Webhooks `webhook/pagbank/` e `webhook/mercadopago/` com token na URL, enviada em cada cobrança (sem cadastro
+  manual); o status é sempre relido na API do gateway.
+- **Sincronização ativa**: a consulta do portal (`GET cobrancas/{id}/`) pergunta ao gateway a cada 15 s e o
+  `agendador` roda `sincronizar_cobrancas` a cada 30 minutos — necessário porque PagBank e Mercado Pago só
+  notificam URLs HTTPS. Vale também para o Asaas.
+- Painel: modal **Pagamento online** do Financeiro com seletor de gateway e instruções por provedor.
+- Testes: `payments/tests.py` (gateways com HTTP simulado, troca de provedor, webhooks, sincronização) e
+  `core/test_agendador.py`.
+- Ainda não validado contra as contas reais de sandbox/teste de PagBank e Mercado Pago.
+
 ## Situação em produção (2026-10-18)
 
 - Tudo acima está em produção. Últimos deploys: `5106f5e` (assembleias, newsletter, diretório), `53f9fed`
