@@ -1,7 +1,7 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean
 
-> **Última atualização:** 2026-10-22  
-> **Domínio:** produção migrou para `gesttora.com.br` (DNS e e-mail na DreamHost, A → mesmo IP do droplet); `gesttora.vertent.com.br` segue aceito na transição. SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`).
+> **Última atualização:** 2026-10-22 (seção 12)  
+> **Domínio:** produção migrou para `gesttora.com.br` (DNS e e-mail na DreamHost, A → mesmo IP do droplet); `gesttora.vertent.com.br` segue aceito na transição. SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`). SMTP de saída bloqueado no droplet.
 
 ---
 
@@ -314,3 +314,56 @@ Deploys do dia, todos validados em staging antes de `main`:
 - Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — destrava lembretes da régua e newsletter.
 - Healthcheck do `frontend` aparece `unhealthy` em staging e produção, embora o site responda.
 - HTTPS (seção 9).
+
+---
+
+## 12. Domínio gesttora.com.br, e-mail DreamHost e verify-staging (2026-10-22)
+
+Deploys do dia, todos validados em staging antes de `main`:
+
+| Commit | Conteúdo | Produção |
+|--------|----------|----------|
+| `39ae19e` | Domínio `gesttora.com.br` (`ALLOWED_HOSTS`, `FRONTEND_URL`, remetente, landing) + bloco SMTP opcional no deploy | 13:10 (via **Run workflow**) |
+| `9b6cb19` | Docs: DNS na DreamHost | junto com o anterior |
+| `569d154` | Merge da `orb`: gateways PagBank/Mercado Pago, réguas da newsletter (`newsletter/0002`, `payments/0003`) e correção do `verify-staging` | 13:58 |
+
+### Domínio
+
+- `gesttora.com.br` registrado no Registro.br. DNS e e-mail na **DreamHost**: A `@` → `159.203.183.184`,
+  CNAME `www` → `gesttora.com.br`, MX `mx1/mx2.dreamhost.com`, SPF e DKIM criados pela DreamHost.
+- Nameservers trocados no Registro.br para `ns1/ns2/ns3.dreamhost.com`. Como o domínio usava o DNS do próprio
+  Registro.br (`a/b.auto.dns.br`), a troca tem carência de ~1h20 antes de publicar.
+- `ALLOWED_HOSTS`: `159.203.183.184,gesttora.com.br,www.gesttora.com.br,gesttora.vertent.com.br,localhost,127.0.0.1`.
+  O domínio antigo segue aceito até ser desligado.
+- `deploy-production.yml` reescreve `ALLOWED_HOSTS` e `FRONTEND_URL=http://gesttora.com.br` no `.env.production`
+  a cada deploy e troca o remetente antigo `noreply@vertent.com.br` por `noreply@gesttora.com.br`.
+- Roteamento de tenant é por path (`TenantPathMiddleware`); `BASE_DOMAIN` não mudou.
+
+### E-mail: SMTP bloqueado no droplet
+
+- Caixas `contato@` e `noreply@gesttora.com.br` criadas na DreamHost (recebimento depende só do DNS).
+- `deploy-production.yml` ganhou um bloco que, com o secret `SMTP_PASSWORD`, grava `EMAIL_*` para
+  `smtp.dreamhost.com:587` e `SUPPORT_EMAIL=contato@gesttora.com.br` (senha via `envs` do ssh-action, gravada entre
+  aspas simples; testada com caracteres especiais no bash 5 e no compose).
+- **Testado no droplet em 2026-10-22: portas 25, 465, 587 e 2525 de saída bloqueadas pela DigitalOcean**
+  (do Mac, 465 e 587 da DreamHost abrem). Portanto **não criar `SMTP_PASSWORD`** enquanto o bloqueio existir:
+  o backend passaria a tentar SMTP e cada envio esperaria o timeout.
+- Caminhos: pedir à DigitalOcean a liberação de SMTP (ticket de suporte) ou usar provedor por API HTTP
+  (Brevo, Resend ou SES) com o domínio `gesttora.com.br` autenticado (DKIM/SPF do provedor na zona da DreamHost).
+
+### verify-staging travado por commit só de docs
+
+- **Sintoma:** o "Deploy to Production" de `9b6cb19` ficou em "Aguardar staging OK" com `Tentativa n/90: []`.
+- **Causa:** o job procurava um run de staging com o SHA exato da `main`; `9b6cb19` só alterava `docs/`, que está
+  em `paths-ignore` e não dispara staging. O código (`39ae19e`) tinha passado no staging.
+- **Contorno:** cancelar e disparar **Run workflow** (`workflow_dispatch` pula o `verify-staging`). **Re-run** de
+  uma execução de push repete o evento e trava de novo.
+- **Correção (`34b4425`, em produção com `569d154`):** o job localiza o último commit com código (mesmos
+  `paths-ignore` do staging) e aceita staging bem-sucedido dele ou de qualquer commit só de docs posterior.
+  Espera se houver staging em andamento; bloqueia se todos falharam ou foram cancelados.
+
+### Pendências
+
+- Confirmar propagação: `dig +short gesttora.com.br NS` (DreamHost) e `curl http://gesttora.com.br/health/`.
+- E-mail de saída (ver acima). DMARC (`_dmarc`, `p=none` para começar) a criar na DreamHost.
+- HTTPS (seção 9) — também liga o webhook automático de PagBank/Mercado Pago, que exige URL HTTPS.

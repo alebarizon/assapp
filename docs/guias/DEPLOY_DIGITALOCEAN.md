@@ -230,7 +230,9 @@ Caixas `contato@gesttora.com.br` e `noreply@gesttora.com.br` hospedadas na Dream
 | TXT (DKIM) | `dreamhost._domainkey` | chave gerada no painel DreamHost |
 | TXT (DMARC) | `_dmarc` | `v=DMARC1; p=none; rua=mailto:contato@gesttora.com.br` (endurecer para `quarantine`/`reject` depois de validar) |
 
-Envio pelo sistema (convites, senha, certificados, newsletter): SMTP `smtp.dreamhost.com:587` (STARTTLS), usuário `noreply@gesttora.com.br`. A senha fica no secret **`SMTP_PASSWORD`** do GitHub Actions (sem aspas simples); com ele preenchido, `deploy-production.yml` grava o bloco `EMAIL_*` e `SUPPORT_EMAIL=contato@gesttora.com.br` no `.env.production`. Sem o secret, o envio continua em modo console (log).
+> **Bloqueio (testado em 2026-10-22):** a DigitalOcean bloqueia a saída nas portas 25, 465 e 587 do droplet. Enquanto isso valer, **não criar o secret `SMTP_PASSWORD`** — o backend tentaria SMTP e cada envio esperaria o timeout. Alternativas: ticket à DigitalOcean pedindo liberação de SMTP ou provedor por API HTTP (Brevo, Resend, SES). Teste no droplet: `timeout 6 bash -c '</dev/tcp/smtp.dreamhost.com/587' && echo aberta`.
+
+Envio pelo sistema (convites, senha, certificados, newsletter), quando liberado: SMTP `smtp.dreamhost.com:587` (STARTTLS), usuário `noreply@gesttora.com.br`. A senha fica no secret **`SMTP_PASSWORD`** do GitHub Actions (sem aspas simples); com ele preenchido, `deploy-production.yml` grava o bloco `EMAIL_*` e `SUPPORT_EMAIL=contato@gesttora.com.br` no `.env.production`. Sem o secret, o envio continua em modo console (log).
 
 ```bash
 dig +short gesttora.com.br MX   # mx1/mx2.dreamhost.com
