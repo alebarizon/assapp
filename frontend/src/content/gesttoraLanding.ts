@@ -1,11 +1,11 @@
 /**
- * Copy estático da landing SaaS Gesttora (gesttora.online).
+ * Copy estático da landing SaaS Gesttora (gesttora.com.br).
  * Frontend-only — sem adminpanel / API nesta rodada.
  */
 
 export const gesttoraLanding = {
   brand: "Gesttora",
-  domain: "gesttora.vertent.com.br",
+  domain: "gesttora.com.br",
 
   nav: {
     links: [
@@ -104,7 +104,7 @@ export const gesttoraLanding = {
   contact: {
     eyebrow: "Contato",
     title: "Fale com a equipe Gesttora",
-    email: "contato@gesttora.vertent.com.br",
+    email: "contato@gesttora.com.br",
     address: "São Paulo, Brasil",
     phone: "+55 (11) 0000-0000",
     formTitle: "Envie uma mensagem",
@@ -123,7 +123,7 @@ export const gesttoraLanding = {
       { href: "#", label: "Privacidade" },
       { href: "#", label: "Termos" },
     ],
-    copyright: `© ${new Date().getFullYear()} Gesttora · gesttora.vertent.com.br`,
+    copyright: `© ${new Date().getFullYear()} Gesttora · gesttora.com.br`,
   },
 } as const;
 

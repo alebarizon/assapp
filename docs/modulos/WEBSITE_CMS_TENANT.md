@@ -101,7 +101,7 @@ Itens de anuidade ativos no catálogo `ecommerce` aparecem automaticamente no bo
 | Ambiente | Exemplo | Resolução |
 |----------|---------|-----------|
 | Dev | `demo.localhost:5174/site` | slug antes de `.localhost` |
-| Staging/prod | `abciber.gesttora.vertent.com.br` | tabela `tenants.Domain` |
+| Staging/prod | `abciber.gesttora.com.br` | tabela `tenants.Domain` |
 | Custom | `www.abciber.org.br` | registro em `Domain` (is_primary) |
 
 API: `GET /api/tenants/public/resolve/?host=demo.localhost`
