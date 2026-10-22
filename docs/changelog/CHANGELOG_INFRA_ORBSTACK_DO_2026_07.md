@@ -1,7 +1,7 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean
 
 > **Última atualização:** 2026-10-22  
-> **Domínio:** produção migrou para `gesttora.com.br` (DNS na DigitalOcean, mesmo IP); `gesttora.vertent.com.br` segue aceito na transição. SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`).
+> **Domínio:** produção migrou para `gesttora.com.br` (DNS e e-mail na DreamHost, A → mesmo IP do droplet); `gesttora.vertent.com.br` segue aceito na transição. SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`).
 
 ---
 
