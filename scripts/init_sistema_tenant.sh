@@ -70,7 +70,7 @@ tenant_abc = ensure_tenant('abciber', 'ABCiber', 'abciber', 'abciber.localhost',
 
 with schema_context('abciber'):
     diretor, _ = User.objects.get_or_create(
-        email='diretoria@abciber.org.br',
+        email='diretoria@abciber.example.org',
         defaults={
             'username': 'diretoria',
             'role': User.ASSOCIATION_ADMIN,
@@ -142,10 +142,10 @@ with schema_context('abciber'):
     from membros.models import Membro, Filiacao, FiliacaoStatus, Anuidade, AnuidadeStatus
     from decimal import Decimal
     membros_demo = [
-        {'nome_completo': 'Ana Silva', 'email': 'ana.silva@usp.br', 'instituicao': 'ECA/USP', 'area_atuacao': 'Cibercultura', 'tipo': 'efetivo'},
-        {'nome_completo': 'Bruno Costa', 'email': 'bruno.costa@unifesp.br', 'instituicao': 'UNIFESP', 'area_atuacao': 'Comunicação Digital', 'tipo': 'efetivo'},
-        {'nome_completo': 'Carla Mendes', 'email': 'carla.m@pucsp.edu.br', 'instituicao': 'PUC-SP', 'area_atuacao': 'Estudos de Internet', 'tipo': 'estudante'},
-        {'nome_completo': 'Prof. Dr. João Nery', 'email': 'joao.nery@unicamp.br', 'instituicao': 'UNICAMP', 'area_atuacao': 'Pesquisa em Mídia', 'tipo': 'honorario'},
+        {'nome_completo': 'Ana Silva', 'email': 'ana.silva@example.org', 'instituicao': 'ECA/USP', 'area_atuacao': 'Cibercultura', 'tipo': 'efetivo'},
+        {'nome_completo': 'Bruno Costa', 'email': 'bruno.costa@example.org', 'instituicao': 'UNIFESP', 'area_atuacao': 'Comunicação Digital', 'tipo': 'efetivo'},
+        {'nome_completo': 'Carla Mendes', 'email': 'carla.m@example.org', 'instituicao': 'PUC-SP', 'area_atuacao': 'Estudos de Internet', 'tipo': 'estudante'},
+        {'nome_completo': 'Prof. Dr. João Nery', 'email': 'joao.nery@example.org', 'instituicao': 'UNICAMP', 'area_atuacao': 'Pesquisa em Mídia', 'tipo': 'honorario'},
     ]
     ano_atual = date.today().year
     for md in membros_demo:
@@ -165,7 +165,7 @@ with schema_context('abciber'):
             defaults={'mandato': mandato, 'tipo': md['tipo'], 'status': FiliacaoStatus.ATIVA},
         )
         # Um inadimplente para demo
-        if md['email'] == 'bruno.costa@unifesp.br':
+        if md['email'] == 'bruno.costa@example.org':
             filiacao.status = FiliacaoStatus.INADIMPLENTE
             filiacao.save(update_fields=['status'])
             Anuidade.objects.get_or_create(
@@ -183,9 +183,9 @@ with schema_context('abciber'):
     print(f\"👥 Membros demo: {len(membros_demo)} associados\")
 
     # Associado demo — portal (role member)
-    ana_membro = Membro.objects.filter(email='ana.silva@usp.br').first()
+    ana_membro = Membro.objects.filter(email='ana.silva@example.org').first()
     associado, _ = User.objects.get_or_create(
-        email='ana.silva@usp.br',
+        email='ana.silva@example.org',
         defaults={
             'username': 'ana.silva',
             'role': User.MEMBER,
@@ -264,7 +264,7 @@ with schema_context('abciber'):
             'areas_tematicas': ['Cibercultura', 'Mídia Digital', 'Redes Sociais'],
         },
     )
-    ana = Membro.objects.filter(email='ana.silva@usp.br').first()
+    ana = Membro.objects.filter(email='ana.silva@example.org').first()
     if ana:
         sub, created = SubmissaoTrabalho.objects.get_or_create(
             cfp=cfp,
@@ -332,7 +332,7 @@ with schema_context('abciber'):
         )
         print(f\"📄 Documento demo: {doc.title}\")
 
-    ana_m = Membro.objects.filter(email='ana.silva@usp.br').first()
+    ana_m = Membro.objects.filter(email='ana.silva@example.org').first()
     if ana_m and not Document.objects.filter(title='Comprovante de filiação (Ana)').exists():
         doc_ana = Document(
             title='Comprovante de filiação (Ana)',

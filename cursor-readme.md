@@ -18,7 +18,7 @@ Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter a cada
 E-mail em staging/prod ainda é console (nada é entregue; a régua roda só marcando vencidas) — falta provedor por API (DigitalOcean bloqueia SMTP).  
 Changelog recente: [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) · infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11) · deploy: [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md)
 
-**Login remoto (ABCiber):** `diretoria@abciber.org.br` / `abciber123` — requer `init_sistema_tenant.sh` no droplet.
+**Login remoto (ABCiber):** `diretoria@abciber.example.org` / `abciber123` — requer `init_sistema_tenant.sh` no droplet.
 
 ---
 
@@ -212,7 +212,7 @@ docker compose exec backend python manage.py migrate_schemas
 ```
 
 Seed tenants:
-- `./scripts/init_sistema_tenant.sh` — `sistema` + `abciber` (`diretoria@abciber.org.br` / `abciber123`)
+- `./scripts/init_sistema_tenant.sh` — `sistema` + `abciber` (`diretoria@abciber.example.org` / `abciber123`)
 - `./scripts/init_demo_tenant.sh` — tenant `demo` (`demo@demo.com` / `demo`) + website/anuidades
 
 **Droplet:** rodar seed em **cada** ambiente após 1º deploy — ver [`DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md).

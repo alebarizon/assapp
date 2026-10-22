@@ -17,7 +17,7 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const tenantHint = searchParams.get("schema") || resolveTenantSchema(searchParams);
   const nextPath = safeNextPath(searchParams.get("next"));
-  const [email, setEmail] = useState("diretoria@abciber.org.br");
+  const [email, setEmail] = useState("diretoria@abciber.example.org");
   const [password, setPassword] = useState("abciber123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ export default function Login() {
       navigate(nextPath || homePathForUser(data.user, completed));
     } catch {
       setError(
-        "Credenciais inválidas. Demo: diretoria@abciber.org.br / abciber123 ou ana.silva@usp.br / associado123."
+        "Credenciais inválidas. Demo: diretoria@abciber.example.org / abciber123 ou ana.silva@example.org / associado123."
       );
     } finally {
       setLoading(false);

@@ -147,7 +147,7 @@ UI: padrão WellSaaS (`dashboard-*`, KPIs `stats-grid`) — [`UI_PADRAO_WELLSAAS
 | `/app/portal/perfil` | Perfil + anuidades |
 | `/app/portal/documentos` | Docs `meus/` |
 
-Demo: `ana.silva@usp.br` / `associado123`.
+Demo: `ana.silva@example.org` / `associado123`.
 
 Documentos `meus/` e submissões H3 resolvem o associado via FK (com fallback por e-mail).
 

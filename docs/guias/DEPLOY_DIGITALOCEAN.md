@@ -184,7 +184,7 @@ ASSAPP_BACKEND_CONTAINER=assapp_backend_staging ./scripts/init_sistema_tenant.sh
 ASSAPP_BACKEND_CONTAINER=assapp_backend_prod ./scripts/init_sistema_tenant.sh
 ```
 
-Credenciais criadas: `diretoria@abciber.org.br` / `abciber123` (tenant `abciber`).
+Credenciais criadas: `diretoria@abciber.example.org` / `abciber123` (tenant `abciber`).
 
 Validação:
 

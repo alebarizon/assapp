@@ -354,8 +354,11 @@ Deploys do dia, todos validados em staging antes de `main`:
   `smtp.dreamhost.com`), chave em `/opt/assapp-smtp`, usuário `gesttora@pdx1-shared-a1-07.dreamhost.com`.
   Ensaio no droplet: STARTTLS com certificado verificado e AUTH oferecido. Cota interna `EMAIL_LIMITE_POR_HORA=70`
   (DreamHost bloqueia acima de 100/hora). Brevo documentada como próxima etapa em `DEPLOY_DIGITALOCEAN.md`.
-- Tenant `abciber` de produção tem e-mails de demonstração em domínios reais (usp.br, unifesp.br, pucsp.edu.br,
-  unicamp.br): com e-mail ligado, sairiam 4 lembretes de anuidade no primeiro dia. Resolver antes do `SMTP_PASSWORD`.
+- Tenant `abciber` tinha e-mails de demonstração em domínios reais (abciber.org.br, usp.br, unifesp.br,
+  pucsp.edu.br, unicamp.br — todos com MX ativo): com e-mail ligado, sairiam 4 lembretes de anuidade no primeiro dia.
+  Trocados em produção, staging e local (Membro + User, em transação) e no `init_sistema_tenant.sh` para
+  `@example.org`. **Logins de demonstração:** `diretoria@abciber.example.org` / `abciber123` e
+  `ana.silva@example.org` / `associado123`.
 
 ### verify-staging travado por commit só de docs
 

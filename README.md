@@ -256,7 +256,7 @@ Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTR
 
 | Ambiente | Login ABCiber |
 |----------|----------------|
-| Staging `:8080` | `diretoria@abciber.org.br` / `abciber123` |
+| Staging `:8080` | `diretoria@abciber.example.org` / `abciber123` |
 | Produção | idem |
 
 Seed no droplet: `ASSAPP_BACKEND_CONTAINER=assapp_backend_{staging\|prod} ./scripts/init_sistema_tenant.sh`
