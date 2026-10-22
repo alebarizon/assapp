@@ -57,6 +57,8 @@ services:
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      EMAIL_TIMEOUT: ${EMAIL_TIMEOUT:-15}
+      EMAIL_LIMITE_POR_HORA: ${EMAIL_LIMITE_POR_HORA:-0}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@gesttora.com.br}
       SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
       NEWSLETTER_POR_MINUTO: ${NEWSLETTER_POR_MINUTO:-30}
@@ -91,6 +93,31 @@ services:
       - backend
     networks:
       - assapp_network
+
+  # A DigitalOcean bloqueia SMTP de saída; o túnel SSH até a DreamHost expõe o
+  # smtp.dreamhost.com:587 na rede interna com o mesmo nome (o certificado TLS confere).
+  # Chave e known_hosts em /opt/assapp-smtp no droplet (ver DEPLOY_DIGITALOCEAN.md).
+  smtp_tunnel:
+    image: alpine:3.20
+    container_name: assapp_smtp_tunnel_prod
+    restart: always
+    command: >
+      sh -c "apk add --no-cache openssh-client >/dev/null &&
+      exec ssh -N -i /ssh/id_ed25519 -o UserKnownHostsFile=/ssh/known_hosts
+      -o StrictHostKeyChecking=yes -o BatchMode=yes -o ExitOnForwardFailure=yes
+      -o ServerAliveInterval=30 -o ServerAliveCountMax=3
+      -L 0.0.0.0:587:smtp.dreamhost.com:587 $${SMTP_TUNNEL_USER}@$${SMTP_TUNNEL_HOST}"
+    environment:
+      SMTP_TUNNEL_USER: ${SMTP_TUNNEL_USER:-gesttora}
+      SMTP_TUNNEL_HOST: ${SMTP_TUNNEL_HOST:-pdx1-shared-a1-07.dreamhost.com}
+    volumes:
+      - /opt/assapp-smtp:/ssh:ro
+    healthcheck:
+      disable: true
+    networks:
+      assapp_network:
+        aliases:
+          - smtp.dreamhost.com
 
   frontend:
     image: ${DOCKER_USERNAME:-alebarizon}/assapp-frontend:${IMAGE_TAG:-latest}

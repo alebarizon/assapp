@@ -151,6 +151,7 @@ def enviar_lembretes_anuidade(hoje: date | None = None, request=None) -> dict:
     Régua de cobrança: envia, para cada anuidade em aberto, o lembrete da etapa
     mais recente ainda não enviada. Idempotente — pode rodar várias vezes ao dia.
     """
+    from core import cota_email
     from core.emails import enviar_email, frontend_url, nome_associacao
 
     hoje = hoje or timezone.now().date()
@@ -182,6 +183,8 @@ def enviar_lembretes_anuidade(hoje: date | None = None, request=None) -> dict:
         if any(_ETAPAS_ORDEM.index(e) >= indice for e in ja_enviadas):
             continue
 
+        if not cota_email.cabe():
+            break
         email = anuidade.filiacao.membro.email
         assunto, texto = _texto_lembrete(anuidade, etapa, associacao)
         if enviar_email(email, assunto, texto, link=link, link_label="Pagar anuidade"):

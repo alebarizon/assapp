@@ -212,6 +212,10 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "15"))
+# Destinatários por hora para envios em massa (newsletter, réguas, lembretes); 0 = sem limite.
+# A DreamHost bloqueia o remetente acima de 100/hora: deixar folga para os e-mails individuais.
+EMAIL_LIMITE_POR_HORA = int(os.environ.get("EMAIL_LIMITE_POR_HORA", "0"))
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@assapp.local")
 NEWSLETTER_POR_MINUTO = int(os.environ.get("NEWSLETTER_POR_MINUTO", "30"))
 # Hora (Brasília) a partir da qual o agendador roda a régua de anuidades do dia

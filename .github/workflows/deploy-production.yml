@@ -234,10 +234,14 @@ jobs:
               case "$SMTP_PASSWORD" in
                 *"'"*) echo "❌ SMTP_PASSWORD não pode conter aspas simples"; exit 1 ;;
               esac
-              set_env EMAIL_BACKEND django.core.mail.backends.smtp.EmailBackend
+              if [ ! -f /opt/assapp-smtp/id_ed25519 ]; then
+                echo "❌ SMTP_PASSWORD definido mas falta a chave do túnel em /opt/assapp-smtp"; exit 1
+              fi
+              set_env EMAIL_BACKEND core.email_backend.CotaSMTPBackend
               set_env EMAIL_HOST smtp.dreamhost.com
               set_env EMAIL_PORT 587
               set_env EMAIL_USE_TLS True
+              set_env EMAIL_LIMITE_POR_HORA 70
               set_env EMAIL_HOST_USER noreply@gesttora.com.br
               set_env EMAIL_HOST_PASSWORD "$SMTP_PASSWORD"
               set_env DEFAULT_FROM_EMAIL noreply@gesttora.com.br

@@ -18,6 +18,7 @@ from django.utils.html import escape, linebreaks, urlize
 from rest_framework.exceptions import ValidationError
 
 from contatos.models import Contato
+from core import cota_email
 from core.emails import frontend_url
 from eventos.models import InscricaoEvento
 from membros.models import Anuidade, AnuidadeStatus, FiliacaoStatus, Membro
@@ -293,6 +294,8 @@ def processar_fila(limite: int) -> dict:
                     envio.erro = "Descadastrado"
                     envio.save(update_fields=["status", "erro"])
                     continue
+                if not cota_email.cabe():
+                    break
                 envio.tentativas += 1
                 try:
                     montar_email(envio.campanha, envio.email, envio.nome, schema, conexao).send()

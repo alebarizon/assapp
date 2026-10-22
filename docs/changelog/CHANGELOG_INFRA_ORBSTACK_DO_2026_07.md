@@ -350,6 +350,12 @@ Deploys do dia, todos validados em staging antes de `main`:
   o backend passaria a tentar SMTP e cada envio esperaria o timeout.
 - Caminhos: pedir à DigitalOcean a liberação de SMTP (ticket de suporte) ou usar provedor por API HTTP
   (Brevo, Resend ou SES) com o domínio `gesttora.com.br` autenticado (DKIM/SPF do provedor na zona da DreamHost).
+- **Decisão (sem clientes ainda): manter tudo na DreamHost** via túnel SSH — serviço `smtp_tunnel` (alias de rede
+  `smtp.dreamhost.com`), chave em `/opt/assapp-smtp`, usuário `gesttora@pdx1-shared-a1-07.dreamhost.com`.
+  Ensaio no droplet: STARTTLS com certificado verificado e AUTH oferecido. Cota interna `EMAIL_LIMITE_POR_HORA=70`
+  (DreamHost bloqueia acima de 100/hora). Brevo documentada como próxima etapa em `DEPLOY_DIGITALOCEAN.md`.
+- Tenant `abciber` de produção tem e-mails de demonstração em domínios reais (usp.br, unifesp.br, pucsp.edu.br,
+  unicamp.br): com e-mail ligado, sairiam 4 lembretes de anuidade no primeiro dia. Resolver antes do `SMTP_PASSWORD`.
 
 ### verify-staging travado por commit só de docs
 

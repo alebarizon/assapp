@@ -230,9 +230,41 @@ Caixas `contato@gesttora.com.br` e `noreply@gesttora.com.br` hospedadas na Dream
 | TXT (DKIM) | `dreamhost._domainkey` | chave gerada no painel DreamHost |
 | TXT (DMARC) | `_dmarc` | `v=DMARC1; p=none; rua=mailto:contato@gesttora.com.br` (endurecer para `quarantine`/`reject` depois de validar) |
 
-> **Bloqueio (testado em 2026-10-22):** a DigitalOcean bloqueia a saída nas portas 25, 465 e 587 do droplet. Enquanto isso valer, **não criar o secret `SMTP_PASSWORD`** — o backend tentaria SMTP e cada envio esperaria o timeout. Alternativas: ticket à DigitalOcean pedindo liberação de SMTP ou provedor por API HTTP (Brevo, Resend, SES). Teste no droplet: `timeout 6 bash -c '</dev/tcp/smtp.dreamhost.com/587' && echo aberta`.
+#### Envio pelo sistema: túnel SSH até a DreamHost
 
-Envio pelo sistema (convites, senha, certificados, newsletter), quando liberado: SMTP `smtp.dreamhost.com:587` (STARTTLS), usuário `noreply@gesttora.com.br`. A senha fica no secret **`SMTP_PASSWORD`** do GitHub Actions (sem aspas simples); com ele preenchido, `deploy-production.yml` grava o bloco `EMAIL_*` e `SUPPORT_EMAIL=contato@gesttora.com.br` no `.env.production`. Sem o secret, o envio continua em modo console (log).
+A DigitalOcean bloqueia a saída nas portas 25, 465 e 587 do droplet (testado em 2026-10-22; 2525 também fecha). O envio passa por um **túnel SSH** (porta 22, liberada) até o servidor da DreamHost:
+
+| Peça | Valor |
+|------|-------|
+| Serviço | `smtp_tunnel` em `docker-compose.prod.yml` (`alpine:3.20` + `ssh -N -L 0.0.0.0:587:smtp.dreamhost.com:587`) |
+| Alias de rede | `smtp.dreamhost.com` — o backend usa `EMAIL_HOST=smtp.dreamhost.com:587` e o certificado TLS confere |
+| Usuário SSH | `gesttora@pdx1-shared-a1-07.dreamhost.com` (`SMTP_TUNNEL_USER` / `SMTP_TUNNEL_HOST`) |
+| Chave | `/opt/assapp-smtp/id_ed25519` + `known_hosts` no droplet (fora do repo; montado só-leitura) |
+| Backend Django | `core.email_backend.CotaSMTPBackend` (SMTP + registro na cota) |
+| Autenticação SMTP | `noreply@gesttora.com.br`, senha no secret **`SMTP_PASSWORD`** |
+
+- A chave pública está em `~gesttora/.ssh/authorized_keys` na DreamHost com `restrict,port-forwarding,permitopen=...`, **mas o sshd da DreamHost ignora essas opções**: a chave dá shell ao usuário `gesttora`. Manter esse usuário dedicado ao túnel (sem arquivos de site) e a chave só no droplet (root, `600`).
+- **Cota da DreamHost:** 100 destinatários/hora por caixa, não ajustável; estouros repetidos bloqueiam a caixa de vez ([SMTP quota limits](https://help.dreamhost.com/hc/en-us/articles/215730437-SMTP-quota-limits)). `EMAIL_LIMITE_POR_HORA=70` (tabela `core_emailenviado` no schema public) faz newsletter, réguas e lembretes de anuidade pararem ao atingir 70 na última hora e continuarem depois; e-mails individuais (senha, convite, certificado) sempre saem. Réguas e lembretes rodam uma vez por dia: o que sobrar fica para o dia seguinte.
+- Com `SMTP_PASSWORD` preenchido, `deploy-production.yml` grava `EMAIL_*`, `EMAIL_LIMITE_POR_HORA=70` e `SUPPORT_EMAIL=contato@gesttora.com.br` no `.env.production` (e falha se faltar a chave do túnel). Sem o secret, o envio continua em modo console (log). `EMAIL_TIMEOUT=15` evita requisição presa se o túnel cair.
+- **Antes de ligar:** o agendador passa a enviar lembretes de anuidade e réguas (boas-vindas e autor não sócio nascem ligadas) para os associados cadastrados — conferir se os e-mails do tenant de demonstração são reais.
+
+Diagnóstico:
+
+```bash
+docker logs assapp_smtp_tunnel_prod --tail 20          # vazio = túnel de pé
+docker exec assapp_backend_prod python manage.py sendtestemail voce@exemplo.com
+docker exec assapp_backend_prod python manage.py shell -c "from core.cota_email import usados_na_ultima_hora as u; print(u())"
+```
+
+Recriar a chave (se o droplet for refeito): `ssh-keygen -t ed25519 -N "" -f /opt/assapp-smtp/id_ed25519`, `ssh-keyscan -t ed25519,rsa pdx1-shared-a1-07.dreamhost.com > /opt/assapp-smtp/known_hosts`, `chmod 600` e colar a `.pub` em `~/.ssh/authorized_keys` do usuário `gesttora` na DreamHost.
+
+#### Opção futura: Brevo (quando houver volume)
+
+Quando a cota de 100/hora da DreamHost apertar (newsletter de várias associações), trocar o envio para um provedor por API HTTP — recomendado **Brevo** (plano gratuito ~300/dia, painel em PT-BR; alternativas Resend e Amazon SES):
+
+1. Criar conta Brevo e autenticar o domínio `gesttora.com.br` (registros DKIM/Brevo-code na zona da DreamHost; SPF ganha `include:spf.brevo.com`).
+2. Backend: `django-anymail[brevo]`, `EMAIL_BACKEND=anymail.backends.brevo.EmailBackend` e `ANYMAIL={"BREVO_API_KEY": ...}` (secret no GitHub). Para manter a cota, criar um backend que estenda o da Anymail registrando em `core.cota_email`, ou zerar `EMAIL_LIMITE_POR_HORA`.
+3. Remover o serviço `smtp_tunnel`. As caixas da DreamHost continuam recebendo (`contato@`).
 
 ```bash
 dig +short gesttora.com.br MX   # mx1/mx2.dreamhost.com

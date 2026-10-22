@@ -38,7 +38,7 @@ if [ "$ENVIRONMENT" = "production" ]; then
   HOST_PORT=80
   BACKEND_CONTAINER="assapp_backend_prod"
   COMPOSE_PROJECT_NAME="assapp_prod"
-  CONTAINER_NAMES="assapp_db_prod assapp_backend_prod assapp_agendador_prod assapp_newsletter_prod assapp_frontend_prod assapp_nginx_prod"
+  CONTAINER_NAMES="assapp_db_prod assapp_backend_prod assapp_agendador_prod assapp_newsletter_prod assapp_smtp_tunnel_prod assapp_frontend_prod assapp_nginx_prod"
 else
   COMPOSE_FILE="docker-compose.staging.yml"
   IMAGE_TAG_DEFAULT="develop"
@@ -86,6 +86,9 @@ log "Pull $BACKEND_IMAGE"
 docker pull "$BACKEND_IMAGE"
 log "Pull $FRONTEND_IMAGE"
 docker pull "$FRONTEND_IMAGE"
+if [ "$ENVIRONMENT" = "production" ]; then
+  docker pull -q alpine:3.20 >/dev/null || warning "Pull alpine:3.20 falhou (túnel SMTP usa a imagem local)"
+fi
 
 log "Parando stack anterior ($COMPOSE_PROJECT_NAME)..."
 COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \

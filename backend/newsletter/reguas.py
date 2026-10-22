@@ -16,6 +16,7 @@ from django.db import IntegrityError, connection
 from django.db.models import Max, Min
 from django.utils import timezone
 
+from core import cota_email
 from core.emails import frontend_url
 from eventos.models import EventoAcademico, InscricaoEvento, SubmissaoStatus, SubmissaoTrabalho
 from membros.models import FiliacaoStatus, Membro
@@ -311,6 +312,8 @@ def executar(hoje=None) -> dict:
             conexao.open()
             try:
                 for cand in lista:
+                    if not cota_email.cabe():
+                        break
                     try:
                         montar(regua, cand, schema, proximo, conexao).send()
                     except Exception as exc:
