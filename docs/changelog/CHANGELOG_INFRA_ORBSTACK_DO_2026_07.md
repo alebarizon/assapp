@@ -1,7 +1,7 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean
 
-> **Última atualização:** 2026-07-27  
-> **Pausa HTTPS:** domínio `gesttora.vertent.com.br` OK em HTTP; SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`).
+> **Última atualização:** 2026-10-22  
+> **Domínio:** produção migrou para `gesttora.com.br` (DNS na DigitalOcean, mesmo IP); `gesttora.vertent.com.br` segue aceito na transição. SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`).
 
 ---
 
@@ -17,7 +17,7 @@
 | Compose staging/prod + nginx + `deploy.sh` | ✅ |
 | **Staging no ar** (`:8080`) | ✅ |
 | Produção (`main` → `:80`) | ✅ (2026-07-25) |
-| Domínio HTTP `gesttora.vertent.com.br` | ✅ A → droplet |
+| Domínio HTTP `gesttora.com.br` (antes `gesttora.vertent.com.br`) | A → droplet (2026-10-22) |
 | Domínio + SSL (HTTPS / Certbot) | ❌ **adiado** — proxy TLS no host + AssApp em `127.0.0.1:8081` (detalhe em [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https-adiado--retomar-depois)) |
 | Tenant `sistema` / seed no staging | ❓ |
 | Tenant `demo` em staging/prod | ❌ (script local: `scripts/init_demo_tenant.sh`) |
@@ -26,9 +26,9 @@
 
 | Recurso | URL |
 |---------|-----|
-| Frontend (domínio) | http://gesttora.vertent.com.br/ |
+| Frontend (domínio) | http://gesttora.com.br/ |
 | Frontend (IP) | http://159.203.183.184/ |
-| Health API | http://gesttora.vertent.com.br/health/ |
+| Health API | http://gesttora.com.br/health/ |
 
 ### URLs staging (funcionando)
 
@@ -221,7 +221,7 @@ Checklist: `.github/CHECKLIST_SECRETS.md`
 
 1. `git checkout orb && git pull origin orb`
 2. Desenvolver em `orb` → merge/push em `develop` para atualizar staging
-3. Validar staging (`:8080`) e produção (`gesttora.vertent.com.br`) após cada deploy
+3. Validar staging (`:8080`) e produção (`gesttora.com.br`) após cada deploy
 4. Seeds no droplet (se necessário):
    - `./scripts/init_sistema_tenant.sh` — superadmin + ABCiber
    - `./scripts/init_demo_tenant.sh` — tenant `demo` (`demo@demo.com` / `demo`)
@@ -236,7 +236,7 @@ Ver seção em [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domín
 git checkout develop && git merge orb && git push origin develop
 # validar staging
 git checkout main && git merge develop && git push origin main
-# validar http://gesttora.vertent.com.br/
+# validar http://gesttora.com.br/
 ```
 
 ### Produto / PIPE (Fase 1)

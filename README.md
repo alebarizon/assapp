@@ -247,7 +247,7 @@ Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTR
 | Ambiente | URL |
 |----------|-----|
 | Staging | http://159.203.183.184:8080/ |
-| Produção | http://gesttora.vertent.com.br/ · http://159.203.183.184/ |
+| Produção | http://gesttora.com.br/ · http://159.203.183.184/ |
 | HTTPS | adiado — ver guia de deploy |
 
 **Branches alinhadas** em `5486641` (2026-08-17). Changelog: [`docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md)

@@ -10,7 +10,7 @@
 | Ambiente | URL | Branch |
 |----------|-----|--------|
 | Staging | http://159.203.183.184:8080/ | `develop` |
-| Produção | http://gesttora.vertent.com.br/ · http://159.203.183.184/ | `main` |
+| Produção | http://gesttora.com.br/ · http://159.203.183.184/ | `main` |
 | Dev Mac | http://localhost:5174 | `orb` |
 
 Droplet: `159.203.183.184` · HTTPS: **adiado**  
@@ -50,7 +50,7 @@ Django 4.2 + DRF + JWT + django-tenants + PostgreSQL 14 + React 18 + TS + Vite
 
 | Rota | Página |
 |------|--------|
-| `/` | Landing SaaS **Gesttora** (`gesttora.vertent.com.br`) — conteúdo estático |
+| `/` | Landing SaaS **Gesttora** (`gesttora.com.br`) — conteúdo estático |
 | `/site`, `/site/p/:slug` | **Website do tenant** (público, `?schema=`) · CMS em `/app/website` |
 | `/login` | Login |
 | `/signup` | Cadastro da associação (simulado) |
@@ -165,7 +165,7 @@ Ver: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLU
 |-----------|----------|
 | [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md) | **Consolidado 24–27 jul** (landing, deploy, domínio) |
 | [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md) | Landing SaaS Gesttora (`/`) |
-| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra · **HTTPS adiado** (`gesttora.vertent.com.br`) |
+| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra · **HTTPS adiado** (`gesttora.com.br`) |
 | [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy DO + seção **Domínio + HTTPS (adiado)** |
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
@@ -220,7 +220,7 @@ Já adaptado:
 - finance OSC + documents
 - MandatoDetail + deep-links da transição
 - Ponte User↔Membro + portal associado (`/app/portal`)
-- Landing SaaS Gesttora em `/` (estática; `gesttora.vertent.com.br`)
+- Landing SaaS Gesttora em `/` (estática; `gesttora.com.br`)
 - E-commerce (`ecommerce/`) + Website CMS tenant (`website/`, `/site`, `/app/website`)
 - Cursos (`courses/`) integrados à loja + certificado PDF (`core/certificates.py`) — ver [`COURSES.md`](docs/modulos/COURSES.md)
 - Formulários (`formularios/`, a partir do QPC) — ver [`FORMULARIOS.md`](docs/modulos/FORMULARIOS.md)

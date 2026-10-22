@@ -24,8 +24,9 @@ Validado em 2026-08-17 (commit `5486641`).
 | Campo | Valor |
 |-------|--------|
 | URL (IP) | http://159.203.183.184/ |
-| URL (domínio) | http://gesttora.vertent.com.br/ |
-| Health | http://gesttora.vertent.com.br/health/ |
+| URL (domínio) | http://gesttora.com.br/ |
+| Health | http://gesttora.com.br/health/ |
+| Domínio antigo | `gesttora.vertent.com.br` — ainda aceito em `ALLOWED_HOSTS` durante a transição |
 | Branch CI | `main` |
 | Compose | `docker-compose.prod.yml` |
 | Tag imagens | `latest` |
@@ -96,7 +97,7 @@ Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 | Compose + deploy.sh | ✅ |
 | Staging no ar | ✅ |
 | Produção (`main`) | ✅ (promovida 2026-07-25 · landing Gesttora) |
-| Domínio HTTP | ✅ `gesttora.vertent.com.br` → A `159.203.183.184` |
+| Domínio HTTP | `gesttora.com.br` → A `159.203.183.184` (DNS na DigitalOcean — ver seção Domínio) |
 | Domínio + SSL (HTTPS) | ❌ **adiado** — ver seção abaixo |
 | Seed tenant sistema + abciber | ✅ executado staging + prod (2026-08-17) |
 
@@ -158,28 +159,58 @@ curl -s "http://159.203.183.184:8080/site?schema=demo" -o /dev/null -w "%{http_c
 
 ## Domínio + HTTPS (adiado — retomar depois)
 
-**Estado em 2026-07-25**
+**Estado em 2026-10-22** — domínio próprio `gesttora.com.br` substitui `gesttora.vertent.com.br`
 
 | Item | Valor |
 |------|--------|
-| Domínio raiz (hospedagem DNS) | `vertent.com.br` (painel do registrador / DNS onde o domínio está) |
-| Subdomínio | `gesttora.vertent.com.br` |
-| DNS | registro **A** → `159.203.183.184` |
-| HTTP | ✅ `http://gesttora.vertent.com.br` |
+| Domínio | `gesttora.com.br` (registrado no Registro.br) |
+| DNS | zona na DigitalOcean (Networking → Domains): **A** `@` → `159.203.183.184`; **A** ou **CNAME** `www` → mesmo droplet |
+| Nameservers (Registro.br) | `ns1.digitalocean.com`, `ns2.digitalocean.com`, `ns3.digitalocean.com` |
+| HTTP | `http://gesttora.com.br` |
 | HTTPS | ❌ porta **443** sem listener (`Connection refused`) |
+| Domínio antigo | `gesttora.vertent.com.br` (A → mesmo IP) segue em `ALLOWED_HOSTS` até ser desligado |
+
+O workflow `deploy-production.yml` reescreve `ALLOWED_HOSTS` e `FRONTEND_URL` no `.env.production` do droplet a cada deploy.
+
+Verificação do DNS:
+
+```bash
+dig +short gesttora.com.br NS   # deve listar ns*.digitalocean.com
+dig +short gesttora.com.br A    # 159.203.183.184
+curl -sS http://gesttora.com.br/health/
+```
+
+### E-mail (DreamHost)
+
+Caixas `contato@gesttora.com.br` e `noreply@gesttora.com.br` hospedadas na DreamHost. A DigitalOcean não hospeda e-mail; a zona DNS na DO precisa dos registros da DreamHost (copiar os valores exatos do painel DreamHost → Websites/Mail → DNS do domínio):
+
+| Tipo | Nome | Valor |
+|------|------|-------|
+| MX (prioridade 0) | `@` | `mx1.dreamhost.com.` |
+| MX (prioridade 0) | `@` | `mx2.dreamhost.com.` |
+| TXT (SPF) | `@` | `v=spf1 mx include:netblocks.dreamhost.com include:relay.mailchannels.net -all` |
+| TXT (DKIM) | `dreamhost._domainkey` | chave gerada no painel DreamHost |
+| TXT (DMARC) | `_dmarc` | `v=DMARC1; p=none; rua=mailto:contato@gesttora.com.br` (endurecer para `quarantine`/`reject` depois de validar) |
+
+Envio pelo sistema (convites, senha, certificados, newsletter): SMTP `smtp.dreamhost.com:587` (STARTTLS), usuário `noreply@gesttora.com.br`. A senha fica no secret **`SMTP_PASSWORD`** do GitHub Actions (sem aspas simples); com ele preenchido, `deploy-production.yml` grava o bloco `EMAIL_*` e `SUPPORT_EMAIL=contato@gesttora.com.br` no `.env.production`. Sem o secret, o envio continua em modo console (log).
+
+```bash
+dig +short gesttora.com.br MX   # mx1/mx2.dreamhost.com
+dig +short gesttora.com.br TXT  # SPF com netblocks.dreamhost.com
+```
 
 **Causa:** produção AssApp só publica `80:80` ([`docker-compose.prod.yml`](../../docker-compose.prod.yml)); o nginx do container ([`nginx/nginx_assapp_prod.conf`](../../nginx/nginx_assapp_prod.conf)) só faz `listen 80`. Let’s Encrypt no host, se instalado, **não** está ligado a um serviço na 443.
 
 ### Solução recomendada (quando retomar)
 
 1. Mudar o mapeamento da produção AssApp de `80:80` para interno, ex.: `127.0.0.1:8081:80`.
-2. Nginx (ou Caddy) **no host** escutando **80 + 443**, `server_name gesttora.vertent.com.br`, `proxy_pass http://127.0.0.1:8081`.
+2. Nginx (ou Caddy) **no host** escutando **80 + 443**, `server_name gesttora.com.br www.gesttora.com.br`, `proxy_pass http://127.0.0.1:8081`.
 3. Emitir/renovar certificado:
    ```bash
-   sudo certbot --nginx -d gesttora.vertent.com.br
+   sudo certbot --nginx -d gesttora.com.br -d www.gesttora.com.br
    ```
-4. Em `.env.production` no droplet: incluir `gesttora.vertent.com.br` em `ALLOWED_HOSTS` e `CSRF_TRUSTED_ORIGINS=https://gesttora.vertent.com.br`.
-5. Reiniciar stack + nginx do host; validar `https://gesttora.vertent.com.br`.
+4. Em `.env.production` no droplet: `CSRF_TRUSTED_ORIGINS=https://gesttora.com.br,https://www.gesttora.com.br` e `FRONTEND_URL=https://gesttora.com.br` (ajustar também o `sed` de `FRONTEND_URL` em `deploy-production.yml`).
+5. Reiniciar stack + nginx do host; validar `https://gesttora.com.br`.
 
 **Alternativa (menos preferida):** montar `/etc/letsencrypt` no `assapp_nginx_prod`, `listen 443 ssl` no conf e publicar `443:443` no compose.
 
