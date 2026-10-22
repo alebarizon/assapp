@@ -96,7 +96,7 @@ Alterar só `*.md` / `docs/` / `.github/*.md` **não** dispara os workflows (`pa
 3. Se o `.env.<ambiente>` não existir, o workflow copia do `env.<ambiente>.example` e gera `SECRET_KEY` e senha de banco novas. Em ambiente com volume existente isso **quebra** a conexão com o Postgres.
 4. `scripts/deploy.sh <ambiente>`: carrega o `.env`, faz `docker pull` **antes** de parar qualquer coisa (se o pull falhar, a versão anterior continua no ar), para só o projeto daquele ambiente (`assapp_prod` ou `assapp_staging`), libera só a porta do ambiente (80 ou 8080), `up -d`, espera `/health/` por até 2 minutos e, com health OK, roda `docker image prune -f` (só imagens sem tag e sem container — cada deploy deixa ~1 GB de imagem antiga; em out/2026 o disco encheu e o pull falhou).
 5. O backend, ao subir, roda `wait_for_db` → `migrate_schemas --shared` → `migrate_schemas` → `collectstatic` → `gunicorn`. Health OK = migrations aplicadas.
-6. Em push para `main`, o job `verify-staging` exige que o SHA esteja em `origin/develop` e que o "Deploy to Staging" daquele SHA tenha concluído com sucesso (timeout 45 min).
+6. Em push para `main`, o job `verify-staging` exige que o SHA esteja em `origin/develop` e que o "Deploy to Staging" tenha concluído com sucesso para o último commit com código (ou para um commit só de docs posterior a ele, já que esses não disparam staging). Timeout 45 min. O **Run workflow** manual pula essa verificação; o **Re-run** de uma execução de push não pula.
 
 Logs bons no Actions:
 

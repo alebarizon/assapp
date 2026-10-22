@@ -20,11 +20,15 @@ class ConfiguracaoPagamento(models.Model):
     """Credenciais do gateway da associação (registro único por schema)."""
 
     ASAAS = "asaas"
-    PROVEDOR_CHOICES = [(ASAAS, "Asaas")]
+    PAGBANK = "pagbank"
+    MERCADOPAGO = "mercadopago"
+    PROVEDOR_CHOICES = [(ASAAS, "Asaas"), (PAGBANK, "PagBank"), (MERCADOPAGO, "Mercado Pago")]
 
     provedor = models.CharField(max_length=20, choices=PROVEDOR_CHOICES, default=ASAAS)
     ativo = models.BooleanField(default=False)
-    sandbox = models.BooleanField(default=True, help_text="Ambiente de testes do gateway")
+    sandbox = models.BooleanField(
+        default=True, help_text="Ambiente de testes do gateway (no Mercado Pago valem as credenciais de teste)"
+    )
     api_key_cifrada = models.TextField(blank=True, default="")
     webhook_token = models.CharField(max_length=64, default=_novo_webhook_token)
     aceita_pix = models.BooleanField(default=True)

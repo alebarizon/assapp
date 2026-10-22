@@ -58,6 +58,50 @@ class EnvioCampanha(models.Model):
         constraints = [models.UniqueConstraint(fields=["campanha", "email"], name="envio_unico_por_campanha")]
 
 
+class TipoRegua(models.TextChoices):
+    BOAS_VINDAS = "boas_vindas", "Boas-vindas ao novo associado"
+    INATIVOS = "inativos", "Reengajamento de inativos"
+    AUTOR_NAO_SOCIO = "autor_nao_socio", "Convite ao autor aprovado que não é sócio"
+
+
+class Regua(models.Model):
+    """Configuração de uma régua automática de relacionamento (uma linha por tipo)."""
+
+    tipo = models.CharField(max_length=20, choices=TipoRegua.choices, unique=True)
+    ativa = models.BooleanField(default=False)
+    assunto = models.CharField(max_length=200)
+    corpo = models.TextField()
+    dias = models.PositiveSmallIntegerField(
+        default=0, help_text="Inativos: meses sem atividade. Demais: janela em dias após o gatilho"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["tipo"]
+
+    def __str__(self):
+        return self.get_tipo_display()
+
+
+class EnvioRegua(models.Model):
+    tipo = models.CharField(max_length=20, choices=TipoRegua.choices, db_index=True)
+    chave = models.CharField(max_length=200, help_text="Identifica o gatilho; impede envio repetido")
+    email = models.EmailField()
+    nome = models.CharField(max_length=255, blank=True, default="")
+    membro = models.ForeignKey(
+        "membros.Membro", on_delete=models.SET_NULL, null=True, blank=True, related_name="envios_regua"
+    )
+    detalhe = models.CharField(max_length=255, blank=True, default="")
+    enviado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-enviado_em"]
+        constraints = [models.UniqueConstraint(fields=["tipo", "chave"], name="envio_regua_unico")]
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} → {self.email}"
+
+
 class Descadastro(models.Model):
     email = models.EmailField(unique=True)
     campanha = models.ForeignKey(Campanha, on_delete=models.SET_NULL, null=True, blank=True, related_name="descadastros")

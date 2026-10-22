@@ -43,7 +43,7 @@ export async function salvarConfiguracaoPagamento(
   return data;
 }
 
-export async function testarConfiguracaoPagamento(): Promise<{ ok: boolean; saldo?: number }> {
+export async function testarConfiguracaoPagamento(): Promise<{ ok: boolean; saldo?: number; conta?: string }> {
   const { data } = await api.post("/api/pagamentos/configuracao/testar/", {});
   return data;
 }

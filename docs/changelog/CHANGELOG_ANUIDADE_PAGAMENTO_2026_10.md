@@ -159,4 +159,64 @@ retentados na execução seguinte.
   `scripts/deploy.sh` remove o container antigo. Variável nova: `REGUA_HORA`.
 - Testes: `core/test_agendador.py`.
 
+## Réguas automáticas de relacionamento (2026-10-19)
+
+- Novos modelos `newsletter.Regua` e `newsletter.EnvioRegua` (migration `newsletter/0002`) e `newsletter/reguas.py`:
+  - **Boas-vindas** (ligada): filiação ativa iniciada nos últimos 7 dias; uma vez por associado.
+  - **Reengajamento de inativos** (desligada): filiado há mais de 6 meses e sem login, inscrição, curso,
+    formulário ou submissão nesse período; no máximo um e-mail a cada 6 meses.
+  - **Autor aprovado que não é sócio** (ligada): autores e coautores de trabalho aceito nos últimos 30 dias;
+    convite para o associe-se do site; uma vez por pessoa e evento.
+- Texto, assunto e prazo editáveis por associação, com variáveis (`{nome}`, `{associacao}`, `{proximo_evento}`,
+  `{trabalho}`, `{evento}`). Inativos e autor respeitam descadastros e levam rodapé/one-click.
+- Comando `reguas_relacionamento`, chamado pelo `agendador` uma vez por dia (só com provedor de e-mail real);
+  até 200 por régua por dia em cada associação.
+- `newsletter.services.montar_mensagem`: montagem genérica (a campanha passou a usá-la).
+- Painel: aba **Réguas automáticas** em `/app/newsletter` (ativar com confirmação do volume, prévia de quem
+  receberia, teste, texto padrão, histórico). Linha do tempo do associado mostra os e-mails automáticos.
+- Testes: `newsletter/test_reguas.py`; `core/test_agendador.py` atualizado.
+
+## Gateways PagBank e Mercado Pago (2026-10-19)
+
+- `payments/gateways.py`: `PagBankGateway` (Pix por `/orders`, cartão/boleto pelo Checkout PagBank) e
+  `MercadoPagoGateway` (Pix por `/v1/payments`, cartão/boleto pelo Checkout Pro). Asaas segue igual.
+- `ConfiguracaoPagamento.provedor` passa a ser escolhido pela associação (migration `payments/0003`); trocar de
+  gateway exige a chave do novo.
+- Webhooks `webhook/pagbank/` e `webhook/mercadopago/` com token na URL, enviada em cada cobrança (sem cadastro
+  manual); o status é sempre relido na API do gateway.
+- **Sincronização ativa**: a consulta do portal (`GET cobrancas/{id}/`) pergunta ao gateway a cada 15 s e o
+  `agendador` roda `sincronizar_cobrancas` a cada 30 minutos — necessário porque PagBank e Mercado Pago só
+  notificam URLs HTTPS. Vale também para o Asaas.
+- Painel: modal **Pagamento online** do Financeiro com seletor de gateway e instruções por provedor.
+- Testes: `payments/tests.py` (gateways com HTTP simulado, troca de provedor, webhooks, sincronização) e
+  `core/test_agendador.py`.
+- Ainda não validado contra as contas reais de sandbox/teste de PagBank e Mercado Pago.
+
+## Situação em produção (2026-10-18)
+
+- Tudo acima está em produção. Últimos deploys: `5106f5e` (assembleias, newsletter, diretório), `53f9fed`
+  (agendador) e `f3d0852` (correção do `deploy.sh`; incidente descrito em
+  [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md), seção 11).
+- Diretório público vem desligado: cada associação liga em Website e cada associado autoriza no portal.
+- E-mail ainda é console em staging e produção: convocações, newsletter e lembretes só aparecem no log.
+
+### Pendências (decisão do produto)
+
+- Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — a DigitalOcean bloqueia SMTP.
+- `PAGAMENTO_SIMULADO=False` + chave Asaas real em produção, ou manter simulado.
+- "Atualizar anais" nos eventos com anais já publicados, para gerar as páginas por trabalho.
+- Domínio `gesttora.com.br` em registro (2026-10-19): e-mail e HTTPS ficam para depois dele.
+
+### Roadmap adiado (decisão de 2026-10-19)
+
+Ficam para depois, sem data:
+
+- Onda 2: conta institucional (organização + indicados), CRM de patrocínio, regra `exige_adimplencia` em
+  documentos, DOI Crossref + ORCID OAuth, importação do Lattes (XML).
+- Eventos: credenciamento por QR, distribuição automática de pareceristas, programação por salas com choque
+  de horário e trabalho aceito → atividade.
+- Relacionamento: régua de lead parado em contatos, scoring de engajamento.
+- Onda 3 inteira: ponte OJS, GTs/SIGs, prêmios e editais, educação continuada, PWA, WhatsApp, acervo
+  histórico, perfil científico público.
+
 Docs: [`EVENTOS.md`](../modulos/EVENTOS.md) · [`ECOMMERCE.md`](../modulos/ECOMMERCE.md) · [`PAGAMENTOS.md`](../modulos/PAGAMENTOS.md) · [`MEMBROS.md`](../modulos/MEMBROS.md) · [`CONTATOS.md`](../modulos/CONTATOS.md) · [`PUBLICACOES.md`](../modulos/PUBLICACOES.md) · [`GOVERNANCA.md`](../modulos/GOVERNANCA.md) · [`NEWSLETTER.md`](../modulos/NEWSLETTER.md)

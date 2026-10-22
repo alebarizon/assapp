@@ -2,12 +2,15 @@
 Tarefas periódicas do servidor (serviço `agendador` do compose).
 
 - A cada minuto: um lote da fila da newsletter (`enviar_newsletters`).
-- Uma vez por dia, a partir de REGUA_HORA (horário de Brasília): a régua de anuidades
-  (`regua_anuidades`), que marca vencidas/inadimplentes e envia os lembretes.
+- A cada 30 minutos: status das cobranças online pendentes (`sincronizar_cobrancas`).
+- Uma vez por dia, a partir de REGUA_HORA (horário de Brasília):
+  - régua de anuidades (`regua_anuidades`): marca vencidas/inadimplentes e envia os lembretes;
+  - réguas de relacionamento (`reguas_relacionamento`): boas-vindas, inativos, autor não sócio.
 
     docker compose exec -T backend python manage.py agendador
 """
 import time
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.management import call_command
@@ -20,6 +23,7 @@ _BACKENDS_SEM_ENTREGA = {
     "django.core.mail.backends.dummy.EmailBackend",
     "django.core.mail.backends.filebased.EmailBackend",
 }
+INTERVALO_COBRANCAS = timedelta(minutes=30)
 
 
 def email_entregue() -> bool:
@@ -27,7 +31,10 @@ def email_entregue() -> bool:
 
 
 class Command(BaseCommand):
-    help = "Roda a fila da newsletter a cada minuto e a régua de anuidades uma vez por dia."
+    help = (
+        "Roda a fila da newsletter a cada minuto, a sincronização de cobranças a cada 30 minutos "
+        "e as réguas diárias (anuidades e relacionamento)."
+    )
 
     def _rodar(self, nome, comando, *args) -> bool:
         try:
@@ -37,21 +44,36 @@ class Command(BaseCommand):
             self.stderr.write(f"Falha em {nome}: {exc}")
             return False
 
+    def _diarias(self) -> list[tuple[str, str, list[str]]]:
+        # Sem provedor que entregue de fato, o envio ficaria registrado como feito e
+        # nunca seria repetido quando o e-mail passar a funcionar.
+        if not email_entregue():
+            return [("régua de anuidades", "regua_anuidades", ["--sem-email"])]
+        return [
+            ("régua de anuidades", "regua_anuidades", []),
+            ("réguas de relacionamento", "reguas_relacionamento", []),
+        ]
+
     def ciclo(self, agora=None):
         self._rodar("newsletter", "enviar_newsletters")
 
         agora = agora or timezone.localtime()
-        if agora.hour < getattr(settings, "REGUA_HORA", 8) or self.ultima_regua == agora.date():
+        ultima = self.ultimas.get("sincronizar_cobrancas")
+        if ultima is None or agora - ultima >= INTERVALO_COBRANCAS:
+            self._rodar("cobranças online", "sincronizar_cobrancas")
+            self.ultimas["sincronizar_cobrancas"] = agora
+
+        if agora.hour < getattr(settings, "REGUA_HORA", 8):
             return
-        # Sem provedor que entregue de fato, o lembrete ficaria registrado como
-        # enviado e a etapa nunca seria reenviada quando o e-mail passar a funcionar.
-        extra = [] if email_entregue() else ["--sem-email"]
-        self.stdout.write(f"Régua de anuidades {agora:%d/%m %H:%M}{' (sem e-mail)' if extra else ''}")
-        if self._rodar("régua de anuidades", "regua_anuidades", *extra):
-            self.ultima_regua = agora.date()
+        for nome, comando, args in self._diarias():
+            if self.ultimas.get(comando) == agora.date():
+                continue
+            self.stdout.write(f"{nome[0].upper()}{nome[1:]} {agora:%d/%m %H:%M}{' (sem e-mail)' if args else ''}")
+            if self._rodar(nome, comando, *args):
+                self.ultimas[comando] = agora.date()
 
     def handle(self, *args, **options):
-        self.ultima_regua = None
+        self.ultimas = {}
         while True:
             inicio = time.monotonic()
             self.ciclo()

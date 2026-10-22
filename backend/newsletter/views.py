@@ -5,8 +5,11 @@ Painel:  /api/newsletter/campanhas/              CRUD + enviar, teste, cancelar,
          /api/newsletter/campanhas/publico/      prévia do público (total e amostra)
          /api/newsletter/campanhas/opcoes/       eventos e etiquetas para segmentar
          /api/newsletter/descadastros/           lista e reinscrição (DELETE)
+         /api/newsletter/reguas/                 réguas automáticas: lista, PATCH {tipo}, previa, teste,
+                                                 restaurar, envios/?tipo=
 Público: /api/newsletter/public/descadastrar/?schema=&t=   GET situação, POST descadastra (inclui one-click)
 """
+from django.conf import settings
 from django_tenants.utils import schema_context
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -21,9 +24,16 @@ from eventos.models import EventoAcademico
 from mandatos.permissions import IsBoardOrAdmin
 from tenants.resolvers import resolve_tenant_from_request
 
-from . import services
-from .models import Campanha, Descadastro, StatusCampanha
-from .serializers import CampanhaSerializer, DescadastroSerializer, EnvioSerializer, validar_publico
+from . import reguas, services
+from .models import Campanha, Descadastro, EnvioRegua, Regua, StatusCampanha, TipoRegua
+from .serializers import (
+    CampanhaSerializer,
+    DescadastroSerializer,
+    EnvioReguaSerializer,
+    EnvioSerializer,
+    ReguaSerializer,
+    validar_publico,
+)
 
 
 class CampanhaViewSet(viewsets.ModelViewSet):
@@ -104,6 +114,59 @@ class CampanhaViewSet(viewsets.ModelViewSet):
         if st:
             qs = qs.filter(status=st)
         return Response(EnvioSerializer(qs[:500], many=True).data)
+
+
+class ReguaViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated, IsBoardOrAdmin]
+    modulo = "newsletter"
+    serializer_class = ReguaSerializer
+    pagination_class = None
+    lookup_field = "tipo"
+    lookup_value_regex = "|".join(TipoRegua.values)
+    http_method_names = ["get", "patch", "post"]
+
+    def get_queryset(self):
+        reguas.obter_reguas()
+        return Regua.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        from core.management.commands.agendador import email_entregue
+
+        return Response({
+            "reguas": self.get_serializer(self.get_queryset(), many=True).data,
+            "email_entregue": email_entregue(),
+            "hora": getattr(settings, "REGUA_HORA", 8),
+            "limite_por_dia": reguas.LIMITE_POR_EXECUCAO,
+        })
+
+    @action(detail=True, methods=["get"])
+    def previa(self, request, tipo=None):
+        return Response(reguas.previa(self.get_object()))
+
+    @action(detail=True, methods=["post"])
+    def teste(self, request, tipo=None):
+        email = (request.data.get("email") or request.user.email or "").strip()
+        if not email:
+            raise ValidationError({"email": "Informe um e-mail."})
+        if not reguas.enviar_teste(self.get_object(), email, request.user.get_full_name()):
+            raise ValidationError("Não foi possível enviar o teste. Verifique a configuração de e-mail.")
+        return Response({"enviado_para": email})
+
+    @action(detail=True, methods=["post"])
+    def restaurar(self, request, tipo=None):
+        regua = self.get_object()
+        padrao = reguas.PADROES[regua.tipo]
+        regua.assunto, regua.corpo, regua.dias = padrao["assunto"], padrao["corpo"], padrao["dias"]
+        regua.save(update_fields=["assunto", "corpo", "dias", "updated_at"])
+        return Response(self.get_serializer(regua).data)
+
+    @action(detail=False, methods=["get"])
+    def envios(self, request):
+        qs = EnvioRegua.objects.all()
+        tipo = request.query_params.get("tipo")
+        if tipo:
+            qs = qs.filter(tipo=tipo)
+        return Response(EnvioReguaSerializer(qs[:200], many=True).data)
 
 
 class DescadastroViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):

@@ -2,9 +2,14 @@ import type {
   Campanha,
   Descadastro,
   EnvioCampanha,
+  EnvioRegua,
+  ListaReguas,
   OpcoesPublico,
+  PreviaRegua,
   PublicoCampanha,
+  Regua,
   ResumoPublico,
+  TipoRegua,
 } from "@/types/newsletter";
 import { api } from "./api";
 
@@ -74,4 +79,30 @@ export async function getDescadastro(schema: string, t: string): Promise<Situaca
 
 export async function confirmarDescadastro(schema: string, t: string): Promise<SituacaoDescadastro> {
   return (await api.post<SituacaoDescadastro>("/api/newsletter/public/descadastrar/", { t }, { params: { schema } })).data;
+}
+
+const R = "/api/newsletter/reguas";
+
+export async function listReguas(): Promise<ListaReguas> {
+  return (await api.get<ListaReguas>(`${R}/`)).data;
+}
+
+export async function salvarRegua(tipo: TipoRegua, payload: Partial<Regua>): Promise<Regua> {
+  return (await api.patch<Regua>(`${R}/${tipo}/`, payload)).data;
+}
+
+export async function previaRegua(tipo: TipoRegua): Promise<PreviaRegua> {
+  return (await api.get<PreviaRegua>(`${R}/${tipo}/previa/`)).data;
+}
+
+export async function testarRegua(tipo: TipoRegua, email?: string): Promise<{ enviado_para: string }> {
+  return (await api.post(`${R}/${tipo}/teste/`, email ? { email } : {})).data;
+}
+
+export async function restaurarRegua(tipo: TipoRegua): Promise<Regua> {
+  return (await api.post<Regua>(`${R}/${tipo}/restaurar/`)).data;
+}
+
+export async function listEnviosRegua(tipo?: TipoRegua): Promise<EnvioRegua[]> {
+  return (await api.get<EnvioRegua[]>(`${R}/envios/`, { params: tipo ? { tipo } : {} })).data;
 }

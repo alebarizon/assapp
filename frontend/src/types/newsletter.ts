@@ -109,3 +109,62 @@ export function descreverPublico(p: PublicoCampanha, opcoes?: OpcoesPublico): st
   }
   return partes.join(" · ") || "Nenhum público definido";
 }
+
+export type TipoRegua = "boas_vindas" | "inativos" | "autor_nao_socio";
+
+export interface Regua {
+  tipo: TipoRegua;
+  nome: string;
+  ativa: boolean;
+  assunto: string;
+  corpo: string;
+  dias: number;
+  padrao: { assunto: string; corpo: string; dias: number };
+  enviados_30_dias: number;
+  enviados_total: number;
+  updated_at: string;
+}
+
+export interface ListaReguas {
+  reguas: Regua[];
+  email_entregue: boolean;
+  hora: number;
+  limite_por_dia: number;
+}
+
+export interface PreviaRegua {
+  total: number;
+  limite_por_dia: number;
+  amostra: { nome: string; email: string; detalhe: string }[];
+}
+
+export interface EnvioRegua {
+  id: number;
+  tipo: TipoRegua;
+  tipo_nome: string;
+  email: string;
+  nome: string;
+  membro: string | null;
+  detalhe: string;
+  enviado_em: string;
+}
+
+export const REGUA_INFO: Record<TipoRegua, { gatilho: (dias: number) => string; diasLabel: string; diasMax: number }> = {
+  boas_vindas: {
+    gatilho: (d) => `Associados com filiação ativa iniciada nos últimos ${d} dia(s). Uma vez por associado.`,
+    diasLabel: "Janela (dias após o início da filiação)",
+    diasMax: 90,
+  },
+  inativos: {
+    gatilho: (d) =>
+      `Associados em dia, filiados há mais de ${d} mês(es), sem login, inscrição, curso, formulário ou submissão nesse período. No máximo um e-mail a cada ${d} mês(es).`,
+    diasLabel: "Meses sem atividade",
+    diasMax: 24,
+  },
+  autor_nao_socio: {
+    gatilho: (d) =>
+      `Autores e coautores de trabalhos aprovados nos últimos ${d} dia(s) que não são associados. Uma vez por pessoa e evento.`,
+    diasLabel: "Janela (dias após a decisão)",
+    diasMax: 90,
+  },
+};

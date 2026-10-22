@@ -9,6 +9,8 @@ from .views import (
     SimularPagamentoView,
     TestarConfiguracaoView,
     WebhookAsaasView,
+    WebhookMercadoPagoView,
+    WebhookPagBankView,
 )
 
 app_name = "payments"
@@ -26,4 +28,6 @@ urlpatterns = [
         name="simular-pagamento",
     ),
     path("webhook/asaas/", WebhookAsaasView.as_view(), name="webhook-asaas"),
+    path("webhook/pagbank/", WebhookPagBankView.as_view(), name="webhook-pagbank"),
+    path("webhook/mercadopago/", WebhookMercadoPagoView.as_view(), name="webhook-mercadopago"),
 ]

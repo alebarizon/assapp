@@ -1,9 +1,7 @@
-from django.db import connection
 from rest_framework import serializers
 
-from core.emails import frontend_url
-
 from .models import Cobranca, ConfiguracaoPagamento
+from .services import notificacao_automatica, url_webhook
 
 
 class CobrancaSerializer(serializers.ModelSerializer):
@@ -42,6 +40,7 @@ class ConfiguracaoPagamentoSerializer(serializers.ModelSerializer):
     tem_api_key = serializers.SerializerMethodField()
     api_key_final = serializers.SerializerMethodField()
     webhook_url = serializers.SerializerMethodField()
+    notificacao_automatica = serializers.SerializerMethodField()
 
     class Meta:
         model = ConfiguracaoPagamento
@@ -54,12 +53,13 @@ class ConfiguracaoPagamentoSerializer(serializers.ModelSerializer):
             "api_key_final",
             "webhook_url",
             "webhook_token",
+            "notificacao_automatica",
             "aceita_pix",
             "aceita_cartao",
             "aceita_boleto",
             "updated_at",
         )
-        read_only_fields = ("provedor", "webhook_token", "updated_at")
+        read_only_fields = ("webhook_token", "updated_at")
 
     def get_tem_api_key(self, obj) -> bool:
         return bool(obj.api_key)
@@ -69,17 +69,28 @@ class ConfiguracaoPagamentoSerializer(serializers.ModelSerializer):
         return f"…{chave[-4:]}" if chave else ""
 
     def get_webhook_url(self, obj) -> str:
-        return frontend_url(f"/api/pagamentos/webhook/asaas/?schema={connection.schema_name}")
+        return url_webhook(obj)
+
+    def get_notificacao_automatica(self, obj) -> bool:
+        return notificacao_automatica()
+
+    def _troca_provedor(self, attrs) -> bool:
+        return bool(self.instance) and attrs.get("provedor", self.instance.provedor) != self.instance.provedor
 
     def validate(self, attrs):
         chave = attrs.get("api_key")
-        tem_chave = bool(chave) or (chave is None and bool(self.instance and self.instance.api_key))
+        chave_atual = bool(self.instance and self.instance.api_key) and not self._troca_provedor(attrs)
+        tem_chave = bool(chave) or (chave is None and chave_atual)
         if attrs.get("ativo", getattr(self.instance, "ativo", False)) and not tem_chave:
+            if self._troca_provedor(attrs):
+                raise serializers.ValidationError({"api_key": "Informe a chave de API do novo provedor."})
             raise serializers.ValidationError({"api_key": "Informe a chave de API para ativar."})
         return attrs
 
     def update(self, instance, validated_data):
         chave = validated_data.pop("api_key", None)
+        if self._troca_provedor(validated_data):
+            instance.api_key = ""
         if chave:
             instance.api_key = chave.strip()
         return super().update(instance, validated_data)

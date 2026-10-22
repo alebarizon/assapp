@@ -1,7 +1,7 @@
 # AssApp — Referência Técnica para o Cursor
 
 > Consulte este arquivo primeiro. Links para docs detalhados em `docs/`.  
-> **Última revisão:** 2026-10-16 (sem hipóteses PIPE · plano de reaproveitamento WellSaaS)
+> **Última revisão:** 2026-10-18 (assembleias, newsletter, diretório, agendador da régua · deploy pull-antes-de-parar)
 
 ---
 
@@ -14,7 +14,9 @@
 | Dev Mac | http://localhost:5174 | `orb` |
 
 Droplet: `159.203.183.184` · HTTPS: **adiado**  
-Changelog do dia: [`CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md)
+Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter a cada minuto + status das cobranças online a cada 30 min + régua de anuidades e réguas de relacionamento diárias às `REGUA_HORA`), `frontend`, `nginx` — sufixo `_staging` / `_prod`.  
+E-mail em staging/prod ainda é console (nada é entregue; a régua roda só marcando vencidas) — falta provedor por API (DigitalOcean bloqueia SMTP).  
+Changelog recente: [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) · infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11) · deploy: [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md)
 
 **Login remoto (ABCiber):** `diretoria@abciber.org.br` / `abciber123` — requer `init_sistema_tenant.sh` no droplet.
 
@@ -73,7 +75,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `sistema` | superadmin |
 | `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, publicacoes, governanca, newsletter, website, accounts |
 
-> `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via Asaas da própria associação.
+> `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via gateway da própria associação (Asaas, PagBank ou Mercado Pago).
 
 ---
 
@@ -85,7 +87,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `memoria` | ContextoHistorico, timeline |
 | `eventos` | Chamada de trabalhos (submissão pelo portal, parecer duplo-cego por critérios, decisão, certificados de autor/parecerista), anais com página citável por trabalho (`/site/eventos/:slug/anais`), programação e hotsite (`/site/eventos`) |
 | `membros` | Filiados, anuidades, régua de cobrança (`regua_anuidades`, diária pelo serviço `agendador`), linha do tempo do associado, carteirinha digital com QR (`/site/carteirinha/:codigo`), diretório público opt-in (`/site/associados`) |
-| `payments` | Pagamento online de anuidades (Asaas: Pix, cartão, boleto) + webhook (`/app/finance` → Pagamento online) |
+| `payments` | Pagamento online de anuidades e pedidos (Asaas, PagBank ou Mercado Pago: Pix, cartão, boleto) + webhooks + `sincronizar_cobrancas` a cada 30 min pelo `agendador` (`/app/finance` → Pagamento online) |
 | `finance` | Lançamentos OSC, dashboard, e-mail fechamento |
 | `ecommerce` | Catálogo, carrinho, pedidos (anuidade, evento, curso, material) |
 | `courses` | Cursos online: aulas, quiz, Q&A, certificado; venda via loja (`/app/courses`, `/app/portal/cursos`, `/site/cursos`) |
@@ -97,7 +99,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `website` | Site público tenant + CMS (`/site`, `/app/website`) |
 | `publicacoes` | Dossiês, e-books, boletins: acesso aberto, para adimplentes ou venda pela loja (`/app/publicacoes`, `/app/portal/publicacoes`, `/site/publicacoes`) |
 | `governanca` | Assembleias (convocação, presença, quórum, ata com hash) e votações com cédula digital (`/app/governanca`, `/app/portal/governanca`) |
-| `newsletter` | Campanhas segmentadas (associados, inscritos, etiquetas) com fila limitada por minuto e descadastro (`/app/newsletter`, `/site/descadastrar`) |
+| `newsletter` | Campanhas segmentadas (associados, inscritos, etiquetas) com fila limitada por minuto e descadastro (`/app/newsletter`, `/site/descadastrar`); réguas automáticas de boas-vindas, inativos e autor não sócio (`reguas_relacionamento`, diária pelo `agendador`) |
 
 App compartilhado (schema `public`): `support` — chamados associação → equipe Gesttora (`/app/suporte`).
 Certificados (cursos e eventos) usam `core/certificates.py` + verificação pública em `/site/certificados`.
@@ -137,7 +139,7 @@ Gestão em `/app/usuarios` — ver [`USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_
 /api/documents/  documents (+ meus/)
 /api/publicacoes/ publicações (diretoria, minhas/ portal, public/ site)
 /api/governanca/ assembleias/, votacoes/ (diretoria), minhas/ (portal: votar, presença, ata)
-/api/newsletter/ campanhas/, descadastros/ (diretoria), public/descadastrar/ (link do e-mail)
+/api/newsletter/ campanhas/, reguas/, descadastros/ (diretoria), public/descadastrar/ (link do e-mail)
 /api/website/    website CMS tenant (config, pages, public)
 /api/tenants/    resolve domínio → schema (public/resolve)
 ```
@@ -192,6 +194,12 @@ Ver: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLU
 | [`docs/changelog/CHANGELOG_USUARIOS_PERFIS_2026_10.md`](docs/changelog/CHANGELOG_USUARIOS_PERFIS_2026_10.md) | Perfis de acesso, convite por e-mail, definição/redefinição de senha |
 | [`docs/modulos/WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md) | **Website público do tenant** |
 | [`docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md`](docs/changelog/CHANGELOG_CMS_TENANT_PLANEJAMENTO_2026_08.md) | Planejamento CMS 2026-08 |
+| [`docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) | **Roadmap 2026-10**: régua, pagamento online, loja, eventos, anais, carteirinha, ficha 360, publicações, assembleias, newsletter, diretório, agendador |
+| [`docs/modulos/MEMBROS.md`](docs/modulos/MEMBROS.md) | **Membros**: anuidades, régua diária, carteirinha, diretório público |
+| [`docs/modulos/PUBLICACOES.md`](docs/modulos/PUBLICACOES.md) | **Publicações** (dossiês, e-books, acesso por venda/associado) |
+| [`docs/modulos/GOVERNANCA.md`](docs/modulos/GOVERNANCA.md) | **Assembleias e votações** (quórum, cédula, ata com hash) |
+| [`docs/modulos/NEWSLETTER.md`](docs/modulos/NEWSLETTER.md) | **Newsletter** (público, fila, descadastro) |
+| [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md) | Roteiro de deploy staging → produção e regras de segurança do droplet |
 
 ---
 

@@ -52,30 +52,39 @@ jobs:
         run: |
           COMMIT="${{ github.sha }}"
           REPO="${{ github.repository }}"
-          echo "Aguardando workflow Deploy to Staging (commit ${COMMIT})..."
+          # Mesmos paths-ignore do deploy-staging.yml: commits só de docs não geram run de staging
+          TARGET=$(git log -1 --format=%H "$COMMIT" -- . \
+            ':(exclude,glob)**/*.md' ':(exclude)docs' ':(exclude,glob).github/*.md')
+          if [ -z "$TARGET" ]; then
+            echo "✅ Nenhuma mudança de código no histórico — nada a validar"
+            exit 0
+          fi
+          CANDIDATES=$(git rev-list "$COMMIT" --not $(git rev-list --parents -n 1 "$TARGET" | cut -d' ' -f2-))
+          echo "Último commit com código: ${TARGET}"
+          echo "Aceita staging de qualquer um destes (código + commits só de docs depois dele):"
+          echo "$CANDIDATES"
+          SHAS_JSON=$(echo "$CANDIDATES" | jq -R . | jq -sc .)
+
           for attempt in $(seq 1 90); do
             RUNS=$(gh run list \
               --repo "$REPO" \
               --workflow=deploy-staging.yml \
-              --commit="$COMMIT" \
-              --json status,conclusion \
-              --limit 5)
+              --branch develop \
+              --json headSha,status,conclusion \
+              --limit 50 \
+              | jq -c --argjson shas "$SHAS_JSON" '[.[] | select(.headSha as $s | $shas | index($s))]')
             echo "Tentativa ${attempt}/90: ${RUNS}"
-            if echo "$RUNS" | grep -q '"conclusion":"success"'; then
+            if echo "$RUNS" | jq -e 'any(.[]; .conclusion == "success")' >/dev/null; then
               echo "✅ Staging validado — produção pode continuar"
               exit 0
             fi
-            if echo "$RUNS" | grep -q '"conclusion":"failure"'; then
-              echo "❌ Deploy staging falhou para este commit — produção bloqueada"
-              exit 1
-            fi
-            if echo "$RUNS" | grep -q '"conclusion":"cancelled"'; then
-              echo "❌ Deploy staging cancelado — produção bloqueada"
+            if echo "$RUNS" | jq -e 'length > 0 and all(.[]; .status == "completed")' >/dev/null; then
+              echo "❌ Deploy staging falhou ou foi cancelado para este código — produção bloqueada"
               exit 1
             fi
             sleep 30
           done
-          echo "❌ Timeout (45 min) aguardando staging para commit ${COMMIT}"
+          echo "❌ Timeout (45 min) aguardando staging para ${TARGET}"
           exit 1
 
   build-and-deploy:

@@ -17,7 +17,7 @@ from membros.models import Anuidade
 from membros.services import resolver_membro_do_user
 from tenants.resolvers import resolve_tenant_from_request
 
-from .gateways import AsaasGateway, GatewayError
+from .gateways import GatewayError
 from .models import Cobranca, ConfiguracaoPagamento
 from .serializers import CobrancaSerializer, CobrarSerializer, ConfiguracaoPagamentoSerializer
 from .services import (
@@ -25,7 +25,11 @@ from .services import (
     cobrar_pedido,
     confirmar_cobranca,
     disponibilidade,
+    gateway_da_config,
     processar_webhook_asaas,
+    processar_webhook_mercadopago,
+    processar_webhook_pagbank,
+    sincronizar_cobranca,
 )
 
 logger = logging.getLogger(__name__)
@@ -78,7 +82,7 @@ class TestarConfiguracaoView(APIView):
         if not config.api_key:
             raise ValidationError({"detail": "Salve a chave de API antes de testar."})
         try:
-            resultado = AsaasGateway(config.api_key, sandbox=config.sandbox).testar()
+            resultado = gateway_da_config(config).testar()
         except GatewayError as exc:
             raise ValidationError({"detail": str(exc)})
         return Response(resultado)
@@ -139,6 +143,7 @@ class MinhaCobrancaView(APIView):
     def get(self, request, cobranca_id):
         membro = _membro_do_request(request)
         cobranca = get_object_or_404(Cobranca, pk=cobranca_id, membro=membro)
+        cobranca = sincronizar_cobranca(cobranca)
         return Response(CobrancaSerializer(cobranca).data)
 
 
@@ -180,4 +185,46 @@ class WebhookAsaasView(APIView):
             resultado = processar_webhook_asaas(payload)
         logger.info("Webhook Asaas [%s] %s → %s", tenant.schema_name, payload.get("event"), resultado)
         return Response({"resultado": resultado})
+
+
+class _WebhookComTokenNaUrl(APIView):
+    """
+    POST /api/pagamentos/webhook/<provedor>/?schema=<schema>&token=<token>
+    A URL vai em cada cobrança; o status sempre é relido na API do gateway.
+    """
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    nome = ""
+
+    def processar(self, request, payload: dict) -> str:
+        raise NotImplementedError
+
+    def post(self, request):
+        tenant = resolve_tenant_from_request(request)
+        if not tenant:
+            raise NotFound("Associação não encontrada.")
+        token = request.query_params.get("token", "")
+        payload = request.data if isinstance(request.data, dict) else {}
+        with schema_context(tenant.schema_name):
+            config = ConfiguracaoPagamento.atual()
+            if not token or not hmac.compare_digest(token, config.webhook_token):
+                raise PermissionDenied("Token inválido.")
+            resultado = self.processar(request, payload)
+        logger.info("Webhook %s [%s] → %s", self.nome, tenant.schema_name, resultado)
+        return Response({"resultado": resultado})
+
+
+class WebhookPagBankView(_WebhookComTokenNaUrl):
+    nome = "PagBank"
+
+    def processar(self, request, payload):
+        return processar_webhook_pagbank(payload)
+
+
+class WebhookMercadoPagoView(_WebhookComTokenNaUrl):
+    nome = "Mercado Pago"
+
+    def processar(self, request, payload):
+        return processar_webhook_mercadopago(payload, request.query_params)
 

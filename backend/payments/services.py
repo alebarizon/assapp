@@ -4,14 +4,23 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import connection, transaction
 from django.utils import timezone
 
+from core.emails import frontend_url
 from ecommerce.models import Order, OrderStatus, PaymentMethod
 from membros.models import Anuidade, AnuidadeStatus
 from membros.services import registrar_pagamento
 
-from .gateways import AsaasGateway, GatewayError, SimuladoGateway
+from .gateways import (
+    CANCELADO,
+    PAGO,
+    AsaasGateway,
+    GatewayError,
+    MercadoPagoGateway,
+    PagBankGateway,
+    SimuladoGateway,
+)
 from .models import Cobranca, ConfiguracaoPagamento
 
 logger = logging.getLogger(__name__)
@@ -19,13 +28,43 @@ logger = logging.getLogger(__name__)
 EVENTOS_PAGO = {"PAYMENT_RECEIVED", "PAYMENT_CONFIRMED", "PAYMENT_RECEIVED_IN_CASH"}
 EVENTOS_CANCELADO = {"PAYMENT_DELETED", "PAYMENT_REFUNDED"}
 PRAZO_PEDIDO_DIAS = 3
+GATEWAYS = {
+    ConfiguracaoPagamento.ASAAS: AsaasGateway,
+    ConfiguracaoPagamento.PAGBANK: PagBankGateway,
+    ConfiguracaoPagamento.MERCADOPAGO: MercadoPagoGateway,
+}
+CONSULTA_MINIMA = timedelta(seconds=15)
+SINCRONIZAR_DIAS = 10
+
+
+def url_webhook(config: ConfiguracaoPagamento) -> str:
+    caminho = f"/api/pagamentos/webhook/{config.provedor}/?schema={connection.schema_name}"
+    if config.provedor != ConfiguracaoPagamento.ASAAS:
+        caminho += f"&token={config.webhook_token}"
+    return frontend_url(caminho)
+
+
+def notificacao_automatica() -> bool:
+    """PagBank e Mercado Pago só notificam endereços HTTPS; sem isso a confirmação vem da consulta periódica."""
+    return frontend_url().startswith("https://")
+
+
+def gateway_da_config(config: ConfiguracaoPagamento):
+    """Instancia o gateway do provedor configurado (sem olhar se está ativo)."""
+    classe = GATEWAYS[config.provedor]
+    return classe(
+        config.api_key,
+        sandbox=config.sandbox,
+        notification_url=url_webhook(config) if notificacao_automatica() else "",
+        retorno_url=frontend_url("/app/portal"),
+    )
 
 
 def gateway_ativo(config: ConfiguracaoPagamento | None = None):
     """Gateway real se configurado; simulado só quando PAGAMENTO_SIMULADO está ligado."""
     config = config or ConfiguracaoPagamento.atual()
     if config.ativo and config.api_key:
-        return AsaasGateway(config.api_key, sandbox=config.sandbox)
+        return gateway_da_config(config)
     if getattr(settings, "PAGAMENTO_SIMULADO", False):
         return SimuladoGateway()
     return None
@@ -53,9 +92,14 @@ def _gateway_para(metodo: str):
 
 def _emitir(gateway, metodo: str, *, membro, descricao: str, valor, vencimento, **alvo) -> Cobranca:
     """Reaproveita a cobrança em aberto (mesmo alvo, método, provedor e valor) ou cria uma nova no gateway."""
-    existente = Cobranca.objects.filter(
+    existentes = Cobranca.objects.filter(
         metodo=metodo, provedor=gateway.provedor, status=Cobranca.PENDENTE, valor=valor, **alvo
-    ).first()
+    )
+    if gateway.validade_horas:
+        # Margem para o associado ainda conseguir pagar antes de o gateway expirar a cobrança.
+        limite = timezone.now() - timedelta(hours=gateway.validade_horas) + timedelta(hours=12)
+        existentes = existentes.filter(created_at__gte=limite)
+    existente = existentes.first()
     if existente:
         return existente
 
@@ -209,3 +253,128 @@ def processar_webhook_asaas(payload: dict) -> str:
         cobranca.save(update_fields=["status", "payload", "updated_at"])
         return "cancelado"
     return "ignorado"
+
+
+def aplicar_estado(cobranca: Cobranca, estado: str, payload: dict | None = None) -> str:
+    if estado == PAGO:
+        confirmar_cobranca(cobranca, payload=payload or None)
+        return "pago"
+    if estado == CANCELADO and cobranca.status == Cobranca.PENDENTE:
+        cobranca.status = Cobranca.CANCELADA
+        if payload:
+            cobranca.payload = payload
+        cobranca.save(update_fields=["status", "payload", "updated_at"])
+        return "cancelado"
+    return "ignorado"
+
+
+def sincronizar_cobranca(cobranca: Cobranca, gateway=None, forcar: bool = False) -> Cobranca:
+    """Pergunta ao gateway o status de uma cobrança pendente (dispensa o webhook quando ele não chega)."""
+    if cobranca.status != Cobranca.PENDENTE or not cobranca.external_id:
+        return cobranca
+    if not forcar and timezone.now() - cobranca.updated_at < CONSULTA_MINIMA:
+        return cobranca
+    gateway = gateway or gateway_ativo()
+    if gateway is None or gateway.provedor != cobranca.provedor or isinstance(gateway, SimuladoGateway):
+        return cobranca
+    try:
+        estado, payload = gateway.consultar(cobranca)
+    except GatewayError as exc:
+        logger.warning("Consulta da cobrança %s no %s falhou: %s", cobranca.pk, gateway.provedor, exc)
+        estado, payload = None, None
+    if aplicar_estado(cobranca, estado, payload) == "ignorado":
+        Cobranca.objects.filter(pk=cobranca.pk).update(updated_at=timezone.now())
+    cobranca.refresh_from_db()
+    return cobranca
+
+
+def sincronizar_pendentes() -> dict:
+    """Varre as cobranças pendentes recentes do provedor ativo."""
+    gateway = gateway_ativo()
+    if gateway is None or isinstance(gateway, SimuladoGateway):
+        return {}
+    contagem = {"pago": 0, "cancelado": 0, "pendente": 0}
+    pendentes = Cobranca.objects.filter(
+        provedor=gateway.provedor,
+        status=Cobranca.PENDENTE,
+        created_at__gte=timezone.now() - timedelta(days=SINCRONIZAR_DIAS),
+    ).exclude(external_id="")
+    for cobranca in pendentes:
+        atual = sincronizar_cobranca(cobranca, gateway=gateway, forcar=True)
+        chave = {Cobranca.PAGA: "pago", Cobranca.CANCELADA: "cancelado"}.get(atual.status, "pendente")
+        contagem[chave] += 1
+    return contagem
+
+
+def _cobranca_por_referencia(provedor: str, external_id: str, referencia: str) -> Cobranca | None:
+    if external_id:
+        cobranca = Cobranca.objects.filter(provedor=provedor, external_id=external_id).first()
+        if cobranca:
+            return cobranca
+    if not referencia:
+        return None
+    try:
+        return Cobranca.objects.filter(pk=referencia, provedor=provedor).first()
+    except (ValueError, ValidationError):
+        return None
+
+
+def _gateway_do_provedor(provedor: str):
+    config = ConfiguracaoPagamento.atual()
+    if config.provedor != provedor or not config.api_key:
+        return None
+    return gateway_da_config(config)
+
+
+def processar_webhook_pagbank(payload: dict) -> str:
+    """O conteúdo da notificação não é confiável por si: o pedido é relido na API com a chave da associação."""
+    order_id = payload.get("id") or ""
+    if not order_id.startswith("ORDE_"):
+        return "ignorado"
+    gateway = _gateway_do_provedor(ConfiguracaoPagamento.PAGBANK)
+    if gateway is None:
+        return "sem_configuracao"
+    try:
+        pedido = gateway.pedido(order_id)
+    except GatewayError as exc:
+        logger.warning("Webhook PagBank: pedido %s não consultado: %s", order_id, exc)
+        return "erro"
+    referencias = [pedido.get("reference_id") or ""] + [i.get("reference_id") or "" for i in pedido.get("items") or []]
+    cobranca = None
+    for referencia in referencias:
+        cobranca = _cobranca_por_referencia(ConfiguracaoPagamento.PAGBANK, order_id, referencia)
+        if cobranca:
+            break
+    if cobranca is None:
+        return "desconhecido"
+    estado = gateway.estado_do_pedido(pedido)
+    if estado != PAGO and cobranca.external_id.startswith("CHEC_"):
+        # Cartão recusado no checkout não encerra o link: o associado pode tentar de novo.
+        return "ignorado"
+    return aplicar_estado(cobranca, estado, pedido)
+
+
+def processar_webhook_mercadopago(payload: dict, params: dict) -> str:
+    """Só usa o id do pagamento; status e referência vêm da API do Mercado Pago."""
+    tipo = payload.get("type") or payload.get("topic") or params.get("type") or params.get("topic") or ""
+    payment_id = str((payload.get("data") or {}).get("id") or params.get("data.id") or params.get("id") or "")
+    if tipo != "payment" or not payment_id.isdigit():
+        return "ignorado"
+    gateway = _gateway_do_provedor(ConfiguracaoPagamento.MERCADOPAGO)
+    if gateway is None:
+        return "sem_configuracao"
+    try:
+        pagamento = gateway.pagamento(payment_id)
+    except GatewayError as exc:
+        logger.warning("Webhook Mercado Pago: pagamento %s não consultado: %s", payment_id, exc)
+        return "erro"
+    cobranca = _cobranca_por_referencia(
+        ConfiguracaoPagamento.MERCADOPAGO, payment_id, pagamento.get("external_reference") or ""
+    )
+    if cobranca is None:
+        return "desconhecido"
+    estado = gateway.estado_do_pagamento(pagamento)
+    if estado != PAGO and cobranca.external_id != payment_id:
+        # Tentativa recusada no Checkout Pro não encerra a preferência: o associado pode tentar de novo.
+        return "ignorado"
+    return aplicar_estado(cobranca, estado, pagamento)
