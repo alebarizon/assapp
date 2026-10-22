@@ -25,7 +25,7 @@ Landing pública do produto **Gesttora** em `/`. Domínio de produção: **`gest
 - `adminpanel` / `LandingPageContent` / API pública de landing
 - Stripe / planos na landing
 - Website CMS do tenant (`website_cms`)
-- HTTPS (Let's Encrypt) — ver [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https-adiado--retomar-depois)
+- HTTPS (Let's Encrypt) — ver [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https)
 
 ## Como ver
 

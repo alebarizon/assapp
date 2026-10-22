@@ -10,10 +10,10 @@
 | Ambiente | URL | Branch |
 |----------|-----|--------|
 | Staging | http://159.203.183.184:8080/ | `develop` |
-| Produção | http://gesttora.com.br/ · http://159.203.183.184/ | `main` |
+| Produção | https://gesttora.com.br/ | `main` |
 | Dev Mac | http://localhost:5174 | `orb` |
 
-Droplet: `159.203.183.184` · HTTPS: **adiado**  
+Droplet: `159.203.183.184` · HTTPS: ✅ nginx do host + Let's Encrypt (stack prod em `127.0.0.1:8081`)  
 Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter a cada minuto + status das cobranças online a cada 30 min + régua de anuidades e réguas de relacionamento diárias às `REGUA_HORA`), `frontend`, `nginx` — sufixo `_staging` / `_prod`.  
 E-mail em staging/prod ainda é console (nada é entregue; a régua roda só marcando vencidas) — falta provedor por API (DigitalOcean bloqueia SMTP).  
 Changelog recente: [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) · infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11) · deploy: [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md)
@@ -28,7 +28,7 @@ Changelog recente: [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CH
 |--------|----------|-----|
 | `orb` | Dev Mac / OrbStack | nenhum |
 | `develop` | Staging DO `:8080` | `deploy-staging.yml` |
-| `main` | **Produção** DO `:80` | `deploy-production.yml` |
+| `main` | **Produção** DO (https, nginx do host → `:8081`) | `deploy-production.yml` |
 
 ```
 orb → develop (staging) → main (produção)
@@ -167,8 +167,8 @@ Ver: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLU
 |-----------|----------|
 | [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md) | **Consolidado 24–27 jul** (landing, deploy, domínio) |
 | [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md) | Landing SaaS Gesttora (`/`) |
-| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra · **HTTPS adiado** (`gesttora.com.br`) |
-| [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy DO + seção **Domínio + HTTPS (adiado)** |
+| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra · domínio `gesttora.com.br`, e-mail e HTTPS (seção 12) |
+| [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy DO + domínio, e-mail (túnel DreamHost) e HTTPS |
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
 | [`docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md`](docs/guias/TUTORIAL_MIGRACAO_ORB_DEVELOP_MAIN.md) | Promoção orb → develop → main |

@@ -1,7 +1,7 @@
 # Deploy DigitalOcean — AssApp
 
-**Última atualização:** 2026-10-18  
-**Changelog recente:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11 — agendador e deploy) · [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](../changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md)  
+**Última atualização:** 2026-10-22  
+**Changelog recente:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 12 — domínio, e-mail e HTTPS) · [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](../changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md)  
 **Roteiro de deploy:** [`PROMPT_DEPLOY.md`](../../PROMPT_DEPLOY.md)
 
 ---
@@ -16,7 +16,7 @@
 | Compose | `docker-compose.staging.yml` |
 | Tag imagens | `develop` |
 
-**Mesmo droplet, stacks isolados:** staging (`:8080`) e produção (`:80`) usam `COMPOSE_PROJECT_NAME` distinto (`assapp_staging` / `assapp_prod`) em `deploy.sh` — um deploy **não** derruba o outro.
+**Mesmo droplet, stacks isolados:** staging (`:8080`) e produção (`127.0.0.1:8081`, atrás do nginx do host) usam `COMPOSE_PROJECT_NAME` distinto (`assapp_staging` / `assapp_prod`) em `deploy.sh` — um deploy **não** derruba o outro.
 
 Validado em 2026-08-17 (commit `5486641`).
 
@@ -24,10 +24,9 @@ Validado em 2026-08-17 (commit `5486641`).
 
 | Campo | Valor |
 |-------|--------|
-| URL (IP) | http://159.203.183.184/ |
-| URL (domínio) | http://gesttora.com.br/ |
-| Health | http://gesttora.com.br/health/ |
-| Domínio antigo | `gesttora.vertent.com.br` — ainda aceito em `ALLOWED_HOSTS` durante a transição |
+| URL | https://gesttora.com.br/ (`www` e `http` redirecionam / respondem pelo mesmo certificado) |
+| Health | https://gesttora.com.br/health/ · pelo IP: http://159.203.183.184/health/ |
+| Domínio antigo | `gesttora.vertent.com.br` — redireciona (301) para `https://gesttora.com.br` |
 | Branch CI | `main` |
 | Compose | `docker-compose.prod.yml` |
 | Tag imagens | `latest` |
@@ -51,13 +50,13 @@ UFW: `22`, `80`, `443`, `8080`.
 
 ```
 develop → GitHub Actions → Docker Hub → deploy.sh staging → :8080
-main    → GitHub Actions → Docker Hub → deploy.sh production → :80
+main    → GitHub Actions → Docker Hub → deploy.sh production → 127.0.0.1:8081 ← nginx do host (80/443)
 ```
 
 | Ambiente | Branch | Porta | Compose |
 |----------|--------|-------|---------|
 | Staging | `develop` | 8080 | `docker-compose.staging.yml` |
-| Produção | `main` | 80 | `docker-compose.prod.yml` |
+| Produção | `main` | 8081 (só localhost; público via nginx do host em 80/443) | `docker-compose.prod.yml` |
 
 **Branches alinhadas** em `b2433e5` (2026-07-25). Fluxo: `orb` → `develop` → `main`.
 
@@ -99,7 +98,8 @@ Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 | Staging no ar | ✅ |
 | Produção (`main`) | ✅ (promovida 2026-07-25 · landing Gesttora) |
 | Domínio HTTP | `gesttora.com.br` → A `159.203.183.184` (DNS na DreamHost — ver seção Domínio) |
-| Domínio + SSL (HTTPS) | ❌ **adiado** — ver seção abaixo |
+| Domínio + SSL (HTTPS) | ✅ 2026-10-22 — nginx do host + Let's Encrypt (ver seção HTTPS) |
+| E-mail (DreamHost via túnel SSH) | ✅ 2026-10-22 |
 | Seed tenant sistema + abciber | ✅ executado staging + prod (2026-08-17) |
 
 ---
@@ -134,12 +134,12 @@ Nunca `system prune`, `container prune`, `volume rm` nem `down -v` no droplet: s
 | `backend` | `assapp_backend_<amb>` | Migrations no startup + Gunicorn |
 | `agendador` | `assapp_agendador_<amb>` | `manage.py agendador`: lote da newsletter a cada minuto; régua de anuidades e réguas de relacionamento (`reguas_relacionamento`) 1×/dia a partir de `REGUA_HORA` (padrão 8h Brasília). Sem healthcheck HTTP |
 | `frontend` | `assapp_frontend_<amb>` | Build Vite servido por nginx (o healthcheck aparece `unhealthy`, mas o site responde — pendente investigar) |
-| `nginx` | `assapp_nginx_<amb>` | Proxy na porta 80 (prod) / 8080 (staging) |
+| `nginx` | `assapp_nginx_<amb>` | Proxy em `127.0.0.1:8081` (prod) / `8080` (staging) |
+| `smtp_tunnel` | `assapp_smtp_tunnel_prod` | Só produção: túnel SSH até o SMTP da DreamHost (ver seção E-mail) |
 
 Variáveis do `.env.<amb>` ligadas ao agendador: `NEWSLETTER_POR_MINUTO` (padrão 30) e `REGUA_HORA` (padrão 8).
-Enquanto o `EMAIL_BACKEND` for console, nada é entregue: a régua de anuidades roda com `--sem-email` e as réguas
-de relacionamento nem rodam. Para enviar de verdade é
-preciso um provedor por API HTTP (Brevo, Resend, SES): a DigitalOcean bloqueia SMTP de saída.
+Enquanto o `EMAIL_BACKEND` for console (caso do staging), nada é entregue: a régua de anuidades roda com `--sem-email`
+e as réguas de relacionamento nem rodam. Produção envia pela DreamHost (seção E-mail).
 
 Na primeira subida após mudanças de modelo, o agendador pode logar `relation ... does not exist` uma vez (rodou antes
 das migrations do backend); o ciclo seguinte já funciona.
@@ -195,27 +195,56 @@ curl -s "http://159.203.183.184:8080/site?schema=demo" -o /dev/null -w "%{http_c
 
 ---
 
-## Domínio + HTTPS (adiado — retomar depois)
+## Domínio + HTTPS
 
-**Estado em 2026-10-22** — domínio próprio `gesttora.com.br` substitui `gesttora.vertent.com.br`
+**Estado em 2026-10-22** — domínio próprio `gesttora.com.br` substitui `gesttora.vertent.com.br`, com HTTPS
 
 | Item | Valor |
 |------|--------|
 | Domínio | `gesttora.com.br` (registrado no Registro.br) |
 | DNS | zona na **DreamHost** (painel → DNS do domínio): **A** `@` → `159.203.183.184`; **CNAME** `www` → `gesttora.com.br` |
 | Nameservers (Registro.br) | `ns1.dreamhost.com`, `ns2.dreamhost.com`, `ns3.dreamhost.com` |
-| HTTP | `http://gesttora.com.br` |
-| HTTPS | ❌ porta **443** sem listener (`Connection refused`) |
-| Domínio antigo | `gesttora.vertent.com.br` (A → mesmo IP) segue em `ALLOWED_HOSTS` até ser desligado |
+| HTTPS | `https://gesttora.com.br` (Let's Encrypt, `gesttora.com.br` + `www`) |
+| HTTP | redireciona (301) para `https://gesttora.com.br`, exceto `/health/` (diagnóstico pelo IP) |
+| Domínio antigo | `gesttora.vertent.com.br` (A → mesmo IP) redireciona para o novo; segue em `ALLOWED_HOSTS` até ser desligado |
 
-O workflow `deploy-production.yml` reescreve `ALLOWED_HOSTS` e `FRONTEND_URL` no `.env.production` do droplet a cada deploy.
+O workflow `deploy-production.yml` reescreve `ALLOWED_HOSTS` e `FRONTEND_URL=https://gesttora.com.br` no `.env.production` do droplet a cada deploy.
 
 Verificação do DNS:
 
 ```bash
 dig +short gesttora.com.br NS   # deve listar ns*.dreamhost.com
 dig +short gesttora.com.br A    # 159.203.183.184
-curl -sS http://gesttora.com.br/health/
+curl -sS https://gesttora.com.br/health/
+```
+
+### HTTPS: nginx do host + Certbot
+
+```
+internet :80/:443 → nginx do HOST (TLS) → 127.0.0.1:8081 → assapp_nginx_prod → frontend / backend
+```
+
+| Peça | Onde |
+|------|------|
+| Config do nginx do host | `/etc/nginx/sites-available/gesttora` (cópia versionada: [`nginx/host/gesttora.conf`](../../nginx/host/gesttora.conf)); `default` desabilitado |
+| Certificado | `/etc/letsencrypt/live/gesttora.com.br/` (Let's Encrypt, 90 dias) |
+| Renovação | `certbot.timer` (systemd, 2×/dia); `certbot renew --dry-run` validado em 2026-10-22 |
+| Porta da stack de produção | `127.0.0.1:8081:80` em [`docker-compose.prod.yml`](../../docker-compose.prod.yml); `deploy.sh` checa o health nela |
+| Proxy → Django | nginx do host manda `X-Forwarded-Proto`; o do container repassa (`map $proto_origem` em [`nginx_assapp_prod.conf`](../../nginx/nginx_assapp_prod.conf)); `SECURE_PROXY_SSL_HEADER` no settings |
+
+Com `FRONTEND_URL` em https, os webhooks de PagBank e Mercado Pago passam a ser registrados automaticamente na cobrança (`payments.services.notificacao_automatica()`).
+
+Durante o deploy de produção, o site mostra **502** do nginx do host por ~1–2 min (a stack em 8081 está trocando); o nginx do host não é tocado pelo deploy.
+
+Alterar a config do host: editar `nginx/host/gesttora.conf`, copiar para `/etc/nginx/sites-available/gesttora`, `nginx -t && systemctl reload nginx`. Manter as linhas `# managed by Certbot` (a renovação usa o plugin nginx). Se o droplet for refeito: `apt install nginx certbot python3-certbot-nginx`, copiar a config **sem** o bloco 443 e o `default_server` da porta 80 apontando para `127.0.0.1:8081`, `ln -s` em `sites-enabled`, remover `default`, e rodar `certbot --nginx -d gesttora.com.br -d www.gesttora.com.br --redirect -m contato@gesttora.com.br --agree-tos`.
+
+Diagnóstico:
+
+```bash
+systemctl status nginx --no-pager | head -5
+ss -tlnp | grep -E ':80 |:443 |:8081 '
+curl -sS -m 10 http://127.0.0.1:8081/health/     # stack de produção, sem o nginx do host
+certbot certificates
 ```
 
 ### E-mail (DreamHost)
@@ -271,28 +300,6 @@ dig +short gesttora.com.br MX   # mx1/mx2.dreamhost.com
 dig +short gesttora.com.br TXT  # SPF com netblocks.dreamhost.com
 ```
 
-**Causa:** produção AssApp só publica `80:80` ([`docker-compose.prod.yml`](../../docker-compose.prod.yml)); o nginx do container ([`nginx/nginx_assapp_prod.conf`](../../nginx/nginx_assapp_prod.conf)) só faz `listen 80`. Let’s Encrypt no host, se instalado, **não** está ligado a um serviço na 443.
-
-### Solução recomendada (quando retomar)
-
-1. Mudar o mapeamento da produção AssApp de `80:80` para interno, ex.: `127.0.0.1:8081:80`.
-2. Nginx (ou Caddy) **no host** escutando **80 + 443**, `server_name gesttora.com.br www.gesttora.com.br`, `proxy_pass http://127.0.0.1:8081`.
-3. Emitir/renovar certificado:
-   ```bash
-   sudo certbot --nginx -d gesttora.com.br -d www.gesttora.com.br
-   ```
-4. Em `.env.production` no droplet: `CSRF_TRUSTED_ORIGINS=https://gesttora.com.br,https://www.gesttora.com.br` e `FRONTEND_URL=https://gesttora.com.br` (ajustar também o `sed` de `FRONTEND_URL` em `deploy-production.yml`).
-5. Reiniciar stack + nginx do host; validar `https://gesttora.com.br`.
-
-**Alternativa (menos preferida):** montar `/etc/letsencrypt` no `assapp_nginx_prod`, `listen 443 ssl` no conf e publicar `443:443` no compose.
-
-Diagnóstico rápido no droplet:
-
-```bash
-ss -tlnp | grep -E ':80|:443'
-sudo ls /etc/letsencrypt/live/
-```
-
 ---
 
 ## Deploy local (dev)
@@ -307,6 +314,5 @@ sudo ls /etc/letsencrypt/live/
 
 1. `git pull` em `orb` (desenvolvimento local)
 2. Desenvolver → merge `orb` → `develop` → push → validar staging `:8080`
-3. Quando OK: merge `develop` → `main` → push → validar produção `:80`
+3. Quando OK: merge `develop` → `main` → push → validar produção em https://gesttora.com.br/health/
 4. Confirmar health OK (migrations já rodaram no startup do backend)
-5. **HTTPS:** seguir seção [Domínio + HTTPS (adiado)](#domínio--https-adiado--retomar-depois)

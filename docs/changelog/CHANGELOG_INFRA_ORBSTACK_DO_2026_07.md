@@ -1,7 +1,7 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean
 
 > **Última atualização:** 2026-10-22 (seção 12)  
-> **Domínio:** produção migrou para `gesttora.com.br` (DNS e e-mail na DreamHost, A → mesmo IP do droplet); `gesttora.vertent.com.br` segue aceito na transição. SSL adiado (ver `DEPLOY_DIGITALOCEAN.md`). SMTP de saída bloqueado no droplet.
+> **Domínio:** produção em **https://gesttora.com.br** (DNS e e-mail na DreamHost, A → mesmo IP do droplet; nginx do host + Let's Encrypt); `gesttora.vertent.com.br` redireciona. E-mail sai pela DreamHost via túnel SSH (a DigitalOcean bloqueia SMTP de saída).
 
 ---
 
@@ -16,9 +16,10 @@
 | Docker Hub `assapp-backend` / `assapp-frontend` | ✅ |
 | Compose staging/prod + nginx + `deploy.sh` | ✅ |
 | **Staging no ar** (`:8080`) | ✅ |
-| Produção (`main` → `:80`) | ✅ (2026-07-25) |
-| Domínio HTTP `gesttora.com.br` (antes `gesttora.vertent.com.br`) | A → droplet (2026-10-22) |
-| Domínio + SSL (HTTPS / Certbot) | ❌ **adiado** — proxy TLS no host + AssApp em `127.0.0.1:8081` (detalhe em [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https-adiado--retomar-depois)) |
+| Produção (`main` → `127.0.0.1:8081`, público via nginx do host) | ✅ (2026-07-25) |
+| Domínio `gesttora.com.br` (antes `gesttora.vertent.com.br`) | ✅ A → droplet (2026-10-22) |
+| Domínio + SSL (HTTPS / Certbot) | ✅ 2026-10-22 — nginx do host + Let's Encrypt, renovação pelo `certbot.timer` ([`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#https-nginx-do-host--certbot)) |
+| E-mail de saída (DreamHost via túnel SSH) | ✅ 2026-10-22 |
 | Tenant `sistema` / seed no staging | ❓ |
 | Tenant `demo` em staging/prod | ❌ (script local: `scripts/init_demo_tenant.sh`) |
 
@@ -26,9 +27,8 @@
 
 | Recurso | URL |
 |---------|-----|
-| Frontend (domínio) | http://gesttora.com.br/ |
-| Frontend (IP) | http://159.203.183.184/ |
-| Health API | http://gesttora.com.br/health/ |
+| Frontend | https://gesttora.com.br/ |
+| Health API | https://gesttora.com.br/health/ (pelo IP: http://159.203.183.184/health/) |
 
 ### URLs staging (funcionando)
 
@@ -51,7 +51,7 @@
 | Dev Mac / OrbStack | `orb` |
 
 ```
-orb → develop (staging :8080) → main (produção :80)
+orb → develop (staging :8080) → main (produção https://gesttora.com.br)
 ```
 
 ### Commits relevantes (infra)
@@ -197,7 +197,8 @@ Checklist: `.github/CHECKLIST_SECRETS.md`
 | `docker-compose.staging.yml` | Stack staging (pull-only) |
 | `docker-compose.prod.yml` | Stack produção (pull-only) |
 | `nginx/nginx_assapp_staging.conf` | Proxy :8080 |
-| `nginx/nginx_assapp_prod.conf` | Proxy :80 |
+| `nginx/nginx_assapp_prod.conf` | Proxy da stack prod (`127.0.0.1:8081`) |
+| `nginx/host/gesttora.conf` | Cópia da config do nginx do host (TLS, 2026-10-22) |
 | `scripts/deploy.sh` | Pull (antes de parar) + up + health check + limpeza de imagens sem tag |
 | `scripts/setup_digitalocean.sh` | Bootstrap droplet |
 | `env.staging.example` / `env.production.example` | Templates |
@@ -228,17 +229,13 @@ Checklist: `.github/CHECKLIST_SECRETS.md`
    - `./scripts/init_sistema_tenant.sh` — superadmin + ABCiber
    - `./scripts/init_demo_tenant.sh` — tenant `demo` (`demo@demo.com` / `demo`)
 
-### HTTPS (adiado)
-
-Ver seção em [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https-adiado--retomar-depois): proxy TLS no host + AssApp em porta interna.
-
 ### Promover produção (fluxo habitual)
 
 ```bash
 git checkout develop && git merge orb && git push origin develop
 # validar staging
 git checkout main && git merge develop && git push origin main
-# validar http://gesttora.com.br/
+# validar https://gesttora.com.br/
 ```
 
 ### Produto / PIPE (Fase 1)
@@ -247,7 +244,6 @@ Retomar sprints conforme `docs/referencia/STATUS_SPRINTS_FASE1.md` — mandatos 
 
 ### Infra futura
 
-- HTTPS (Certbot) — ver acima
 - Stripe real (último, conforme docs)
 - `G_TOKEN_DEPLOY` se repo ficar privado
 
@@ -313,11 +309,11 @@ Deploys do dia, todos validados em staging antes de `main`:
 
 - Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — destrava lembretes da régua e newsletter.
 - Healthcheck do `frontend` aparece `unhealthy` em staging e produção, embora o site responda.
-- HTTPS (seção 9).
+- HTTPS — feito em 2026-10-22 (seção 12).
 
 ---
 
-## 12. Domínio gesttora.com.br, e-mail DreamHost e verify-staging (2026-10-22)
+## 12. Domínio gesttora.com.br, e-mail DreamHost, HTTPS e verify-staging (2026-10-22)
 
 Deploys do dia, todos validados em staging antes de `main`:
 
@@ -326,6 +322,9 @@ Deploys do dia, todos validados em staging antes de `main`:
 | `39ae19e` | Domínio `gesttora.com.br` (`ALLOWED_HOSTS`, `FRONTEND_URL`, remetente, landing) + bloco SMTP opcional no deploy | 13:10 (via **Run workflow**) |
 | `9b6cb19` | Docs: DNS na DreamHost | junto com o anterior |
 | `569d154` | Merge da `orb`: gateways PagBank/Mercado Pago, réguas da newsletter (`newsletter/0002`, `payments/0003`) e correção do `verify-staging` | 13:58 |
+| `12b6a87` | Túnel SSH até o SMTP da DreamHost (`smtp_tunnel`) + cota de envio (`CotaSMTPBackend`, `core/0001_cota_email`) | tarde |
+| `b7e437e` | E-mails de demonstração da abciber em `@example.org` | tarde |
+| `824180e` | HTTPS: produção em `127.0.0.1:8081`, nginx do host, `SECURE_PROXY_SSL_HEADER`, `FRONTEND_URL` https | 15:45 |
 
 ### Domínio
 
@@ -335,7 +334,7 @@ Deploys do dia, todos validados em staging antes de `main`:
   Registro.br (`a/b.auto.dns.br`), a troca tem carência de ~1h20 antes de publicar.
 - `ALLOWED_HOSTS`: `159.203.183.184,gesttora.com.br,www.gesttora.com.br,gesttora.vertent.com.br,localhost,127.0.0.1`.
   O domínio antigo segue aceito até ser desligado.
-- `deploy-production.yml` reescreve `ALLOWED_HOSTS` e `FRONTEND_URL=http://gesttora.com.br` no `.env.production`
+- `deploy-production.yml` reescreve `ALLOWED_HOSTS` e `FRONTEND_URL` (https desde `824180e`) no `.env.production`
   a cada deploy e troca o remetente antigo `noreply@vertent.com.br` por `noreply@gesttora.com.br`.
 - Roteamento de tenant é por path (`TenantPathMiddleware`); `BASE_DOMAIN` não mudou.
 
@@ -346,8 +345,7 @@ Deploys do dia, todos validados em staging antes de `main`:
   `smtp.dreamhost.com:587` e `SUPPORT_EMAIL=contato@gesttora.com.br` (senha via `envs` do ssh-action, gravada entre
   aspas simples; testada com caracteres especiais no bash 5 e no compose).
 - **Testado no droplet em 2026-10-22: portas 25, 465, 587 e 2525 de saída bloqueadas pela DigitalOcean**
-  (do Mac, 465 e 587 da DreamHost abrem). Portanto **não criar `SMTP_PASSWORD`** enquanto o bloqueio existir:
-  o backend passaria a tentar SMTP e cada envio esperaria o timeout.
+  (do Mac, 465 e 587 da DreamHost abrem). SMTP direto do droplet não funciona: daí o túnel abaixo.
 - Caminhos: pedir à DigitalOcean a liberação de SMTP (ticket de suporte) ou usar provedor por API HTTP
   (Brevo, Resend ou SES) com o domínio `gesttora.com.br` autenticado (DKIM/SPF do provedor na zona da DreamHost).
 - **Decisão (sem clientes ainda): manter tudo na DreamHost** via túnel SSH — serviço `smtp_tunnel` (alias de rede
@@ -371,8 +369,26 @@ Deploys do dia, todos validados em staging antes de `main`:
   `paths-ignore` do staging) e aceita staging bem-sucedido dele ou de qualquer commit só de docs posterior.
   Espera se houver staging em andamento; bloqueia se todos falharam ou foram cancelados.
 
+- **Em produção (após `12b6a87`):** secret `SMTP_PASSWORD` criado; `sendtestemail` entregue em `contato@`.
+  DMARC `p=none` publicado.
+
+### HTTPS
+
+- `824180e`: a stack de produção passou a publicar só `127.0.0.1:8081:80`; `deploy.sh` checa o health nessa porta.
+  `SECURE_PROXY_SSL_HEADER` no settings e `map $proto_origem` no nginx do container para repassar o
+  `X-Forwarded-Proto` do nginx do host. `deploy-production.yml` grava `FRONTEND_URL=https://gesttora.com.br`.
+- No droplet: `nginx` + `certbot` + `python3-certbot-nginx` via apt (com `policy-rc.d` temporário para o nginx não
+  disputar a porta 80 com a stack antiga). Um serviço systemd transitório subiu o nginx do host assim que o deploy
+  liberou a porta 80 — produção ficou fora ~2 min.
+- `certbot --nginx -d gesttora.com.br -d www.gesttora.com.br --redirect`: certificado Let's Encrypt até 20/01/2027,
+  renovação pelo `certbot.timer` (`renew --dry-run` OK).
+- O Certbot deixou a porta 80 respondendo 404 para o IP; a config versionada em `nginx/host/gesttora.conf` redireciona
+  tudo para `https://gesttora.com.br` e mantém `/health/` em http (diagnóstico pelo IP).
+- Validado: https 200 (`/`, `/health/`, `www`), http → https 301, `gesttora.vertent.com.br` → https 301,
+  `request.is_secure()` True, CSRF com origens https e `notificacao_automatica()` True — webhooks de PagBank e
+  Mercado Pago passam a ser registrados nas cobranças.
+
 ### Pendências
 
-- Confirmar propagação: `dig +short gesttora.com.br NS` (DreamHost) e `curl http://gesttora.com.br/health/`.
-- E-mail de saída (ver acima). DMARC (`_dmarc`, `p=none` para começar) a criar na DreamHost.
-- HTTPS (seção 9) — também liga o webhook automático de PagBank/Mercado Pago, que exige URL HTTPS.
+- Endurecer DMARC para `quarantine` depois de algumas semanas de relatórios.
+- Desligar `gesttora.vertent.com.br` (DNS + `ALLOWED_HOSTS`) quando ninguém mais usar o endereço antigo.

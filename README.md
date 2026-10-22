@@ -240,15 +240,14 @@ Fluxo de domínio: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/
 |--------|----------|-----|
 | `orb` | Desenvolvimento Mac / OrbStack | — |
 | `develop` | Staging DigitalOcean `:8080` | `deploy-staging.yml` |
-| `main` | **Produção** DigitalOcean `:80` | `deploy-production.yml` |
+| `main` | **Produção** DigitalOcean (https) | `deploy-production.yml` |
 
 Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) · [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md)
 
 | Ambiente | URL |
 |----------|-----|
 | Staging | http://159.203.183.184:8080/ |
-| Produção | http://gesttora.com.br/ · http://159.203.183.184/ |
-| HTTPS | adiado — ver guia de deploy |
+| Produção | https://gesttora.com.br/ |
 
 **Branches alinhadas** em `5486641` (2026-08-17). Changelog: [`docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md)
 
@@ -367,7 +366,7 @@ docker compose exec backend python manage.py migrate_schemas
 - [x] Tenant demo local (`scripts/init_demo_tenant.sh`)
 - [x] E-commerce — catálogo, carrinho, pedidos ([`ECOMMERCE.md`](docs/modulos/ECOMMERCE.md))
 - [x] Website CMS tenant — `/site` + `/app/website` ([`WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md))
-- [ ] HTTPS (Let's Encrypt) — adiado  
+- [x] HTTPS (Let's Encrypt) — 2026-10-22  
 
 > **Consolidado 2026-08-17:** [`docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md) · [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](docs/changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md)  
 > **Status detalhado:** [`docs/referencia/STATUS_SPRINTS_FASE1.md`](docs/referencia/STATUS_SPRINTS_FASE1.md)
@@ -397,7 +396,7 @@ Protocolo de entrevistas: [`research/`](research/)
 | [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md) | **Consolidado 24–27 jul** (landing, deploy, domínio) |
 | [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md) | Landing SaaS Gesttora |
 | [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra OrbStack + DigitalOcean |
-| [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy + HTTPS (adiado) |
+| [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy, domínio, e-mail e HTTPS |
 | [`docs/changelog/CHANGELOG_2026_07_15.md`](docs/changelog/CHANGELOG_2026_07_15.md) | Consolidado 2026-07-15 (Mandatos H2 + User↔Membro + portal) |
 | [`docs/changelog/CHANGELOG_PORTAL_ASSOCIADO_2026_07.md`](docs/changelog/CHANGELOG_PORTAL_ASSOCIADO_2026_07.md) | Portal do associado |
 | [`docs/changelog/CHANGELOG_USER_MEMBRO_2026_07.md`](docs/changelog/CHANGELOG_USER_MEMBRO_2026_07.md) | Ponte User ↔ Membro |
