@@ -97,7 +97,7 @@ Checklist: [`.github/CHECKLIST_SECRETS.md`](../../.github/CHECKLIST_SECRETS.md)
 | Compose + deploy.sh | ✅ |
 | Staging no ar | ✅ |
 | Produção (`main`) | ✅ (promovida 2026-07-25 · landing Gesttora) |
-| Domínio HTTP | `gesttora.com.br` → A `159.203.183.184` (DNS na DigitalOcean — ver seção Domínio) |
+| Domínio HTTP | `gesttora.com.br` → A `159.203.183.184` (DNS na DreamHost — ver seção Domínio) |
 | Domínio + SSL (HTTPS) | ❌ **adiado** — ver seção abaixo |
 | Seed tenant sistema + abciber | ✅ executado staging + prod (2026-08-17) |
 
@@ -164,8 +164,8 @@ curl -s "http://159.203.183.184:8080/site?schema=demo" -o /dev/null -w "%{http_c
 | Item | Valor |
 |------|--------|
 | Domínio | `gesttora.com.br` (registrado no Registro.br) |
-| DNS | zona na DigitalOcean (Networking → Domains): **A** `@` → `159.203.183.184`; **A** ou **CNAME** `www` → mesmo droplet |
-| Nameservers (Registro.br) | `ns1.digitalocean.com`, `ns2.digitalocean.com`, `ns3.digitalocean.com` |
+| DNS | zona na **DreamHost** (painel → DNS do domínio): **A** `@` → `159.203.183.184`; **CNAME** `www` → `gesttora.com.br` |
+| Nameservers (Registro.br) | `ns1.dreamhost.com`, `ns2.dreamhost.com`, `ns3.dreamhost.com` |
 | HTTP | `http://gesttora.com.br` |
 | HTTPS | ❌ porta **443** sem listener (`Connection refused`) |
 | Domínio antigo | `gesttora.vertent.com.br` (A → mesmo IP) segue em `ALLOWED_HOSTS` até ser desligado |
@@ -175,14 +175,14 @@ O workflow `deploy-production.yml` reescreve `ALLOWED_HOSTS` e `FRONTEND_URL` no
 Verificação do DNS:
 
 ```bash
-dig +short gesttora.com.br NS   # deve listar ns*.digitalocean.com
+dig +short gesttora.com.br NS   # deve listar ns*.dreamhost.com
 dig +short gesttora.com.br A    # 159.203.183.184
 curl -sS http://gesttora.com.br/health/
 ```
 
 ### E-mail (DreamHost)
 
-Caixas `contato@gesttora.com.br` e `noreply@gesttora.com.br` hospedadas na DreamHost. A DigitalOcean não hospeda e-mail; a zona DNS na DO precisa dos registros da DreamHost (copiar os valores exatos do painel DreamHost → Websites/Mail → DNS do domínio):
+Caixas `contato@gesttora.com.br` e `noreply@gesttora.com.br` hospedadas na DreamHost, que também hospeda a zona DNS (só o registro A aponta para o droplet). Registros de e-mail na zona (MX, SPF e DKIM criados automaticamente pela DreamHost; DMARC adicionar manualmente):
 
 | Tipo | Nome | Valor |
 |------|------|-------|
