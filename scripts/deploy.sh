@@ -35,7 +35,8 @@ fi
 if [ "$ENVIRONMENT" = "production" ]; then
   COMPOSE_FILE="docker-compose.prod.yml"
   IMAGE_TAG_DEFAULT="latest"
-  HOST_PORT=80
+  # 80/443 públicas são do nginx do host (TLS), que repassa para cá
+  HOST_PORT=8081
   BACKEND_CONTAINER="assapp_backend_prod"
   COMPOSE_PROJECT_NAME="assapp_prod"
   CONTAINER_NAMES="assapp_db_prod assapp_backend_prod assapp_agendador_prod assapp_newsletter_prod assapp_smtp_tunnel_prod assapp_frontend_prod assapp_nginx_prod"

@@ -219,9 +219,9 @@ jobs:
             sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=latest|" .env.production
             sed -i "s|^ALLOWED_HOSTS=.*|ALLOWED_HOSTS=159.203.183.184,gesttora.com.br,www.gesttora.com.br,gesttora.vertent.com.br,localhost,127.0.0.1|" .env.production
             if grep -q '^FRONTEND_URL=' .env.production; then
-              sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=http://gesttora.com.br|" .env.production
+              sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=https://gesttora.com.br|" .env.production
             else
-              echo "FRONTEND_URL=http://gesttora.com.br" >> .env.production
+              echo "FRONTEND_URL=https://gesttora.com.br" >> .env.production
             fi
             sed -i "s|^DEFAULT_FROM_EMAIL=noreply@vertent.com.br$|DEFAULT_FROM_EMAIL=noreply@gesttora.com.br|" .env.production
 

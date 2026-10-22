@@ -1,6 +1,6 @@
 # Docker Compose — PRODUÇÃO AssApp (DigitalOcean)
 # Pull-only — imagens do Docker Hub (build no GitHub Actions)
-# Porta host: 80
+# Porta host: 127.0.0.1:8081 (atrás do nginx do host em 80/443)
 
 services:
   db:
@@ -50,7 +50,8 @@ services:
       GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
       GUNICORN_FORWARDED_ALLOW_IPS: "*"
       SYSTEM_TENANT_SCHEMA: ${SYSTEM_TENANT_SCHEMA:-sistema}
-      FRONTEND_URL: ${FRONTEND_URL:-http://gesttora.com.br}
+      FRONTEND_URL: ${FRONTEND_URL:-https://gesttora.com.br}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://gesttora.com.br,https://www.gesttora.com.br}
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
       EMAIL_HOST: ${EMAIL_HOST:-localhost}
       EMAIL_PORT: ${EMAIL_PORT:-587}
@@ -141,8 +142,9 @@ services:
       - ./nginx/nginx_assapp_prod.conf:/etc/nginx/conf.d/default.conf:ro
       - static_volume:/usr/share/nginx/html/static:ro
       - media_volume:/usr/share/nginx/html/media:ro
+    # Portas 80/443 públicas ficam com o nginx do host (TLS); ver nginx/host/gesttora.conf
     ports:
-      - "80:80"
+      - "127.0.0.1:8081:80"
     depends_on:
       - backend
       - frontend
