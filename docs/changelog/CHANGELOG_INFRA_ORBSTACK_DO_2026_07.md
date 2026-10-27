@@ -1,6 +1,6 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean
 
-> **Última atualização:** 2026-10-22 (seção 12)  
+> **Última atualização:** 2026-10-27 (seção 13 — Google Analytics)  
 > **Domínio:** produção em **https://gesttora.com.br** (DNS e e-mail na DreamHost, A → mesmo IP do droplet; nginx do host + Let's Encrypt); `gesttora.vertent.com.br` redireciona. E-mail sai pela DreamHost via túnel SSH (a DigitalOcean bloqueia SMTP de saída).
 
 ---
@@ -392,3 +392,25 @@ Deploys do dia, todos validados em staging antes de `main`:
 
 - Endurecer DMARC para `quarantine` depois de algumas semanas de relatórios.
 - Desligar `gesttora.vertent.com.br` (DNS + `ALLOWED_HOSTS`) quando ninguém mais usar o endereço antigo.
+
+---
+
+## 13. Google Analytics (2026-10-27)
+
+| Commit | Conteúdo | Produção |
+|--------|----------|----------|
+| `55a99be` | GA4 `G-S7EMQXSSJX` nas páginas da Gesttora, só em produção | 08:38 |
+
+- **Não** foi colado no `index.html`: o mesmo arquivo serve a landing, os sites das associações (`/site`) e o painel
+  (`/app`), e rotas como `/definir-senha?token=...`, `/site/descadastrar?t=...` e `/site/formularios/:token` mandariam
+  tokens ao Google (o GA4 registra a URL completa por padrão).
+- `frontend/src/components/GoogleAnalytics.tsx` (montado em `App.tsx`): carrega o `gtag.js` na primeira visita a `/`,
+  `/login` ou `/signup` e envia `page_view` só com o caminho (sem query string). Fora dessas rotas liga
+  `window['ga-disable-G-S7EMQXSSJX']`, então a navegação interna para `/site` ou `/app` não gera evento.
+- ID via `VITE_GA_ID`: `ARG` no `frontend/Dockerfile` e `build-args` só em `deploy-production.yml`. Staging e local
+  não medem — o Vite elimina o código do bundle quando a variável está vazia.
+- Sem aviso de cookies por decisão do produto (ainda sem clientes); citar o Google Analytics na política de privacidade.
+- Validado em produção (navegador): `/` e `/login?schema=...&next=...` registrados como `https://gesttora.com.br/` e
+  `https://gesttora.com.br/login`; ao navegar para `/site?schema=abciber`, medição desligada e nenhum envio.
+- Painel do GA4: desligar "Alterações de página com base em eventos do histórico do navegador" na Medição otimizada
+  (detalhe em [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#google-analytics-ga4)).

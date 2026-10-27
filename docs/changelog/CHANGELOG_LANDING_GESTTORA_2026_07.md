@@ -27,6 +27,12 @@ Landing pública do produto **Gesttora** em `/`. Domínio de produção: **`gest
 - Website CMS do tenant (`website_cms`)
 - HTTPS (Let's Encrypt) — ver [`DEPLOY_DIGITALOCEAN.md`](../guias/DEPLOY_DIGITALOCEAN.md#domínio--https)
 
+## Atualização 2026-10-27 — Google Analytics
+
+GA4 (`G-S7EMQXSSJX`) mede `/`, `/login` e `/signup` em produção, sem query string — ver
+[`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) seção 13. Domínio atual:
+`https://gesttora.com.br`.
+
 ## Como ver
 
 | Ambiente | URL |

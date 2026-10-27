@@ -52,7 +52,7 @@ Django 4.2 + DRF + JWT + django-tenants + PostgreSQL 14 + React 18 + TS + Vite
 
 | Rota | Página |
 |------|--------|
-| `/` | Landing SaaS **Gesttora** (`gesttora.com.br`) — conteúdo estático |
+| `/` | Landing SaaS **Gesttora** (`gesttora.com.br`) — conteúdo estático; Google Analytics em `/`, `/login`, `/signup` (só produção, `GoogleAnalytics.tsx`) |
 | `/site`, `/site/p/:slug` | **Website do tenant** (público, `?schema=`) · CMS em `/app/website` |
 | `/login` | Login |
 | `/signup` | Cadastro da associação (simulado) |
@@ -167,7 +167,7 @@ Ver: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLU
 |-----------|----------|
 | [`docs/changelog/CHANGELOG_2026_07_24_27.md`](docs/changelog/CHANGELOG_2026_07_24_27.md) | **Consolidado 24–27 jul** (landing, deploy, domínio) |
 | [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md) | Landing SaaS Gesttora (`/`) |
-| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra · domínio `gesttora.com.br`, e-mail e HTTPS (seção 12) |
+| [`docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) | Infra · domínio `gesttora.com.br`, e-mail e HTTPS (seção 12) · Google Analytics (seção 13) |
 | [`docs/guias/DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md) | Deploy DO + domínio, e-mail (túnel DreamHost) e HTTPS |
 | [`docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md`](docs/guias/ESTRATEGIA_BRANCHES_ORBSTACK.md) | Branches + OrbStack ARM |
 | [`docs/guias/GIT_WORKFLOW.md`](docs/guias/GIT_WORKFLOW.md) | Fluxo Git / push sequencial |
