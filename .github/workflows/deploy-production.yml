@@ -153,6 +153,8 @@ jobs:
           file: ./frontend/Dockerfile
           target: production
           push: true
+          build-args: |
+            VITE_GA_ID=G-S7EMQXSSJX
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
           cache-from: type=gha

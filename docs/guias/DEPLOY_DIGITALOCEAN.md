@@ -302,6 +302,15 @@ dig +short gesttora.com.br TXT  # SPF com netblocks.dreamhost.com
 
 ---
 
+## Google Analytics (GA4)
+
+- Propriedade `G-S7EMQXSSJX`, passada só no build de produção (`build-args: VITE_GA_ID` em `deploy-production.yml`); staging e local não medem.
+- [`GoogleAnalytics.tsx`](../../frontend/src/components/GoogleAnalytics.tsx) carrega o `gtag.js` e envia `page_view` só em `/`, `/login` e `/signup`, sem query string. Sites das associações (`/site`), painel (`/app`) e rotas com token não são medidos (`ga-disable-*` fora dessas rotas).
+- No painel do GA4: Fluxo de dados → Medição otimizada → **desligar "Alterações de página com base em eventos do histórico do navegador"** (o componente já envia os `page_view`; ligado, duplicaria e mandaria a URL completa).
+- Sem aviso de cookies por enquanto: citar o Google Analytics na política de privacidade quando ela existir.
+
+---
+
 ## Deploy local (dev)
 
 ```bash

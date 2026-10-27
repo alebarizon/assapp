@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AssociationSetup from "@/pages/AssociationSetup";
 import Login from "@/pages/Login";
 import EventoDetail from "@/pages/EventoDetail";
@@ -224,6 +225,7 @@ function AppIndexRedirect() {
 export default function App() {
   return (
     <AuthProvider>
+      <GoogleAnalytics />
       <AppRoutes />
     </AuthProvider>
   );
