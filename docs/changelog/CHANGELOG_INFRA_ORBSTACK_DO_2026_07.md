@@ -400,13 +400,14 @@ Deploys do dia, todos validados em staging antes de `main`:
 | Commit | Conteúdo | Produção |
 |--------|----------|----------|
 | `55a99be` | GA4 `G-S7EMQXSSJX` nas páginas da Gesttora, só em produção | 08:38 |
+| (seguinte) | Troca para a propriedade `G-993BFPZZMV` (só `build-args` em `deploy-production.yml`) | pendente — só na `orb` |
 
 - **Não** foi colado no `index.html`: o mesmo arquivo serve a landing, os sites das associações (`/site`) e o painel
   (`/app`), e rotas como `/definir-senha?token=...`, `/site/descadastrar?t=...` e `/site/formularios/:token` mandariam
   tokens ao Google (o GA4 registra a URL completa por padrão).
 - `frontend/src/components/GoogleAnalytics.tsx` (montado em `App.tsx`): carrega o `gtag.js` na primeira visita a `/`,
   `/login` ou `/signup` e envia `page_view` só com o caminho (sem query string). Fora dessas rotas liga
-  `window['ga-disable-G-S7EMQXSSJX']`, então a navegação interna para `/site` ou `/app` não gera evento.
+  `window['ga-disable-<ID>']`, então a navegação interna para `/site` ou `/app` não gera evento.
 - ID via `VITE_GA_ID`: `ARG` no `frontend/Dockerfile` e `build-args` só em `deploy-production.yml`. Staging e local
   não medem — o Vite elimina o código do bundle quando a variável está vazia.
 - Sem aviso de cookies por decisão do produto (ainda sem clientes); citar o Google Analytics na política de privacidade.
