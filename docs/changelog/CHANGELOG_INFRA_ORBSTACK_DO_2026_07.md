@@ -400,7 +400,7 @@ Deploys do dia, todos validados em staging antes de `main`:
 | Commit | Conteúdo | Produção |
 |--------|----------|----------|
 | `55a99be` | GA4 `G-S7EMQXSSJX` nas páginas da Gesttora, só em produção | 08:38 |
-| (seguinte) | Troca para a propriedade `G-993BFPZZMV` (só `build-args` em `deploy-production.yml`) | pendente — só na `orb` |
+| `a003ff3` | Troca para a propriedade `G-993BFPZZMV` (só `build-args` em `deploy-production.yml`) | 09:53 — validado no navegador (`tid=G-993BFPZZMV`) |
 
 - **Não** foi colado no `index.html`: o mesmo arquivo serve a landing, os sites das associações (`/site`) e o painel
   (`/app`), e rotas como `/definir-senha?token=...`, `/site/descadastrar?t=...` e `/site/formularios/:token` mandariam
