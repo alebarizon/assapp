@@ -1,7 +1,7 @@
 # Changelog — Infra Git, OrbStack e DigitalOcean
 
 > **Última atualização:** 2026-10-27 (seção 13 — Google Analytics)  
-> **Domínio:** produção em **https://gesttora.com.br** (DNS e e-mail na DreamHost, A → mesmo IP do droplet; nginx do host + Let's Encrypt); `gesttora.vertent.com.br` redireciona. E-mail sai pela DreamHost via túnel SSH (a DigitalOcean bloqueia SMTP de saída).
+> **Domínio:** produção em **https://gesttora.com.br** (DNS e e-mail na DreamHost, A → mesmo IP do droplet; nginx do host + Let's Encrypt); `gesttora.vertent.com.br` redireciona. E-mail sai pela DreamHost via túnel SSH (a DigitalOcean bloqueia SMTP de saída). Google Analytics (`G-993BFPZZMV`) só em produção, nas páginas da Gesttora.
 
 ---
 

@@ -249,6 +249,8 @@ Fluxo: `orb` → `develop` → `main` (igual WellSaaS). Guias: [`docs/guias/ESTR
 | Staging | http://159.203.183.184:8080/ |
 | Produção | https://gesttora.com.br/ |
 
+Google Analytics (GA4 `G-993BFPZZMV`) só em produção, nas páginas `/`, `/login` e `/signup` — ver [`DEPLOY_DIGITALOCEAN.md`](docs/guias/DEPLOY_DIGITALOCEAN.md#google-analytics-ga4).
+
 **Branches alinhadas** em `5486641` (2026-08-17). Changelog: [`docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md)
 
 ### Credenciais (remoto, após seed)
@@ -366,7 +368,8 @@ docker compose exec backend python manage.py migrate_schemas
 - [x] Tenant demo local (`scripts/init_demo_tenant.sh`)
 - [x] E-commerce — catálogo, carrinho, pedidos ([`ECOMMERCE.md`](docs/modulos/ECOMMERCE.md))
 - [x] Website CMS tenant — `/site` + `/app/website` ([`WEBSITE_CMS_TENANT.md`](docs/modulos/WEBSITE_CMS_TENANT.md))
-- [x] HTTPS (Let's Encrypt) — 2026-10-22  
+- [x] HTTPS (Let's Encrypt) — 2026-10-22
+- [x] Google Analytics nas páginas da Gesttora (produção) — 2026-10-27  
 
 > **Consolidado 2026-08-17:** [`docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md`](docs/changelog/CHANGELOG_2026_08_17_DEPLOY_SEED.md) · [`CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md`](docs/changelog/CHANGELOG_ECOMMERCE_WEBSITE_2026_08.md)  
 > **Status detalhado:** [`docs/referencia/STATUS_SPRINTS_FASE1.md`](docs/referencia/STATUS_SPRINTS_FASE1.md)
@@ -428,4 +431,4 @@ Resultados de pesquisa serão publicados conforme exigências FAPESP.
 
 ---
 
-**Última atualização:** 2026-08-17
+**Última atualização:** 2026-10-27

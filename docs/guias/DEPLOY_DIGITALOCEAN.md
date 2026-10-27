@@ -1,7 +1,7 @@
 # Deploy DigitalOcean — AssApp
 
-**Última atualização:** 2026-10-22  
-**Changelog recente:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 12 — domínio, e-mail e HTTPS) · [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](../changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md)  
+**Última atualização:** 2026-10-27  
+**Changelog recente:** [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](../changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 12 — domínio, e-mail e HTTPS · seção 13 — Google Analytics) · [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](../changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md)  
 **Roteiro de deploy:** [`PROMPT_DEPLOY.md`](../../PROMPT_DEPLOY.md)
 
 ---
@@ -308,6 +308,8 @@ dig +short gesttora.com.br TXT  # SPF com netblocks.dreamhost.com
 - [`GoogleAnalytics.tsx`](../../frontend/src/components/GoogleAnalytics.tsx) carrega o `gtag.js` e envia `page_view` só em `/`, `/login` e `/signup`, sem query string. Sites das associações (`/site`), painel (`/app`) e rotas com token não são medidos (`ga-disable-*` fora dessas rotas).
 - No painel do GA4: Fluxo de dados → Medição otimizada → **desligar "Alterações de página com base em eventos do histórico do navegador"** (o componente já envia os `page_view`; ligado, duplicaria e mandaria a URL completa).
 - Sem aviso de cookies por enquanto: citar o Google Analytics na política de privacidade quando ela existir.
+- **Trocar a propriedade:** alterar só `VITE_GA_ID` nos `build-args` do frontend em `deploy-production.yml` e seguir o fluxo normal (`orb` → `develop` → `main`). O arquivo de workflow não está no `paths-ignore`, então o push dispara staging e produção. Conferir depois: o bundle de `https://gesttora.com.br/` contém o ID novo e, no navegador, a requisição `/g/collect` sai com `tid=<ID novo>`.
+- **Medir outra rota:** acrescentar em `ROTAS_MEDIDAS` no componente. Não incluir rotas com token na URL nem `/site` e `/app` sem antes decidir sobre aviso de cookies.
 
 ---
 
