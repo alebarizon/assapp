@@ -307,8 +307,9 @@ Deploys do dia, todos validados em staging antes de `main`:
 
 ### Pendências de infra
 
-- Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — destrava lembretes da régua e newsletter.
-- Healthcheck do `frontend` aparece `unhealthy` em staging e produção, embora o site responda.
+- Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — resolvido em 22/10 com o túnel SMTP (seção 12).
+- Healthcheck do `frontend` aparecia `unhealthy`: o nginx do container só escuta em IPv4 e o `wget` resolvia
+  `localhost` para `::1`. Corrigido em 2026-10-31 (`127.0.0.1` no compose e no Dockerfile).
 - HTTPS — feito em 2026-10-22 (seção 12).
 
 ---

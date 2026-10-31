@@ -202,23 +202,29 @@ retentados na execução seguinte.
 
 ### Pendências (decisão do produto)
 
-- Provedor de e-mail por API HTTP (Brevo, Resend ou SES) — a DigitalOcean bloqueia SMTP.
+- ~~Provedor de e-mail~~ — resolvido em 22/10 com o túnel SMTP da DreamHost; Brevo fica como próxima etapa.
 - `PAGAMENTO_SIMULADO=False` + chave Asaas real em produção, ou manter simulado.
 - "Atualizar anais" nos eventos com anais já publicados, para gerar as páginas por trabalho.
-- Domínio `gesttora.com.br` no ar desde 2026-10-22 (DNS na DreamHost); HTTPS pendente.
+- ~~Domínio e HTTPS~~ — `gesttora.com.br` com HTTPS desde 22/10.
 
 ## Situação em produção (2026-10-22)
 
 - Réguas automáticas de relacionamento e gateways PagBank/Mercado Pago em produção (`569d154`, 13:58),
   validados em staging (aba **Réguas automáticas** e seletor de gateway no modal **Pagamento online**).
   Migrations `newsletter/0002` e `payments/0003` aplicadas no startup.
-- Com `FRONTEND_URL` em HTTP, PagBank e Mercado Pago não recebem `notification_url`; a confirmação vem de
-  `sincronizar_cobrancas` (a cada 30 min) e da consulta do portal.
-- E-mail segue console: o SMTP da DreamHost está bloqueado na saída do droplet (detalhes em
-  [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md), seção 12). As réguas, mesmo
-  ligadas, não enviam até haver provedor de e-mail. Boas-vindas e autor não sócio nascem ligadas: quando o e-mail
-  real entrar, passam a enviar já no primeiro dia (janelas de 7 e 30 dias). Avisar as associações antes ou
-  desligar nas que não quiserem.
+- No deploy das 13:58 o `FRONTEND_URL` ainda era HTTP e PagBank/Mercado Pago não recebiam `notification_url`.
+  Desde o HTTPS (`824180e`, 15:45) a URL vai em cada cobrança; `sincronizar_cobrancas` (a cada 30 min) e a
+  consulta do portal continuam como rede de segurança.
+- E-mail real em produção desde a tarde de 22/10: SMTP da DreamHost pelo túnel SSH (`smtp_tunnel`), cota de
+  70/hora (detalhes em [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md),
+  seção 12). Staging segue console. Lembretes de anuidade, newsletter e réguas passam a sair de fato.
+- Boas-vindas e autor não sócio nascem ligadas e já enviam no primeiro dia (janelas de 7 e 30 dias): avisar cada
+  associação nova antes ou desligar nas que não quiserem. A abciber usa e-mails `@example.org`.
+
+### Pagamento online em produção (2026-10-31)
+
+- Desligado: `PAGAMENTO_SIMULADO=False` e a abciber está com Asaas inativo e sem chave.
+- PagBank e Mercado Pago ainda não validados com contas reais de sandbox/teste.
 
 ### Roadmap adiado (decisão de 2026-10-19)
 
