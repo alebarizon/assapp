@@ -2,7 +2,7 @@
 Tarefas periódicas do servidor (serviço `agendador` do compose).
 
 - A cada minuto: um lote da fila da newsletter (`enviar_newsletters`) e o reenvio dos
-  e-mails individuais que falharam (`reenviar_emails`).
+  e-mails individuais que falharam (`reenviar_emails`); webhooks de saída (`entregar_webhooks`).
 - A cada 30 minutos: status das cobranças online pendentes (`sincronizar_cobrancas`).
 - Uma vez por dia, a partir de REGUA_HORA (horário de Brasília):
   - régua de anuidades (`regua_anuidades`): marca vencidas/inadimplentes e envia os lembretes;
@@ -69,6 +69,7 @@ class Command(BaseCommand):
         self._rodar("newsletter", "enviar_newsletters")
         if email_entregue():
             self._rodar("reenvio de e-mails", "reenviar_emails")
+        self._rodar("webhooks de saída", "entregar_webhooks")
 
         agora = agora or timezone.localtime()
         ultima = self.ultimas.get("sincronizar_cobrancas")

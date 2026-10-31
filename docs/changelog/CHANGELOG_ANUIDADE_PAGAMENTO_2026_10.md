@@ -192,6 +192,13 @@ retentados na execução seguinte.
   `core/test_agendador.py`.
 - Ainda não validado contra as contas reais de sandbox/teste de PagBank e Mercado Pago.
 
+## Integrações e webhooks de saída (2026-10-31)
+
+- Novo app `integracoes` (TENANT; substitui o stub vazio `integrations`) e módulo de perfil `integracoes` (só gestor).
+- Página **Integrações** (`/app/integracoes`): catálogo por categoria. Asaas, PagBank e Mercado Pago abrem o modal de pagamento online já existente, webhooks e automação (Make, Zapier, n8n, Pluga) abrem a aba de webhooks, e os demais aparecem como "em breve" (WhatsApp, ORCID, OJS, Crossref, NFS-e, Omie/Conta Azul, Google Agenda, Zoom/Meet, ZapSign).
+- **Webhooks de saída**: eventos `membro.criado`, `anuidade.paga` e `inscricao.criada`; POST JSON assinado (HMAC-SHA256 sobre `timestamp.corpo`); entregues pelo agendador (`entregar_webhooks`) com retentativas de 1 min a 12 h; bloqueio de endereços de rede interna na criação e em cada entrega; botão "Testar" e histórico das últimas entregas.
+- Detalhes em `docs/modulos/INTEGRACOES.md`.
+
 ## Robustez do e-mail (2026-10-31)
 
 Motivo: em 30/10 o túnel SMTP ficou ~23 min fora (lado DreamHost) sem ninguém saber, e e-mails individuais que falham eram só logados.

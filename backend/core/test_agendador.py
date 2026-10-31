@@ -27,7 +27,7 @@ class AgendadorTests(SimpleTestCase):
         cmd = _comando()
         cmd.ciclo(datetime(2026, 10, 18, 7, 59))
         self.assertEqual(
-            _chamadas(chamar), [("enviar_newsletters",), ("reenviar_emails",), ("sincronizar_cobrancas",)]
+            _chamadas(chamar), [("enviar_newsletters",), ("reenviar_emails",), ("entregar_webhooks",), ("sincronizar_cobrancas",)]
         )
 
         chamar.reset_mock()
@@ -38,10 +38,12 @@ class AgendadorTests(SimpleTestCase):
             [
                 ("enviar_newsletters",),
                 ("reenviar_emails",),
+                ("entregar_webhooks",),
                 ("regua_anuidades",),
                 ("reguas_relacionamento",),
                 ("enviar_newsletters",),
                 ("reenviar_emails",),
+                ("entregar_webhooks",),
             ],
         )
 
@@ -66,7 +68,7 @@ class AgendadorTests(SimpleTestCase):
 
         chamar.reset_mock()
         cmd.ciclo(datetime(2026, 10, 18, 8, 1))
-        self.assertEqual(_chamadas(chamar), [("enviar_newsletters",), ("reenviar_emails",), ("regua_anuidades",)])
+        self.assertEqual(_chamadas(chamar), [("enviar_newsletters",), ("reenviar_emails",), ("entregar_webhooks",), ("regua_anuidades",)])
         self.assertEqual(cmd.ultimas["regua_anuidades"], date(2026, 10, 18))
 
     @mock.patch("core.management.commands.agendador.call_command")

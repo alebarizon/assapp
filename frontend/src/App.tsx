@@ -43,6 +43,7 @@ import AssembleiaDetail from "@/pages/AssembleiaDetail";
 import VotacaoDetail from "@/pages/VotacaoDetail";
 import MinhaGovernanca from "@/pages/MinhaGovernanca";
 import Newsletter from "@/pages/Newsletter";
+import Integracoes from "@/pages/Integracoes";
 import CampanhaDetail from "@/pages/CampanhaDetail";
 import TenantSiteDescadastrar from "@/pages/TenantSiteDescadastrar";
 import TenantSiteDiretorio from "@/pages/TenantSiteDiretorio";
@@ -196,6 +197,7 @@ function AppRoutes() {
         <Route path="governanca/assembleias/:id" element={<AssembleiaDetail />} />
         <Route path="governanca/votacoes/:id" element={<VotacaoDetail />} />
         <Route path="newsletter" element={<Newsletter />} />
+        <Route path="integracoes" element={<Integracoes />} />
         <Route path="newsletter/:id" element={<CampanhaDetail />} />
         <Route path="ecommerce/catalog" element={<EcommerceCatalog />} />
         <Route path="ecommerce/orders" element={<EcommerceOrders />} />

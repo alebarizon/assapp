@@ -14,7 +14,7 @@
 | Dev Mac | http://localhost:5174 | `orb` |
 
 Droplet: `159.203.183.184` · HTTPS: ✅ nginx do host + Let's Encrypt (stack prod em `127.0.0.1:8081`)  
-Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter a cada minuto + status das cobranças online a cada 30 min + régua de anuidades e réguas de relacionamento diárias às `REGUA_HORA`), `frontend`, `nginx` — sufixo `_staging` / `_prod`.  
+Containers por ambiente: `db`, `backend`, `agendador` (fila da newsletter, reenvio de e-mails que falharam e webhooks de saída a cada minuto + status das cobranças online a cada 30 min + régua de anuidades e réguas de relacionamento diárias às `REGUA_HORA`), `frontend`, `nginx` — sufixo `_staging` / `_prod`.  
 E-mail em staging/prod ainda é console (nada é entregue; a régua roda só marcando vencidas) — falta provedor por API (DigitalOcean bloqueia SMTP).  
 Changelog recente: [`CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md`](docs/changelog/CHANGELOG_ANUIDADE_PAGAMENTO_2026_10.md) · infra: [`CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md`](docs/changelog/CHANGELOG_INFRA_ORBSTACK_DO_2026_07.md) (seção 11) · deploy: [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md)
 
@@ -73,7 +73,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 |--------|----------|
 | `public` | tenants (com `setup_completed`, `plan_slug`), domains, **support** (chamados de todas as associações) |
 | `sistema` | superadmin |
-| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, publicacoes, governanca, newsletter, website, accounts |
+| `{associacao}` | mandatos ★, memoria ★, eventos ★, membros, finance, documents, ecommerce, courses, formularios, contatos, mensagens, payments, publicacoes, governanca, newsletter, integracoes, website, accounts |
 
 > `adminpanel` — stub; assinatura do SaaS (Stripe) continua simulada. `payments` é TENANT: pagamento de anuidades via gateway da própria associação (Asaas, PagBank ou Mercado Pago).
 
@@ -100,6 +100,7 @@ Changelog: [`docs/changelog/CHANGELOG_LANDING_GESTTORA_2026_07.md`](docs/changel
 | `publicacoes` | Dossiês, e-books, boletins: acesso aberto, para adimplentes ou venda pela loja (`/app/publicacoes`, `/app/portal/publicacoes`, `/site/publicacoes`) |
 | `governanca` | Assembleias (convocação, presença, quórum, ata com hash) e votações com cédula digital (`/app/governanca`, `/app/portal/governanca`) |
 | `newsletter` | Campanhas segmentadas (associados, inscritos, etiquetas) com fila limitada por minuto e descadastro (`/app/newsletter`, `/site/descadastrar`); réguas automáticas de boas-vindas, inativos e autor não sócio (`reguas_relacionamento`, diária pelo `agendador`) |
+| `integracoes` | Catálogo de integrações (gateways de pagamento, webhooks, "em breve") e webhooks de saída assinados com HMAC, entregues pelo `agendador` (`/app/integracoes`, só gestor) — ver `docs/modulos/INTEGRACOES.md` |
 
 App compartilhado (schema `public`): `support` — chamados associação → equipe Gesttora (`/app/suporte`).
 Certificados (cursos e eventos) usam `core/certificates.py` + verificação pública em `/site/certificados`.
@@ -140,6 +141,7 @@ Gestão em `/app/usuarios` — ver [`USUARIOS_PERFIS.md`](docs/modulos/USUARIOS_
 /api/publicacoes/ publicações (diretoria, minhas/ portal, public/ site)
 /api/governanca/ assembleias/, votacoes/ (diretoria), minhas/ (portal: votar, presença, ata)
 /api/newsletter/ campanhas/, reguas/, descadastros/ (diretoria), public/descadastrar/ (link do e-mail)
+/api/integracoes/ catalogo/, webhooks/ (+ testar, regenerar-segredo, entregas) — gestor
 /api/website/    website CMS tenant (config, pages, public)
 /api/tenants/    resolve domínio → schema (public/resolve)
 ```
@@ -199,6 +201,7 @@ Ver: [`docs/referencia/FLUXO_ASSINATURA_SETUP_TRANSICAO.md`](docs/referencia/FLU
 | [`docs/modulos/PUBLICACOES.md`](docs/modulos/PUBLICACOES.md) | **Publicações** (dossiês, e-books, acesso por venda/associado) |
 | [`docs/modulos/GOVERNANCA.md`](docs/modulos/GOVERNANCA.md) | **Assembleias e votações** (quórum, cédula, ata com hash) |
 | [`docs/modulos/NEWSLETTER.md`](docs/modulos/NEWSLETTER.md) | **Newsletter** (público, fila, descadastro) |
+| [`docs/modulos/INTEGRACOES.md`](docs/modulos/INTEGRACOES.md) | **Integrações** (catálogo, webhooks de saída) |
 | [`PROMPT_DEPLOY.md`](PROMPT_DEPLOY.md) | Roteiro de deploy staging → produção e regras de segurança do droplet |
 
 ---

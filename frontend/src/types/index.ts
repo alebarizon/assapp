@@ -43,7 +43,8 @@ export type ModuloPainel =
   | "newsletter"
   | "financeiro"
   | "loja"
-  | "suporte";
+  | "suporte"
+  | "integracoes";
 
 export interface Mandato {
   id: string;

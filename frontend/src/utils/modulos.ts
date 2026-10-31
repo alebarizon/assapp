@@ -12,6 +12,7 @@ import {
   Library,
   LifeBuoy,
   Mail,
+  Plug,
   MessageSquare,
   ShoppingBag,
   UserCog,
@@ -61,6 +62,7 @@ export const BOARD_NAV: NavItem[] = [
   { to: "/app/publicacoes", label: "Publicações", icon: Library, modulo: "publicacoes" },
   { to: "/app/onboarding", label: "Onboarding", icon: BookOpen, modulo: "onboarding" },
   { to: "/app/usuarios", label: "Usuários e perfis", icon: UserCog, modulo: "usuarios" },
+  { to: "/app/integracoes", label: "Integrações", icon: Plug, modulo: "integracoes" },
   { to: "/app/suporte", label: "Suporte", icon: LifeBuoy, modulo: "suporte" },
 ];
 
@@ -82,6 +84,7 @@ const PREFIXO_MODULO: [string, ModuloPainel][] = [
   ["/app/publicacoes", "publicacoes"],
   ["/app/onboarding", "onboarding"],
   ["/app/usuarios", "usuarios"],
+  ["/app/integracoes", "integracoes"],
   ["/app/suporte", "suporte"],
 ];
 

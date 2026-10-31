@@ -1,0 +1,85 @@
+.int-categoria {
+  margin-bottom: 1.5rem;
+}
+
+.int-categoria-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.int-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.int-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e4e2da;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.int-card-em-breve {
+  opacity: 0.7;
+}
+
+.int-card-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.int-card-acao {
+  margin-top: auto;
+}
+
+.int-eventos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.int-eventos label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.int-segredo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.int-entregas {
+  margin-top: 0.75rem;
+  border-top: 1px solid #eeece6;
+  padding-top: 0.75rem;
+}
+
+.int-entrega {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+}
+
+.int-copiar {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid #e4e2da;
+  border-radius: 4px;
+  background: #fff;
+  color: inherit;
+  cursor: pointer;
+  vertical-align: middle;
+}

@@ -28,7 +28,7 @@ via `GET /api/auth/equipe/perfis/`.
 
 | Módulo | Gestor | Diretoria | Administrativo | Financeiro |
 |---|---|---|---|---|
-| usuarios, configuracoes | total | — | — | — |
+| usuarios, configuracoes, integracoes | total | — | — | — |
 | memoria, mandatos, onboarding | total | total | leitura | — |
 | membros | total | total | total | leitura |
 | eventos, cursos, formularios, contatos, mensagens, website | total | total | total | — |

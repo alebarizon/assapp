@@ -42,6 +42,7 @@ MODULOS = [
     ("financeiro", "Financeiro"),
     ("loja", "Loja"),
     ("suporte", "Suporte"),
+    ("integracoes", "Integrações"),
 ]
 MODULOS_VALIDOS = frozenset(m for m, _ in MODULOS)
 
@@ -53,7 +54,7 @@ _OPERACIONAIS = (
 MATRIZ = {
     GESTOR: {m: TOTAL for m in MODULOS_VALIDOS},
     DIRETORIA: {
-        **{m: TOTAL for m in MODULOS_VALIDOS - {"usuarios", "configuracoes", "financeiro", "loja"}},
+        **{m: TOTAL for m in MODULOS_VALIDOS - {"usuarios", "configuracoes", "financeiro", "loja", "integracoes"}},
         "financeiro": LEITURA,
         "loja": LEITURA,
     },

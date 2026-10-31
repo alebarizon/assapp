@@ -219,6 +219,19 @@ def registrar_pagamento(anuidade: Anuidade, nf_numero: str = None, user=None) ->
     except Exception:
         pass
 
+    from integracoes.services import disparar
+
+    membro = filiacao.membro
+    disparar(
+        "anuidade.paga",
+        {
+            "id": str(anuidade.id),
+            "ano_referencia": anuidade.ano_referencia,
+            "valor": f"{anuidade.valor:.2f}",
+            "pago_em": anuidade.pago_em.isoformat(),
+            "membro": {"id": str(membro.id), "nome": membro.nome_completo, "email": membro.email},
+        },
+    )
     return anuidade
 
 
