@@ -192,6 +192,15 @@ retentados na execução seguinte.
   `core/test_agendador.py`.
 - Ainda não validado contra as contas reais de sandbox/teste de PagBank e Mercado Pago.
 
+## Robustez do e-mail (2026-10-31)
+
+Motivo: em 30/10 o túnel SMTP ficou ~23 min fora (lado DreamHost) sem ninguém saber, e e-mails individuais que falham eram só logados.
+
+- `core.EmailPendente` (schema public, migration `core.0002`): `enviar_email` guarda o que falhou; `reenviar_emails` (agendador, a cada minuto) tenta de novo com intervalo crescente (5 min → 12 h, ~27 h no total) e desiste depois. `enviar_email(..., fila=False)` para quem já repete sozinho (lembretes de anuidade).
+- Agendador testa o SMTP (`core.emails.smtp_disponivel`) antes das tarefas diárias de e-mail; fora do ar, adia e tenta a cada minuto.
+- `GET /health/email/` para monitor externo: 503 com SMTP fora, fila parada há mais de 30 min ou desistência em 24 h. Configuração em `docs/guias/DEPLOY_DIGITALOCEAN.md` (seção E-mail).
+- Pendente fora do código: cadastrar o monitor (UptimeRobot ou similar) apontando para `https://gesttora.com.br/health/email/`.
+
 ## Situação em produção (2026-10-18)
 
 - Tudo acima está em produção. Últimos deploys: `5106f5e` (assembleias, newsletter, diretório), `53f9fed`
@@ -204,7 +213,8 @@ retentados na execução seguinte.
 
 - ~~Provedor de e-mail~~ — resolvido em 22/10 com o túnel SMTP da DreamHost; Brevo fica como próxima etapa.
 - `PAGAMENTO_SIMULADO=False` + chave Asaas real em produção, ou manter simulado.
-- "Atualizar anais" nos eventos com anais já publicados, para gerar as páginas por trabalho.
+- ~~"Atualizar anais"~~ — conferido em 31/10: nenhum evento com anais publicados em staging nem em produção
+  (o único evento da abciber está com CFP aberto). Anais novos já nascem com as páginas por trabalho.
 - ~~Domínio e HTTPS~~ — `gesttora.com.br` com HTTPS desde 22/10.
 
 ## Situação em produção (2026-10-22)

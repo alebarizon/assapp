@@ -24,6 +24,38 @@ def health_check(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+def health_email(request):
+    """Para monitor externo (UptimeRobot etc.): 503 se o SMTP caiu ou há e-mail parado na fila."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from core.emails import smtp_disponivel
+    from core.models import EmailPendente
+
+    with schema_context("public"):
+        smtp = smtp_disponivel()
+        pendentes = EmailPendente.objects.filter(status=EmailPendente.PENDENTE)
+        atrasados = pendentes.filter(criado_em__lt=timezone.now() - timedelta(minutes=30)).count()
+        desistencias = EmailPendente.objects.filter(
+            status=EmailPendente.DESISTIU, criado_em__gte=timezone.now() - timedelta(days=1)
+        ).count()
+        total_pendentes = pendentes.count()
+    ok = smtp is not False and atrasados == 0 and desistencias == 0
+    return JsonResponse(
+        {
+            "status": "ok" if ok else "falha",
+            "smtp": {True: "ok", False: "indisponivel", None: "desligado"}[smtp],
+            "pendentes": total_pendentes,
+            "pendentes_ha_mais_de_30min": atrasados,
+            "desistencias_24h": desistencias,
+        },
+        status=200 if ok else 503,
+    )
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
 def api_root(request):
     return JsonResponse(
         {

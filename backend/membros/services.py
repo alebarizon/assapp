@@ -187,7 +187,7 @@ def enviar_lembretes_anuidade(hoje: date | None = None, request=None) -> dict:
             break
         email = anuidade.filiacao.membro.email
         assunto, texto = _texto_lembrete(anuidade, etapa, associacao)
-        if enviar_email(email, assunto, texto, link=link, link_label="Pagar anuidade"):
+        if enviar_email(email, assunto, texto, link=link, link_label="Pagar anuidade", fila=False):
             LembreteAnuidade.objects.create(anuidade=anuidade, etapa=etapa, email=email)
             enviados += 1
             por_etapa[etapa] += 1

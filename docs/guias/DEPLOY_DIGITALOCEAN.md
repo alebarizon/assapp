@@ -132,8 +132,8 @@ Nunca `system prune`, `container prune`, `volume rm` nem `down -v` no droplet: s
 |---------|-----------|--------|
 | `db` | `assapp_db_<amb>` | PostgreSQL 14 (volume `assapp_postgres_data_<amb>`) |
 | `backend` | `assapp_backend_<amb>` | Migrations no startup + Gunicorn |
-| `agendador` | `assapp_agendador_<amb>` | `manage.py agendador`: lote da newsletter a cada minuto; régua de anuidades e réguas de relacionamento (`reguas_relacionamento`) 1×/dia a partir de `REGUA_HORA` (padrão 8h Brasília). Sem healthcheck HTTP |
-| `frontend` | `assapp_frontend_<amb>` | Build Vite servido por nginx (o healthcheck aparece `unhealthy`, mas o site responde — pendente investigar) |
+| `agendador` | `assapp_agendador_<amb>` | `manage.py agendador`: lote da newsletter e reenvio de e-mails que falharam (`reenviar_emails`) a cada minuto; cobranças online a cada 30 min; régua de anuidades e réguas de relacionamento (`reguas_relacionamento`) 1×/dia a partir de `REGUA_HORA` (padrão 8h Brasília). Sem healthcheck HTTP |
+| `frontend` | `assapp_frontend_<amb>` | Build Vite servido por nginx. Healthcheck em `http://127.0.0.1/` (o nginx do container só escuta IPv4; com `localhost` o wget do Alpine tentava `::1` e o container aparecia `unhealthy`) |
 | `nginx` | `assapp_nginx_<amb>` | Proxy em `127.0.0.1:8081` (prod) / `8080` (staging) |
 | `smtp_tunnel` | `assapp_smtp_tunnel_prod` | Só produção: túnel SSH até o SMTP da DreamHost (ver seção E-mail) |
 
@@ -283,7 +283,15 @@ Diagnóstico:
 docker logs assapp_smtp_tunnel_prod --tail 20          # vazio = túnel de pé
 docker exec assapp_backend_prod python manage.py sendtestemail voce@exemplo.com
 docker exec assapp_backend_prod python manage.py shell -c "from core.cota_email import usados_na_ultima_hora as u; print(u())"
+curl -sS https://gesttora.com.br/health/email/          # 200 ok / 503 falha (JSON com smtp e fila)
 ```
+
+#### Falhas de envio e monitoramento
+
+- **E-mail individual que falha** (senha, convite, convocação, certificado, contato) vai para `core_emailpendente` (schema public) e o agendador tenta de novo após 5, 15, 30, 60, 120, 240, 480 e 720 min; depois desiste e registra em log. Com o SMTP fora, o reenvio não gasta tentativas. Lembretes de anuidade e réguas não entram nessa fila: eles já repetem no dia seguinte.
+- **Tarefas diárias de e-mail** (réguas): o agendador testa o SMTP antes; se estiver fora, adia e tenta a cada minuto, em vez de perder o dia. A newsletter já não perde envios com o SMTP fora (o lote inteiro espera o minuto seguinte).
+- **Monitor externo:** `GET /health/email/` responde **503** se o SMTP não aceita login, se há e-mail na fila há mais de 30 min ou se houve desistência nas últimas 24 h (resultado do SMTP em cache por 60 s). Cadastrar num monitor gratuito (UptimeRobot, Better Stack) com intervalo de 5 min e alerta para um e-mail **fora** da DreamHost ou celular. Em staging (console) responde `"smtp": "desligado"` com 200.
+- Ver a fila: `docker exec assapp_backend_prod python manage.py shell -c "from core.models import EmailPendente as E; print(list(E.objects.values_list('status','tentativas','assunto','ultimo_erro')[:20]))"`
 
 Recriar a chave (se o droplet for refeito): `ssh-keygen -t ed25519 -N "" -f /opt/assapp-smtp/id_ed25519`, `ssh-keyscan -t ed25519,rsa pdx1-shared-a1-07.dreamhost.com > /opt/assapp-smtp/known_hosts`, `chmod 600` e colar a `.pub` em `~/.ssh/authorized_keys` do usuário `gesttora` na DreamHost.
 

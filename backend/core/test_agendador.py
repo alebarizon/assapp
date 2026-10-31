@@ -20,12 +20,15 @@ def _chamadas(chamar):
 
 
 @override_settings(REGUA_HORA=8, EMAIL_BACKEND=SMTP)
+@mock.patch("core.management.commands.agendador.smtp_disponivel", return_value=True)
 class AgendadorTests(SimpleTestCase):
     @mock.patch("core.management.commands.agendador.call_command")
-    def test_diarias_rodam_uma_vez_por_dia_depois_da_hora(self, chamar):
+    def test_diarias_rodam_uma_vez_por_dia_depois_da_hora(self, chamar, _smtp):
         cmd = _comando()
         cmd.ciclo(datetime(2026, 10, 18, 7, 59))
-        self.assertEqual(_chamadas(chamar), [("enviar_newsletters",), ("sincronizar_cobrancas",)])
+        self.assertEqual(
+            _chamadas(chamar), [("enviar_newsletters",), ("reenviar_emails",), ("sincronizar_cobrancas",)]
+        )
 
         chamar.reset_mock()
         cmd.ciclo(datetime(2026, 10, 18, 8, 0))
@@ -34,9 +37,11 @@ class AgendadorTests(SimpleTestCase):
             _chamadas(chamar),
             [
                 ("enviar_newsletters",),
+                ("reenviar_emails",),
                 ("regua_anuidades",),
                 ("reguas_relacionamento",),
                 ("enviar_newsletters",),
+                ("reenviar_emails",),
             ],
         )
 
@@ -46,7 +51,7 @@ class AgendadorTests(SimpleTestCase):
         self.assertIn(("reguas_relacionamento",), _chamadas(chamar))
 
     @mock.patch("core.management.commands.agendador.call_command")
-    def test_falha_numa_tarefa_tenta_de_novo_sem_repetir_a_outra(self, chamar):
+    def test_falha_numa_tarefa_tenta_de_novo_sem_repetir_a_outra(self, chamar, _smtp):
         falhas = [RuntimeError("banco indisponível")]
 
         def efeito(nome, *args, **kwargs):
@@ -61,11 +66,11 @@ class AgendadorTests(SimpleTestCase):
 
         chamar.reset_mock()
         cmd.ciclo(datetime(2026, 10, 18, 8, 1))
-        self.assertEqual(_chamadas(chamar), [("enviar_newsletters",), ("regua_anuidades",)])
+        self.assertEqual(_chamadas(chamar), [("enviar_newsletters",), ("reenviar_emails",), ("regua_anuidades",)])
         self.assertEqual(cmd.ultimas["regua_anuidades"], date(2026, 10, 18))
 
     @mock.patch("core.management.commands.agendador.call_command")
-    def test_cobrancas_sincronizam_a_cada_30_minutos(self, chamar):
+    def test_cobrancas_sincronizam_a_cada_30_minutos(self, chamar, _smtp):
         cmd = _comando()
         for minuto in (0, 10, 29, 30, 45, 59):
             cmd.ciclo(datetime(2026, 10, 18, 3, minuto))
@@ -74,8 +79,27 @@ class AgendadorTests(SimpleTestCase):
 
     @override_settings(EMAIL_BACKEND=CONSOLE)
     @mock.patch("core.management.commands.agendador.call_command")
-    def test_sem_provedor_real_so_marca_vencidas(self, chamar):
+    def test_sem_provedor_real_so_marca_vencidas(self, chamar, _smtp):
         _comando().ciclo(datetime(2026, 10, 18, 8, 0))
         chamadas = _chamadas(chamar)
         self.assertIn(("regua_anuidades", "--sem-email"), chamadas)
         self.assertNotIn(("reguas_relacionamento",), chamadas)
+        self.assertNotIn(("reenviar_emails",), chamadas)
+
+    @mock.patch("core.management.commands.agendador.call_command")
+    def test_smtp_fora_adia_diarias_ate_voltar(self, chamar, smtp):
+        smtp.return_value = False
+        cmd = _comando()
+        cmd.ciclo(datetime(2026, 10, 18, 8, 0))
+        self.assertNotIn(("regua_anuidades",), _chamadas(chamar))
+        self.assertNotIn("regua_anuidades", cmd.ultimas)
+
+        smtp.return_value = True
+        chamar.reset_mock()
+        cmd.ciclo(datetime(2026, 10, 18, 8, 1))
+        self.assertIn(("regua_anuidades",), _chamadas(chamar))
+        self.assertIn(("reguas_relacionamento",), _chamadas(chamar))
+
+        smtp.reset_mock()
+        cmd.ciclo(datetime(2026, 10, 18, 8, 2))
+        smtp.assert_not_called()

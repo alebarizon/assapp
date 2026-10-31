@@ -1,11 +1,13 @@
 """
 Tarefas periódicas do servidor (serviço `agendador` do compose).
 
-- A cada minuto: um lote da fila da newsletter (`enviar_newsletters`).
+- A cada minuto: um lote da fila da newsletter (`enviar_newsletters`) e o reenvio dos
+  e-mails individuais que falharam (`reenviar_emails`).
 - A cada 30 minutos: status das cobranças online pendentes (`sincronizar_cobrancas`).
 - Uma vez por dia, a partir de REGUA_HORA (horário de Brasília):
   - régua de anuidades (`regua_anuidades`): marca vencidas/inadimplentes e envia os lembretes;
   - réguas de relacionamento (`reguas_relacionamento`): boas-vindas, inativos, autor não sócio.
+  Com o SMTP fora do ar, as diárias esperam e são tentadas de novo no minuto seguinte.
 
     docker compose exec -T backend python manage.py agendador
 """
@@ -16,6 +18,8 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+
+from core.emails import smtp_disponivel
 
 _BACKENDS_SEM_ENTREGA = {
     "django.core.mail.backends.console.EmailBackend",
@@ -54,8 +58,17 @@ class Command(BaseCommand):
             ("réguas de relacionamento", "reguas_relacionamento", []),
         ]
 
+    def _smtp_ok(self) -> bool:
+        ok = smtp_disponivel() is not False
+        if ok != self.ultimas.get("smtp_ok", True):
+            self.stderr.write("SMTP voltou." if ok else "SMTP indisponível: tarefas diárias de e-mail adiadas.")
+        self.ultimas["smtp_ok"] = ok
+        return ok
+
     def ciclo(self, agora=None):
         self._rodar("newsletter", "enviar_newsletters")
+        if email_entregue():
+            self._rodar("reenvio de e-mails", "reenviar_emails")
 
         agora = agora or timezone.localtime()
         ultima = self.ultimas.get("sincronizar_cobrancas")
@@ -65,9 +78,10 @@ class Command(BaseCommand):
 
         if agora.hour < getattr(settings, "REGUA_HORA", 8):
             return
-        for nome, comando, args in self._diarias():
-            if self.ultimas.get(comando) == agora.date():
-                continue
+        pendentes = [d for d in self._diarias() if self.ultimas.get(d[1]) != agora.date()]
+        if pendentes and email_entregue() and not self._smtp_ok():
+            return
+        for nome, comando, args in pendentes:
             self.stdout.write(f"{nome[0].upper()}{nome[1:]} {agora:%d/%m %H:%M}{' (sem e-mail)' if args else ''}")
             if self._rodar(nome, comando, *args):
                 self.ultimas[comando] = agora.date()

@@ -5,11 +5,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from .certificados_views import CertificadoPdfView, CertificadoVerificacaoView
-from .views import health_check, api_root
+from .views import health_check, health_email, api_root
 
 urlpatterns = [
     path("", api_root, name="api-root"),
     path("health/", health_check, name="health"),
+    path("health/email/", health_email, name="health-email"),
     path("admin/", admin.site.urls),
     path("api/auth/", include("accounts.urls")),
     path("api/mandatos/", include("mandatos.urls")),
